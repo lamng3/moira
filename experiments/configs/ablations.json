@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "results_dir": "results/experiments/ablations",
+  "continue_on_error": false,
+  "experiments": [
+    {
+      "name": "baseline",
+      "kind": "standard",
+      "ontology": ["envo", "sweet"],
+      "options": {
+        "top_k": 10,
+        "eval_alignment": true,
+        "seed": 42
+      }
+    },
+    {
+      "name": "with-refinement",
+      "kind": "standard",
+      "ontology": ["envo", "sweet"],
+      "options": {
+        "top_k": 10,
+        "eval_alignment": true,
+        "refine": true,
+        "seed": 42
+      }
+    },
+    {
+      "name": "with-uq",
+      "kind": "standard",
+      "ontology": ["envo", "sweet"],
+      "options": {
+        "top_k": 10,
+        "eval_alignment": true,
+        "enable_uqlm": true,
+        "uqlm_num_responses": 5,
+        "seed": 42
+      }
+    },
+    {
+      "name": "noise-10",
+      "kind": "standard",
+      "ontology": ["envo", "sweet"],
+      "options": {
+        "top_k": 10,
+        "eval_alignment": true,
+        "noise": 10,
+        "seed": 42
+      }
+    }
+  ]
+}

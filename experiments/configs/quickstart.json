@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "results_dir": "results/experiments/quickstart",
+  "continue_on_error": false,
+  "experiments": [
+    {
+      "name": "envo-sweet-baseline",
+      "kind": "standard",
+      "ontology": [
+        "envo",
+        "sweet"
+      ],
+      "options": {
+        "top_k": 10,
+        "eval_alignment": true,
+        "seed": 42
+      }
+    },
+    {
+      "name": "envo-sweet-refined",
+      "kind": "standard",
+      "ontology": [
+        "envo",
+        "sweet"
+      ],
+      "options": {
+        "top_k": 10,
+        "eval_alignment": true,
+        "refine": true,
+        "seed": 42
+      }
+    }
+  ]
+}

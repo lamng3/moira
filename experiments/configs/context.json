@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "results_dir": "results/experiments/context",
+  "experiments": [
+    {
+      "name": "passthrough-context",
+      "kind": "command",
+      "options": {
+        "command": [
+          "{python}",
+          "-m",
+          "experiments.benchmarks.context_harness",
+          "--mode",
+          "passthrough"
+        ]
+      }
+    },
+    {
+      "name": "jev-shadow-context",
+      "kind": "command",
+      "options": {
+        "command": [
+          "{python}",
+          "-m",
+          "experiments.benchmarks.context_harness",
+          "--mode",
+          "shadow"
+        ]
+      }
+    }
+  ]
+}

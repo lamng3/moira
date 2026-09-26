@@ -1,0 +1,15 @@
+{
+  "rdf": {
+    "envo": {
+      "datapath": "data/BioDiv/envo-sweet/envo.owl"
+    },
+    "sweet": {
+      "datapath": "data/BioDiv/envo-sweet/sweet.owl"
+    },
+    "envo-sweet": {
+      "datapath": "data/BioDiv/envo-sweet/envo-sweet.rdf",
+      "fullset_datapath": "data/BioDiv/envo-sweet/envo-sweet_fullset.rdf"
+    }
+  },
+  "ttl": {}
+}

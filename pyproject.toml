@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentoi"
+version = "0.1.0"
+description = "Agentic ontology integration with budgeted LLM inference"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+  { name = "Lam Nguyen", email = "lamng3.work@gmail.com" },
+  { name = "Ethan Frakes", email = "ethan@ethanfrakes.com" },
+]
+license = "MIT"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+  "boto3",
+  "gensim",
+  "langchain-core",
+  "langchain-ollama",
+  "langchain-together",
+  "matplotlib",
+  "networkx",
+  "node2vec",
+  "numpy",
+  "python-dotenv",
+  "rdflib",
+  "requests",
+  "scikit-learn",
+  "scipy",
+  "tiktoken",
+  "torch",
+  "transformers",
+]
+
+[project.optional-dependencies]
+google = ["langchain-google-genai"]
+groq = ["groq", "langchain-groq"]
+huggingface = ["langchain-huggingface"]
+jev = ["rag-jev", "langchain-typesafe"]
+knowledge-graph = ["neo4j"]
+ollama = ["langchain-ollama", "ollama"]
+openai = ["langchain-openai", "openai"]
+tracking = ["wandb"]
+uq = ["uqlm"]
+website = ["tavily-python"]
+dev = ["pre-commit", "pytest"]
+all = [
+  "agentoi[google,groq,huggingface,jev,knowledge-graph,ollama,openai,tracking,uq,website]",
+]
+
+[project.scripts]
+agentoi = "agentoi.cli:main"
+agentoi-hypergraph = "agentoi.hypergraph:main"
+agentoi-lint = "agentoi.validation.ontology_lint:main"
+
+[project.urls]
+Documentation = "https://lamng3.github.io/agentoi-docs/"
+Repository = "https://github.com/lamng3/agentoi"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["agentoi*"]
+
+[tool.setuptools.package-data]
+agentoi = [
+  "parser/namespaces/*.json",
+  "agents/tools/registry/*.json",
+  "agents/tools/knowledge_graph/*.json",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]

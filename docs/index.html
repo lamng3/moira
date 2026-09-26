@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AgentOI Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <a href="index.html"><strong>AgentOI</strong></a>
+    <nav>
+      <a href="getting-started.html">Get started</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="api.html">API</a>
+      <a href="experiments.html">Experiments</a>
+      <a href="reference.html">Reference</a>
+    </nav>
+  </header>
+  <main class="hero">
+    <section class="hero-layout">
+      <div>
+        <p class="eyebrow">AgentOI documentation</p>
+        <h1>Ontology integration with AgentOI</h1>
+        <p class="lede">
+          Learn how to install, configure, extend, and evaluate AgentOI for
+          ontology matching and entity integration.
+        </p>
+        <div class="actions">
+          <a class="button" href="getting-started.html">Get started</a>
+          <a class="button secondary" href="architecture.html">Architecture</a>
+        </div>
+      </div>
+      <div class="terminal" aria-label="AgentOI installation commands">
+        <pre><code><span class="prompt">$</span> git clone https://github.com/lamng3/agentoi.git
+cd agentoi
+./setup.sh
+source .venv/bin/activate
+<span class="prompt">$</span> agentoi inspect ontology.owl
+<span class="prompt">$</span> agentoi chat ontology.owl</code></pre>
+      </div>
+    </section>
+
+    <div class="stats" aria-label="Project requirements">
+      <div class="stat"><strong>Python 3.12</strong><span>Supported runtime</span></div>
+      <div class="stat"><strong>Reproducible</strong><span>Declarative experiments</span></div>
+      <div class="stat"><strong>Extensible</strong><span>Focused public interfaces</span></div>
+    </div>
+
+    <h2>Demo</h2>
+    <p><a href="chat-log.html">What is the heart part of?</a></p>
+    <p>Local <code>llama3.1</code> chats with the adult mouse anatomy ontology. The title opens the full run log.</p>
+    <a href="chat-log.html"><img class="demo-shot" src="images/chat-demo.jpg" alt="AgentOI chat: llama3.1 chooses an ontology lookup for the heart question"></a>
+
+    <h2>Workflow</h2>
+    <div class="flow">
+      <section class="card"><h3>Parse</h3><p>Load OWL, RDF, Turtle, JSON-LD, and reference alignments.</p></section>
+      <section class="card"><h3>Represent</h3><p>Fuse graph structure and semantic text embeddings.</p></section>
+      <section class="card"><h3>Reason</h3><p>Apply ontology-aware agents only where ambiguity remains.</p></section>
+      <section class="card"><h3>Validate</h3><p>Score, refine, and persist reproducible integrations.</p></section>
+    </div>
+
+    <h2>Repository organization</h2>
+    <div class="grid">
+      <section class="card">
+        <span class="number">01 / CORE</span>
+        <h3>Library</h3>
+        <p><code>src/agentoi/</code> contains all installable product code.</p>
+      </section>
+      <section class="card">
+        <span class="number">02 / CONTEXT</span>
+        <h3>Tools</h3>
+        <p>Only ontology, knowledge-graph, and web retrieval tools used by AgentOI.</p>
+      </section>
+      <section class="card">
+        <span class="number">03 / EVALUATION</span>
+        <h3>Experiments</h3>
+        <p>Declarative JSON suites produce ignored logs and reproducibility manifests.</p>
+      </section>
+      <section class="card">
+        <span class="number">04 / BENCHMARKS</span>
+        <h3>Data</h3>
+        <p>Benchmarks remain separate from the package and use Git LFS where appropriate.</p>
+      </section>
+    </div>
+
+    <h2>Documentation</h2>
+    <div class="grid">
+      <a class="card" href="getting-started.html"><span class="number">GUIDE 01</span><h3>Getting started →</h3><p>Install, configure, and run AgentOI.</p></a>
+      <a class="card" href="architecture.html"><span class="number">GUIDE 02</span><h3>Architecture →</h3><p>Understand modules and extension points.</p></a>
+      <a class="card" href="api.html"><span class="number">GUIDE 03</span><h3>API reference →</h3><p>Classes, signatures, supported types, examples, and source links.</p></a>
+      <a class="card" href="experiments.html"><span class="number">GUIDE 04</span><h3>Experiments →</h3><p>Run reproducible suites and ablations.</p></a>
+      <a class="card" href="reference.html"><span class="number">GUIDE 05</span><h3>Reference →</h3><p>Commands, environment, tests, and security.</p></a>
+    </div>
+  </main>
+  <footer>AgentOI · Ontology integration built by Lam Nguyen and Ethan Frakes</footer>
+</body>
+</html>

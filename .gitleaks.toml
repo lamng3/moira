@@ -1,0 +1,55 @@
+version = 3
+title = "AgentOI Secrets Policy"
+enable-default-rules = false
+
+[allowlist]
+description = "Allow empty env vars, quoted-empty, and placeholders"
+regexes = [
+  '''(?i)^\s*[A-Z0-9_]+\s*=\s*$''',                # KEY=
+  '''(?i)^\s*[A-Z0-9_]+\s*=\s*["']{0,2}\s*$''',    # KEY="" or KEY=''
+  '''<[^>\r\n]{1,128}>'''                          # <placeholder>
+]
+
+[[rules]]
+id = "together_api_key"
+description = "Together API Key"
+regex = '''(?i)^\s*TOGETHER_API_KEY\s*=\s*["']?[A-Za-z0-9_\-]{20,}["']?'''
+keywords = ["TOGETHER_API_KEY"]
+
+[[rules]]
+id = "openai_api_key"
+description = "OpenAI API Key"
+regex = '''(?i)^\s*OPENAI_API_KEY\s*=\s*["']?sk-[A-Za-z0-9]{20,100}["']?'''
+keywords = ["OPENAI_API_KEY","sk-"]
+
+[[rules]]
+id = "bioportal_api_key"
+description = "BioPortal API Key"
+regex = '''(?i)^\s*BIOPORTAL_API_KEY\s*=\s*["']?[A-Za-z0-9_\-]{20,}["']?'''
+keywords = ["BIOPORTAL_API_KEY"]
+
+[[rules]]
+id = "tavily_api_key"
+description = "Tavily API Key"
+regex = '''(?i)^\s*TAVILY_API_KEY\s*=\s*["']?[A-Za-z0-9_\-]{16,}["']?'''
+keywords = ["TAVILY_API_KEY"]
+
+[[rules]]
+id = "neo4j_api_key"
+description = "Neo4j API Key"
+regex = '''(?i)^\s*NEO4J_API_KEY\s*=\s*["']?[A-Za-z0-9/_\-+=]{16,}["']?'''
+keywords = ["NEO4J_API_KEY"]
+
+[[rules]]
+id = "neo4j_password"
+description = "Neo4j Password"
+# only trigger on env-style assignment, not typed code like "NEO4J_PASSWORD: Optional[...]"
+regex = '''(?i)^\s*NEO4J_PASSWORD\s*=\s*["']?[A-Za-z0-9/_\-+=]{8,}["']?'''
+keywords = ["NEO4J_PASSWORD"]
+
+# catch-all for *_API_KEY (env-style, uppercase only), longer to avoid demos
+[[rules]]
+id = "generic_api_key"
+description = "Generic *_API_KEY variable"
+regex = '''^\s*[A-Z0-9_]*API_KEY\s*=\s*["']?[A-Za-z0-9._\-]{24,}["']?'''
+keywords = ["API_KEY"]

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "results_dir": "results/experiments/smoke",
+  "experiments": [
+    {
+      "name": "baseline-relations",
+      "kind": "command",
+      "options": {
+        "command": [
+          "{python}",
+          "-m",
+          "experiments.benchmarks.core_smoke",
+          "--mode",
+          "baseline"
+        ]
+      }
+    },
+    {
+      "name": "refined-relations",
+      "kind": "command",
+      "options": {
+        "command": [
+          "{python}",
+          "-m",
+          "experiments.benchmarks.core_smoke",
+          "--mode",
+          "refined"
+        ]
+      }
+    }
+  ]
+}

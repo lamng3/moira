@@ -1,0 +1,20 @@
+{
+  "default": {
+    "search": "WITH toLower($q) AS q_raw, REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(toLower($q), \"’s\", \"\"), \"'s\", \"\"), \"'\", \"\"), \"-\", \" \"), \"_\", \" \") AS q_norm, $name_props AS props MATCH (n) WITH q_raw, q_norm, props, n, [p IN props WHERE n[p] IS NOT NULL | toLower(toString(n[p]))] AS vals WHERE any(x IN vals WHERE x CONTAINS q_raw OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(x, \"’s\", \"\"), \"'s\", \"\"), \"'\", \"\"), \"-\", \" \"), \"_\", \" \") CONTAINS q_norm) RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props LIMIT $limit",
+    "neighborhood": "MATCH (n) WHERE id(n) = $id WITH n MATCH (n)-[r]-(m) RETURN id(n) AS src, type(r) AS rel, id(m) AS dst, labels(m) AS labels, properties(m) AS props LIMIT $limit",
+    "random_nodes": "MATCH (n) WITH n, rand() AS r RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props ORDER BY r LIMIT $limit",
+    "random_nodes_by_labels": "MATCH (n) WHERE ANY(l IN labels(n) WHERE l IN $labels) WITH n, rand() AS r RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props ORDER BY r LIMIT $limit"
+  },
+  "hetionet": {
+    "search": "WITH toLower($q) AS q_raw, REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(toLower($q), \"’s\", \"\"), \"'s\", \"\"), \"'\", \"\"), \"-\", \" \"), \"_\", \" \") AS q_norm, $name_props AS props MATCH (n) WITH q_raw, q_norm, props, n, [p IN props WHERE n[p] IS NOT NULL | toLower(toString(n[p]))] AS vals WHERE any(x IN vals WHERE x CONTAINS q_raw OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(x, \"’s\", \"\"), \"'s\", \"\"), \"'\", \"\"), \"-\", \" \"), \"_\", \" \") CONTAINS q_norm) RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props LIMIT $limit",
+    "neighborhood": "MATCH (n) WHERE id(n) = $id WITH n MATCH (n)-[r]-(m) RETURN id(n) AS src, type(r) AS rel, id(m) AS dst, labels(m) AS labels, properties(m) AS props LIMIT $limit",
+    "random_nodes": "MATCH (n) WITH n, rand() AS r RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props ORDER BY r LIMIT $limit",
+    "random_nodes_by_labels": "MATCH (n) WHERE ANY(l IN labels(n) WHERE l IN $labels) WITH n, rand() AS r RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props ORDER BY r LIMIT $limit"
+  },
+  "neo4j": {
+    "search": "WITH toLower($q) AS q, $name_props AS keys, $limit AS lim MATCH (n:Resource) WHERE any(k IN keys WHERE exists(n[k]) AND toLower(toString(n[k])) CONTAINS q) RETURN n LIMIT lim",
+    "neighborhood": "MATCH (n) WHERE id(n)=$id MATCH (n)-[r]-(m) RETURN id(n) AS src, type(r) AS rel, id(m) AS dst, labels(m) AS labels, properties(m) AS props LIMIT $limit",
+    "random_nodes": "MATCH (n) WITH n, rand() AS r RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props ORDER BY r LIMIT $limit",
+    "random_nodes_by_labels": "MATCH (n) WHERE ANY(l IN labels(n) WHERE l IN $labels) WITH n, rand() AS r RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props ORDER BY r LIMIT $limit"
+  }
+}

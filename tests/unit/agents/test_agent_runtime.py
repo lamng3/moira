@@ -82,6 +82,24 @@ def test_agent_persists_derived_graph_once(monkeypatch, tmp_path):
     assert saved[0]["graph"]["thoughts"]
 
 
+def test_duckdb_store_is_written_before_dynamodb(monkeypatch, tmp_path):
+    saved = []
+    monkeypatch.setenv("AGENTOI_TRACE_STORE", "duckdb")
+    monkeypatch.setenv("AGENTOI_TRACE_DB", str(tmp_path / "agentoi.duckdb"))
+    monkeypatch.setattr(
+        "agentoi.agents.core.agent.save_run_graph",
+        lambda **payload: saved.append(payload),
+    )
+    agent = _agent(tmp_path, save_traces=True, dynamo_table="agentoi-runs", save_local=True)
+
+    agent.invoke("Persist ontology trace.")
+
+    assert saved == []
+    from agentoi.agents.runtime.duckdb_store import list_runs
+
+    assert len(list_runs(tmp_path / "agentoi.duckdb")) == 1
+
+
 def test_load_run_graph_accepts_legacy_flattened_rows(monkeypatch):
     class Table:
         def query(self, **_kwargs):

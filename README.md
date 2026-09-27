@@ -205,6 +205,10 @@ cannot decide, gated tools fail closed. Leaving `AGENTOI_TOOL_GATE` unset
 preserves normal tool execution. Arguments sent to Jev pass through redaction;
 the query and those redacted arguments still leave the process for TypeSafe.
 
+## Agent runtime
+
+`AGENTOI_TRACE_STORE=duckdb` writes each thought graph to `results/traces/agentoi.duckdb`. Install that store with `agentoi[traces]`. DynamoDB is used when `DYNAMO_TABLE` is set.
+
 ## Experiments
 
 Run the dependency-light smoke benchmark first:

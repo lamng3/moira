@@ -48,11 +48,12 @@ knowledge-graph = ["neo4j"]
 ollama = ["langchain-ollama", "ollama"]
 openai = ["langchain-openai", "openai"]
 tracking = ["wandb"]
+traces = ["duckdb"]
 uq = ["uqlm"]
 website = ["tavily-python"]
 dev = ["pre-commit", "pytest"]
 all = [
-  "agentoi[google,groq,huggingface,jev,knowledge-graph,ollama,openai,tracking,uq,website]",
+  "agentoi[google,groq,huggingface,jev,knowledge-graph,ollama,openai,tracking,traces,uq,website]",
 ]
 
 [project.scripts]

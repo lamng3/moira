@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
 from agentoi.agents.ontology_of_thought.graph import ThoughtGraph
+from agentoi.agents.runtime.duckdb_store import save_run, trace_db_path, trace_store_name
 from agentoi.agents.runtime.persistence import save_run_graph, save_trace_to_file
 from agentoi.agents.runtime.trace import Trace, TraceStep, export_trace
 from agentoi.agents.tools.registry import default_registry_resource
@@ -244,6 +245,20 @@ class Agent:
         memory_trace: Any,
     ) -> None:
         if not self.save_traces:
+            return
+        if trace_store_name() == "duckdb":
+            path = trace_db_path()
+            save_run(
+                path,
+                run_id=run_id,
+                slug=safe_slug(query_text),
+                query=query_text,
+                graph=self.oot.to_dict(),
+                memory_trace=memory_trace.to_dict() if memory_trace else None,
+                start_id=memory_trace.root_node_id if memory_trace else "",
+                end_id=memory_trace.current_node_id if memory_trace else "",
+            )
+            self._emit("duckdb.saved", run_id=run_id, path=str(path))
             return
         if self.save_local and run_dir is not None:
             save_trace_to_file(

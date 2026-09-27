@@ -17,6 +17,6 @@ jobs:
         with:
           python-version: "3.12"
       - name: Test
-        run: uv run --extra dev python -m pytest -q
+        run: uv run --extra dev --extra traces python -m pytest -q
       - name: Build package
         run: uv build

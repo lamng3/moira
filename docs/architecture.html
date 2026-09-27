@@ -60,7 +60,7 @@ flowchart LR
       <tr><td><code>cli.py</code> and <code>workspace.py</code></td><td>Path-based terminal commands and reusable ontology query sessions</td></tr>
       <tr><td><code>agents/core/</code></td><td>Agent orchestration, typed events, and tool execution</td></tr>
       <tr><td><code>agents/decisions.py</code></td><td>Optional Jev model routing and tool-risk gating, recorded on the existing trace</td></tr>
-      <tr><td><code>agents/runtime/</code></td><td>Execution traces and local or DynamoDB persistence</td></tr>
+      <tr><td><code>agents/runtime/</code></td><td>Execution traces, a local DuckDB file, or DynamoDB persistence</td></tr>
       <tr><td><code>agents/ontology_of_thought/</code></td><td>Conversation memory, thought graphs, optimization, and reconstruction</td></tr>
       <tr><td><code>agents/tools/</code></td><td>Shared registry plus ontology, knowledge-graph, and website providers</td></tr>
       <tr><td><code>algorithms/graph/</code></td><td>Ontology, concept, graph, hypergraph, predicates, and shared builders</td></tr>
@@ -174,11 +174,12 @@ flowchart TB
 
     Core --> Persistence["Trace persistence"]
     Persistence --> Local["Local JSON"]
+    Persistence --> Duck["Optional DuckDB"]
     Persistence --> Dynamo["Optional DynamoDB"]
 
     classDef external fill:#f6f8fa,stroke:#8c959f,color:#1f2328;
     classDef core fill:#ddf4ff,stroke:#0969da,color:#1f2328;
-    class User,LLM,OntTools,KGTools,WebTools,Local,Dynamo external;
+    class User,LLM,OntTools,KGTools,WebTools,Local,Duck,Dynamo external;
     class Core,Router,Runtime,Gate,Executor,Registry,Events,Observer,Memory,Thoughts,Optimizer,Persistence core;
       </pre>
     </div>
@@ -188,7 +189,7 @@ flowchart TB
       <section class="card"><h3>Gating</h3><p>Configured external lookups can be refused before execution. The refusal is <code>tool.blocked</code> on the same trace.</p></section>
       <section class="card"><h3>Events</h3><p>Observers receive one event stream without depending on the agent implementation.</p></section>
       <section class="card"><h3>Memory</h3><p><code>MemoryTrace</code> is the canonical record used to derive a <code>ThoughtGraph</code>.</p></section>
-      <section class="card"><h3>Persistence</h3><p>Runtime services serialize traces locally or to DynamoDB without entering the domain layer.</p></section>
+      <section class="card"><h3>Persistence</h3><p><code>AGENTOI_TRACE_STORE=duckdb</code> writes each thought graph to <code>results/traces/agentoi.duckdb</code>. DynamoDB is used when a table is configured.</p></section>
     </div>
 
     <h2>Agent tools</h2>

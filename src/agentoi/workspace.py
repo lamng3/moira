@@ -64,7 +64,10 @@ class OntologyWorkspace:
         self._agent: Any | None = None
         self._model_name: str | None = None
         self._agent_memory: AgentMemory | None = None
+        self._router: Any | None = None
+        self._router_model_name: str | None = None
         self.last_answer_source: str | None = None
+        self.last_route_note: str | None = None
         self.last_thought_seconds: float | None = None
         self.last_context_selection: ContextSelection | None = None
 
@@ -120,6 +123,44 @@ class OntologyWorkspace:
             _check(control)
             self._graph = graph
         return self._graph
+
+    def _replay_routed_question(
+        self,
+        query: str,
+        memory: AgentMemory,
+        progress: Progress | None,
+    ) -> str | None:
+        """Ask the small router to cross-check cached questions before retrieval."""
+        cached = [
+            str(entry["question"])
+            for entry in memory.hot.to_list()
+            if isinstance(entry.get("question"), str)
+        ]
+        if not cached:
+            return None
+        from agentoi.routing.understand import understand_question
+
+        route = understand_question(query, cached, self._router_llm())
+        if route.action != "replay" or not route.question:
+            return None
+        answer = memory.lookup_question(route.question)
+        if not answer:
+            return None
+        self.last_answer_source = "route"
+        self.last_route_note = f"Routed to a remembered question: {route.question}."
+        if progress is not None:
+            progress.stage("Using a remembered answer.")
+            progress.stage("Answer ready.")
+        return answer
+
+    def _router_llm(self) -> Any:
+        from agentoi.routing.understand import router_model_name
+
+        name = router_model_name()
+        if self._router is None or self._router_model_name != name:
+            self._router = create_model_runtime(model_name=name, temperature=0).llm
+            self._router_model_name = name
+        return self._router
 
     def _query_memory(self) -> AgentMemory:
         if self._agent_memory is None:
@@ -177,6 +218,7 @@ class OntologyWorkspace:
         """Answer a question using retrieved ontology context and an LLM."""
         self.last_thought_seconds = None
         self.last_answer_source = None
+        self.last_route_note = None
         _check(control)
         memory = self._query_memory()
         remembered = memory.consult_question(query)
@@ -186,6 +228,9 @@ class OntologyWorkspace:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
             return remembered.answer
+        routed = self._replay_routed_question(query, memory, progress)
+        if routed is not None:
+            return routed
         graph = self.prepare(progress=progress, control=control)
         model_name = self._model_label(model)
         if self._agent is None:

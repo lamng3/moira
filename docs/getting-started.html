@@ -56,7 +56,7 @@ agentoi query data/my-ontology.owl \
 agentoi chat data/my-ontology.owl</code></pre>
     <p>The ontology is parsed and embedded once per command, before the first question. Interactive mode reuses that graph for every question in the session. Add <code>--refine</code> to apply relation refinement first. Answers are plain sentences. Add <code>--log</code> to print the detailed run, or type <code>log</code> after an answer.</p>
     <p>For a local model, set <code>LLM_MODEL=ollama:llama3.1</code>. Hosted models require the corresponding API key. The Ollama client is installed with AgentOI.</p>
-    <p><code>search</code>, <code>query</code>, and <code>chat</code> save concept embeddings under <code>results/memory</code> and load them on the next run. Delete that store with <code>agentoi memory clear data/my-ontology.owl</code>. Pass <code>--no-save-memory</code> to skip writing it.</p>
+    <p><code>search</code>, <code>query</code>, and <code>chat</code> save concept embeddings under <code>results/memory</code> and load them on the next run. Delete that store with <code>agentoi memory clear data/my-ontology.owl</code>. Pass <code>--no-save-memory</code> to skip writing it. Answers are cached separately under <code>results/cache</code>. The <a href="architecture.html">architecture page</a> describes the hot, short-term, and long-term tiers and how eviction keeps each one inside its cap.</p>
 
     <h2>Run the evaluation pipeline</h2>
     <pre><code>agentoi run --ontology envo sweet --top_k 10 --eval_alignment

@@ -69,9 +69,31 @@ Local Ollama models use the `langchain-ollama` package included in the install.
 
 ## Query cache
 
-Repeated questions can skip the model. The first run captures the concept ids, a SPARQL pattern, and the answer. A later question replays that capture when it retrieves the same concepts, in any order. A different concept set still calls the model. Replay reads the capture. It does not execute the SPARQL.
+Embedding memory and the query cache are separate. Embeddings under `results/memory` let the next run skip encoding concepts. The query cache under `results/cache/<sha>/` lets a repeated question skip the model.
 
-The cache is separate from embedding memory. One ontology is stored under `results/cache/<sha>/` as `hot.json`, `short_term.json`, and `long_term.json`. Hot entries, short-term trie nodes, and long-term patterns each have a size cap. Short-term and long-term eviction defaults to `lowest-count`. The hot tier uses least recently used. Add another policy by implementing `EvictionPolicy` and registering its name.
+```mermaid
+flowchart LR
+    Ask --> Hot
+    Hot -->|same question| Answer
+    Hot -->|miss| Understand
+    Understand -->|replay| Answer
+    Understand -->|retrieve| Retrieve
+    Retrieve --> Replay
+    Replay -->|same concepts| Answer
+    Replay -->|new concepts| Model
+    Model --> ShortTerm
+    ShortTerm -->|seen 3 times| LongTerm
+```
+
+The same question hits `hot.json` before retrieval. After a miss, a small understanding model cross-checks the cached questions and can replay one of them before retrieval starts. It runs only when the hot cache already has questions. A failed call, or a name that is not in the cache, continues into retrieval. The default model is `ollama:phi3` (`AGENTOI_ROUTER_MODEL`). Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concept ids, in any order. Replay reads the stored answer and its SPARQL pattern. It does not execute that pattern. A different concept set still calls the model, then the capture is written into the short-term trie. After the same set has been answered 3 times it is copied into `long_term.json`.
+
+| Tier | File | Default cap | Eviction |
+| --- | --- | --- | --- |
+| Hot | `hot.json` | 32 questions | Least recently used |
+| Short-term | `short_term.json` | 512 trie nodes | Lowest count, then oldest |
+| Long-term | `long_term.json` | 1024 patterns | Lowest count, then oldest |
+
+`lowest-count` drops the least-used record, then the oldest. `lru` drops the record touched longest ago. Short-term and long-term follow `AGENTOI_CACHE_EVICTION`. The hot tier stays least recently used. A new policy is a class with `choose(entries)` registered under a name.
 
 ```bash
 export AGENTOI_CACHE_DIR=results/cache
@@ -80,8 +102,6 @@ export AGENTOI_SHORT_TERM_NODES=512
 export AGENTOI_LONG_TERM_ENTRIES=1024
 export AGENTOI_CACHE_EVICTION=lowest-count
 ```
-
-`lru` is the other built-in eviction name.
 
 ## Demo
 

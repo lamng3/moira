@@ -222,6 +222,9 @@ def _print_last_log(workspace: Any) -> None:
     agent = getattr(workspace, "_agent", None)
     run_log = getattr(agent, "run_log", None)
     text = run_log.text() if run_log is not None else ""
+    note = getattr(workspace, "last_route_note", None)
+    if isinstance(note, str) and note:
+        text = f"{note}\n{text}".strip() if text else note
     if text:
         print(text, flush=True)
     else:

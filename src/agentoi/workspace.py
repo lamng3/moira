@@ -8,6 +8,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from agentoi.agent_memory import (
+    AgentMemory,
+    cached_prefix_note,
+    query_path_from_graph,
+)
+from agentoi.agent_memory.service import query_memory_dir
 from agentoi.algorithms.graph import ConceptGraph, Ontology
 from agentoi.algorithms.refinement import OntologyRefiner, RefinementOptions
 from agentoi.model_runtime import create_application_agent, create_model_runtime
@@ -56,6 +62,8 @@ class OntologyWorkspace:
         self._graph: ConceptGraph | None = None
         self._agent: Any | None = None
         self._model_name: str | None = None
+        self._agent_memory: AgentMemory | None = None
+        self.last_answer_source: str | None = None
         self.last_context_selection: ContextSelection | None = None
 
     @staticmethod
@@ -103,6 +111,11 @@ class OntologyWorkspace:
                         )
             self._graph = graph
         return self._graph
+
+    def _query_memory(self) -> AgentMemory:
+        if self._agent_memory is None:
+            self._agent_memory = AgentMemory(query_memory_dir(self.path))
+        return self._agent_memory
 
     def _embedding_memory(self) -> EmbeddingMemory:
         kwargs: dict[str, Any] = {
@@ -152,6 +165,14 @@ class OntologyWorkspace:
         show_log: bool = False,
     ) -> str:
         """Answer a question using retrieved ontology context and an LLM."""
+        memory = self._query_memory()
+        remembered = memory.consult_question(query)
+        if remembered.answer:
+            self.last_answer_source = remembered.source
+            if progress is not None:
+                progress.stage("Using a remembered answer.")
+                progress.stage("Answer ready.")
+            return remembered.answer
         graph = self.prepare(progress=progress)
         model_name = self._model_label(model)
         if self._agent is None:
@@ -191,6 +212,14 @@ class OntologyWorkspace:
             for candidate in selection.documents
             if candidate.source != "web"
         ]
+        path = query_path_from_graph(query, concept_ids, graph)
+        remembered = memory.consult_path(path)
+        if remembered.answer:
+            self.last_answer_source = remembered.source
+            if progress is not None:
+                progress.stage("Using a remembered answer.")
+                progress.stage("Answer ready.")
+            return remembered.answer
         prompt = graph.make_prompt_for_query(
             query,
             [query],
@@ -199,6 +228,15 @@ class OntologyWorkspace:
             selected_ids=concept_ids,
         )
         prompt = _append_web_context(prompt, selection)
+        if remembered.prefix:
+            labels = _concept_labels(graph, remembered.prefix)
+            note = cached_prefix_note(labels)
+            if note:
+                prompt = f"{prompt}\n{note}"
+            if progress is not None:
+                progress.stage(
+                    f"Using {len(remembered.prefix)} concepts remembered from earlier questions."
+                )
         if progress is not None:
             progress.stage(
                 f"Asking {self._model_name or model_name}. Waiting for the model to answer."
@@ -214,7 +252,10 @@ class OntologyWorkspace:
             working.stop()
         if progress is not None:
             progress.stage("Answer ready.")
-        return _spoken_answer(response)
+        answer = _spoken_answer(response)
+        self.last_answer_source = "model"
+        memory.remember(path, answer)
+        return answer
 
 
     @staticmethod
@@ -226,6 +267,17 @@ class OntologyWorkspace:
         if self._model_name:
             return self._model_name
         return model or os.getenv("LLM_MODEL") or "the configured model"
+
+
+def _concept_labels(graph: ConceptGraph, concept_ids: tuple[str, ...]) -> list[str]:
+    labels: list[str] = []
+    for concept_id in concept_ids:
+        node = graph.nodes.get(concept_id)
+        if node is None:
+            labels.append(concept_id)
+        else:
+            labels.append(node.members(return_label=True))
+    return labels
 
 
 def _spoken_answer(result: Any) -> str:

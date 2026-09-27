@@ -69,7 +69,7 @@ def test_embedding_reports_each_stage(tmp_path, monkeypatch) -> None:
 
 def test_ask_reports_retrieval_and_the_model(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "example.ttl"
-    ontology.write_text(ONTOLOGY, encoding="utf-8")
+    ontology.write_text(f"{ONTOLOGY}\n# {tmp_path}\n", encoding="utf-8")
 
     def skip_embeddings(self, alpha=0.5, progress=None):
         return self

@@ -30,7 +30,7 @@ class MemoryConfig:
     short_term_nodes: int = 512
     long_term_entries: int = 1024
     promote_at: int = 3
-    eviction: str = "lowest-count"
+    eviction: str = "lfu"
 
 
 def cache_dir(ontology: Path, root: Path | None = None) -> Path:
@@ -49,5 +49,5 @@ def config_for(ontology: Path) -> MemoryConfig:
         hot_entries=_bounded_int("AGENTOI_HOT_ENTRIES", 32),
         short_term_nodes=_bounded_int("AGENTOI_SHORT_TERM_NODES", 512),
         long_term_entries=_bounded_int("AGENTOI_LONG_TERM_ENTRIES", 1024),
-        eviction=os.getenv("AGENTOI_CACHE_EVICTION", "lowest-count") or "lowest-count",
+        eviction=os.getenv("AGENTOI_CACHE_EVICTION", "lfu") or "lfu",
     )

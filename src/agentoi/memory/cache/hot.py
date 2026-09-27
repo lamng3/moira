@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from agentoi.memory.eviction import CacheEntry, EvictionPolicy, LeastRecentlyUsed
+from agentoi.memory.eviction import CacheEntry, Eviction, LeastRecentlyUsed
 from agentoi.memory.path import normalize_question
 
 
@@ -14,12 +14,14 @@ class _HotItem:
     count: int
     order: int
     last_used: int
+    frequency: int = 1
+    queue: str = ""
 
 
 class HotCache:
     """Small exact-question cache. The default policy is least recently used."""
 
-    def __init__(self, capacity: int = 32, policy: EvictionPolicy | None = None) -> None:
+    def __init__(self, capacity: int = 32, policy: Eviction | None = None) -> None:
         self.capacity = max(1, capacity)
         self.policy = policy or LeastRecentlyUsed()
         self._items: dict[str, _HotItem] = {}
@@ -31,6 +33,8 @@ class HotCache:
         if item is None:
             return None
         item.last_used = self._clock
+        item.frequency += 1
+        item.queue = self.policy.label_for_hit((key,), item.queue)
         self._clock += 1
         return item.answer
 
@@ -44,6 +48,8 @@ class HotCache:
             count=(current.count + 1) if current else 1,
             order=current.order if current else self._clock,
             last_used=self._clock,
+            frequency=(current.frequency + 1) if current else 1,
+            queue=self.policy.label_for_insert((key,), seen=current is not None),
         )
         self._clock += 1
         self._evict()
@@ -52,13 +58,22 @@ class HotCache:
         while len(self._items) > self.capacity:
             chosen = self.policy.choose(
                 [
-                    CacheEntry(key=(key,), count=item.count, order=item.order, last_used=item.last_used)
+                    CacheEntry(
+                        key=(key,),
+                        count=item.count,
+                        order=item.order,
+                        last_used=item.last_used,
+                        frequency=item.frequency,
+                        queue=item.queue,
+                    )
                     for key, item in self._items.items()
                 ]
             )
             if chosen is None:
                 return
-            self._items.pop(chosen.key[0], None)
+            removed = self._items.pop(chosen.key[0], None)
+            if removed is not None:
+                self.policy.note_evict(chosen)
 
     def to_list(self) -> list[dict[str, object]]:
         return [
@@ -66,6 +81,8 @@ class HotCache:
                 "question": question,
                 "answer": item.answer,
                 "count": item.count,
+                "frequency": item.frequency,
+                "queue": item.queue,
                 "order": item.order,
                 "last_used": item.last_used,
             }
@@ -84,11 +101,15 @@ class HotCache:
             key = normalize_question(question)
             order = int(entry.get("order") or self._clock)
             last_used = int(entry.get("last_used") or order)
+            count = int(entry.get("count") or 1)
+            frequency = entry.get("frequency")
             self._items[key] = _HotItem(
                 answer=answer,
-                count=int(entry.get("count") or 1),
+                count=count,
                 order=order,
                 last_used=last_used,
+                frequency=int(frequency) if frequency is not None else count,
+                queue=str(entry.get("queue") or ""),
             )
             self._clock = max(self._clock, order + 1, last_used + 1)
         self._evict()

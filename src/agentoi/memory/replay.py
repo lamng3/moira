@@ -31,7 +31,7 @@ class GraphReplay:
         """Store a completed path and promote it when it is seen often enough."""
         if not path.concept_ids:
             return None
-        node = self.short.trie.insert(_sorted_path(path), answer)
+        node = self.short.insert(_sorted_path(path), answer)
         if node is not None and node.answer and node.count >= self.promote_at:
             self.long.promote(node.concept_ids, node.sparql, node.count, node.answer)
         self.short.evict_to_cap()

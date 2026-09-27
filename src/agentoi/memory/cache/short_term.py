@@ -2,20 +2,40 @@
 
 from __future__ import annotations
 
-from agentoi.memory.eviction import CacheEntry, EvictionPolicy, LowestCount
-from agentoi.memory.trie import PrefixTrie
+from agentoi.memory.eviction import CacheEntry, Eviction, LeastFrequentlyUsed
+from agentoi.memory.path import QueryPath
+from agentoi.memory.trie import PrefixTrie, TrieNode
 
 
 class ShortTermMemory:
     """Trie of recent concept paths, capped by the configured eviction policy."""
 
-    def __init__(self, max_nodes: int = 512, policy: EvictionPolicy | None = None) -> None:
+    def __init__(self, max_nodes: int = 512, policy: Eviction | None = None) -> None:
         self.max_nodes = max(1, max_nodes)
-        self.policy = policy or LowestCount()
+        self.policy = policy or LeastFrequentlyUsed()
         self.trie = PrefixTrie()
 
+    def insert(self, path: QueryPath, answer: str) -> TrieNode | None:
+        node = self.trie.insert(path, answer)
+        if node is None:
+            return None
+        node.queue = self.policy.label_for_insert(node.concept_ids, seen=node.count > 1)
+        if node.frequency == 0:
+            node.frequency = node.count if node.count > 1 else 1
+        else:
+            node.frequency += 1
+        return node
+
     def answer_for(self, concept_ids: tuple[str, ...]) -> str | None:
-        return self.trie.answer_for(concept_ids)
+        node = self.trie.walk(concept_ids)
+        if node.concept_ids != tuple(concept_ids) or not node.answer:
+            return None
+        if node.frequency == 0:
+            node.frequency = node.count
+        node.frequency += 1
+        node.queue = self.policy.label_for_hit(node.concept_ids, node.queue)
+        self.trie.note_read(node)
+        return node.answer
 
     def prefix_nodes(self, concept_ids: tuple[str, ...]) -> tuple[str, ...]:
         return self.trie.prefix_nodes(concept_ids)
@@ -31,6 +51,8 @@ class ShortTermMemory:
                         count=leaf.count,
                         order=leaf.order,
                         last_used=leaf.last_used,
+                        frequency=leaf.frequency or leaf.count,
+                        queue=leaf.queue,
                     )
                     for leaf in leaves
                 ]
@@ -39,6 +61,7 @@ class ShortTermMemory:
                 break
             leaf = next(item for item in leaves if item.concept_ids == chosen.key)
             removed.append(leaf.concept_ids)
+            self.policy.note_evict(chosen)
             self.trie.detach(leaf)
         return removed
 

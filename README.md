@@ -107,18 +107,18 @@ The same question hits `hot.json` before retrieval. After a miss, the Harness as
 
 | Tier | File | Default cap | Eviction |
 | --- | --- | --- | --- |
-| Hot | `hot.json` | 32 questions | Least recently used |
-| Short-term | `short_term.json` | 512 trie nodes | Lowest count, then oldest |
-| Long-term | `long_term.json` | 1024 patterns | Lowest count, then oldest |
+| Hot | `hot.json` | 32 questions | Least frequently used |
+| Short-term | `short_term.json` | 512 trie nodes | Least frequently used |
+| Long-term | `long_term.json` | 1024 patterns | Least frequently used |
 
-`lowest-count` drops the least-used record, then the oldest. `lru` drops the record touched longest ago. Short-term and long-term follow `AGENTOI_CACHE_EVICTION`. The hot tier stays least recently used. A new policy is a class with `choose(entries)` registered under a name.
+`lfu` drops the least frequently read record, then the one touched longest ago. `lru` drops the record touched longest ago. `2q` drops a one-time record before a repeated one. Hot, short-term, and long-term follow `AGENTOI_CACHE_EVICTION`, which defaults to `lfu`. A new policy is a class with `choose(entries)` registered under a name.
 
 ```bash
 export AGENTOI_CACHE_DIR=results/cache
 export AGENTOI_HOT_ENTRIES=32
 export AGENTOI_SHORT_TERM_NODES=512
 export AGENTOI_LONG_TERM_ENTRIES=1024
-export AGENTOI_CACHE_EVICTION=lowest-count
+export AGENTOI_CACHE_EVICTION=lfu
 ```
 
 ## Demo

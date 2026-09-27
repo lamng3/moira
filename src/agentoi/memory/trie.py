@@ -18,6 +18,8 @@ class TrieNode:
     answer: str | None = None
     order: int = 0
     last_used: int = 0
+    frequency: int = 0
+    queue: str = ""
     children: dict[str, TrieNode] = field(default_factory=dict)
 
     @property
@@ -33,6 +35,8 @@ class TrieNode:
             "answer": self.answer,
             "order": self.order,
             "last_used": self.last_used,
+            "frequency": self.frequency,
+            "queue": self.queue,
             "children": {key: child.to_dict() for key, child in self.children.items()},
         }
 
@@ -47,14 +51,18 @@ class TrieNode:
         concept_ids = payload.get("concept_ids") or []
         concept_id = payload.get("concept_id")
         answer = payload.get("answer")
+        count = int(payload.get("count") or 0)
+        frequency = payload.get("frequency")
         return cls(
             concept_id=concept_id if isinstance(concept_id, str) else None,
             concept_ids=tuple(str(item) for item in concept_ids),
-            count=int(payload.get("count") or 0),
+            count=count,
             sparql=str(payload.get("sparql") or ""),
             answer=answer if isinstance(answer, str) else None,
             order=int(payload.get("order") or 0),
             last_used=int(payload.get("last_used") or 0),
+            frequency=int(frequency) if frequency is not None else count,
+            queue=str(payload.get("queue") or ""),
             children=children,
         )
 
@@ -114,6 +122,10 @@ class PrefixTrie:
 
     def node_count(self) -> int:
         return _count(self.root)
+
+    def note_read(self, node: TrieNode) -> None:
+        node.last_used = self._clock
+        self._clock += 1
 
     def detach(self, leaf: TrieNode) -> None:
         parent = self.walk(leaf.concept_ids[:-1])

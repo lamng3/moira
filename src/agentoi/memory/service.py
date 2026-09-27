@@ -10,7 +10,7 @@ from agentoi.memory.cache.hot import HotCache
 from agentoi.memory.cache.long_term import LongTermMemory
 from agentoi.memory.cache.short_term import ShortTermMemory
 from agentoi.memory.config import MemoryConfig
-from agentoi.memory.eviction import LeastRecentlyUsed, policy_for
+from agentoi.memory.eviction import policy_for
 from agentoi.memory.path import QueryPath
 from agentoi.memory.replay import GraphReplay
 from agentoi.memory.trie import TrieNode
@@ -31,10 +31,9 @@ class AgentMemory:
     def __init__(self, config: MemoryConfig) -> None:
         self.config = config
         self.directory = config.directory
-        tier_policy = policy_for(config.eviction)
-        self.hot = HotCache(config.hot_entries, LeastRecentlyUsed())
-        self.short = ShortTermMemory(config.short_term_nodes, tier_policy)
-        self.long = LongTermMemory(config.long_term_entries, tier_policy)
+        self.hot = HotCache(config.hot_entries, policy_for(config.eviction))
+        self.short = ShortTermMemory(config.short_term_nodes, policy_for(config.eviction))
+        self.long = LongTermMemory(config.long_term_entries, policy_for(config.eviction))
         self.replay = GraphReplay(self.short, self.long, promote_at=config.promote_at)
         self.load()
 

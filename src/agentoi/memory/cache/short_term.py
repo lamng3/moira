@@ -2,25 +2,17 @@
 
 from __future__ import annotations
 
-from agentoi.agent_memory.path import QueryPath
-from agentoi.agent_memory.trie import PrefixTrie, TrieNode
+from agentoi.memory.eviction import CacheEntry, EvictionPolicy, LowestCount
+from agentoi.memory.trie import PrefixTrie
 
 
 class ShortTermMemory:
-    """Trie of recent concept paths, capped by evicting rare leaves."""
+    """Trie of recent concept paths, capped by the configured eviction policy."""
 
-    def __init__(self, max_nodes: int = 512) -> None:
+    def __init__(self, max_nodes: int = 512, policy: EvictionPolicy | None = None) -> None:
         self.max_nodes = max(1, max_nodes)
+        self.policy = policy or LowestCount()
         self.trie = PrefixTrie()
-
-    def insert(self, path: QueryPath, answer: str) -> TrieNode | None:
-        node = self.trie.insert(path, answer)
-        self.evict_to_cap()
-        if node is None:
-            return None
-        if node.concept_ids and self.trie.answer_for(node.concept_ids) is None:
-            return None
-        return node
 
     def answer_for(self, concept_ids: tuple[str, ...]) -> str | None:
         return self.trie.answer_for(concept_ids)
@@ -31,9 +23,21 @@ class ShortTermMemory:
     def evict_to_cap(self) -> list[tuple[str, ...]]:
         removed: list[tuple[str, ...]] = []
         while self.trie.node_count() > self.max_nodes:
-            leaf = self.trie.lowest_leaf()
-            if leaf is None:
+            leaves = self.trie.leaves()
+            chosen = self.policy.choose(
+                [
+                    CacheEntry(
+                        key=leaf.concept_ids,
+                        count=leaf.count,
+                        order=leaf.order,
+                        last_used=leaf.last_used,
+                    )
+                    for leaf in leaves
+                ]
+            )
+            if chosen is None:
                 break
+            leaf = next(item for item in leaves if item.concept_ids == chosen.key)
             removed.append(leaf.concept_ids)
             self.trie.detach(leaf)
         return removed

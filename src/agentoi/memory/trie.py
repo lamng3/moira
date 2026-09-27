@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from agentoi.agent_memory.path import QueryPath, render_sparql
+from agentoi.memory.path import QueryPath, render_sparql
 
 
 @dataclass
 class TrieNode:
-    """One concept along a remembered path."""
+    """One concept along a captured path."""
 
     concept_id: str | None = None
     concept_ids: tuple[str, ...] = ()
@@ -17,6 +17,7 @@ class TrieNode:
     sparql: str = ""
     answer: str | None = None
     order: int = 0
+    last_used: int = 0
     children: dict[str, TrieNode] = field(default_factory=dict)
 
     @property
@@ -31,9 +32,8 @@ class TrieNode:
             "sparql": self.sparql,
             "answer": self.answer,
             "order": self.order,
-            "children": {
-                key: child.to_dict() for key, child in self.children.items()
-            },
+            "last_used": self.last_used,
+            "children": {key: child.to_dict() for key, child in self.children.items()},
         }
 
     @classmethod
@@ -45,13 +45,16 @@ class TrieNode:
             if isinstance(value, dict)
         }
         concept_ids = payload.get("concept_ids") or []
+        concept_id = payload.get("concept_id")
+        answer = payload.get("answer")
         return cls(
-            concept_id=payload.get("concept_id") if isinstance(payload.get("concept_id"), str) else None,
+            concept_id=concept_id if isinstance(concept_id, str) else None,
             concept_ids=tuple(str(item) for item in concept_ids),
             count=int(payload.get("count") or 0),
             sparql=str(payload.get("sparql") or ""),
-            answer=payload.get("answer") if isinstance(payload.get("answer"), str) else None,
+            answer=answer if isinstance(answer, str) else None,
             order=int(payload.get("order") or 0),
+            last_used=int(payload.get("last_used") or 0),
             children=children,
         )
 
@@ -62,6 +65,7 @@ class PrefixTrie:
     def __init__(self) -> None:
         self.root = TrieNode()
         self._order = 1
+        self._clock = 1
 
     def insert(self, path: QueryPath, answer: str) -> TrieNode | None:
         """Record one completed path and return its terminal node."""
@@ -73,14 +77,12 @@ class PrefixTrie:
             child = node.children.get(concept_id)
             prefix = path.concept_ids[: index + 1]
             if child is None:
-                child = TrieNode(
-                    concept_id=concept_id,
-                    concept_ids=prefix,
-                    order=self._order,
-                )
+                child = TrieNode(concept_id=concept_id, concept_ids=prefix, order=self._order)
                 self._order += 1
                 node.children[concept_id] = child
             child.count += 1
+            child.last_used = self._clock
+            self._clock += 1
             child.sparql = render_sparql(prefix, path.edges)
             node = child
         node.answer = answer
@@ -105,17 +107,13 @@ class PrefixTrie:
 
     def prefix_nodes(self, concept_ids: tuple[str, ...] | list[str]) -> tuple[str, ...]:
         """Return the concept ids of the longest stored prefix."""
-        node = self.walk(concept_ids)
-        return node.concept_ids
+        return self.walk(concept_ids).concept_ids
+
+    def leaves(self) -> list[TrieNode]:
+        return [node for node in _walk(self.root) if not node.is_root and not node.children]
 
     def node_count(self) -> int:
         return _count(self.root)
-
-    def lowest_leaf(self) -> TrieNode | None:
-        leaves = [node for node in _walk(self.root) if not node.is_root and not node.children]
-        if not leaves:
-            return None
-        return min(leaves, key=lambda node: (node.count, node.order))
 
     def detach(self, leaf: TrieNode) -> None:
         parent = self.walk(leaf.concept_ids[:-1])
@@ -129,7 +127,9 @@ class PrefixTrie:
     def from_dict(cls, payload: dict[str, object]) -> PrefixTrie:
         trie = cls()
         trie.root = TrieNode.from_dict(payload)
-        trie._order = max((node.order for node in _walk(trie.root)), default=0) + 1
+        nodes = list(_walk(trie.root))
+        trie._order = max((node.order for node in nodes), default=0) + 1
+        trie._clock = max((node.last_used for node in nodes), default=0) + 1
         return trie
 
 

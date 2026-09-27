@@ -8,12 +8,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from agentoi.agent_memory import (
+from agentoi.memory import (
     AgentMemory,
     cached_prefix_note,
+    config_for,
     query_path_from_graph,
 )
-from agentoi.agent_memory.service import query_memory_dir
 from agentoi.algorithms.graph import ConceptGraph, Ontology
 from agentoi.algorithms.refinement import OntologyRefiner, RefinementOptions
 from agentoi.model_runtime import create_application_agent, create_model_runtime
@@ -114,7 +114,7 @@ class OntologyWorkspace:
 
     def _query_memory(self) -> AgentMemory:
         if self._agent_memory is None:
-            self._agent_memory = AgentMemory(query_memory_dir(self.path))
+            self._agent_memory = AgentMemory(config_for(self.path))
         return self._agent_memory
 
     def _embedding_memory(self) -> EmbeddingMemory:

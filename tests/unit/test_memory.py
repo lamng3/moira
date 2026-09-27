@@ -1,9 +1,16 @@
+from dataclasses import replace
 from pathlib import Path
 
-from agentoi.agent_memory.hot import HotCache
-from agentoi.agent_memory.path import SUBCLASS_OF, QueryPath
-from agentoi.agent_memory.service import AgentMemory
-from agentoi.agent_memory.trie import PrefixTrie
+from agentoi.memory.cache.hot import HotCache
+from agentoi.memory.config import MemoryConfig
+from agentoi.memory.path import SUBCLASS_OF, QueryPath
+from agentoi.memory.service import AgentMemory
+from agentoi.memory.trie import PrefixTrie
+
+
+def _memory(directory: Path, **overrides: object) -> AgentMemory:
+    config = MemoryConfig(directory=directory, promote_at=3, short_term_nodes=32, hot_entries=4)
+    return AgentMemory(replace(config, **overrides))
 
 
 def test_trie_counts_a_shared_prefix_and_stores_the_sparql_pattern() -> None:
@@ -40,11 +47,8 @@ def test_hot_cache_returns_an_exact_question_and_forgets_the_least_recent() -> N
 
 
 def test_full_path_reuses_the_answer_for_a_different_question(tmp_path: Path) -> None:
-    memory = AgentMemory(tmp_path, promote_at=3, max_nodes=32, hot_size=4)
-    first = QueryPath.from_steps(
-        "What are the organ systems included?",
-        ["organ", "digestive"],
-    )
+    memory = _memory(tmp_path)
+    first = QueryPath.from_steps("What are the organ systems included?", ["organ", "digestive"])
     memory.remember(first, "The digestive system is included.")
     paraphrased = QueryPath.from_steps(
         "Which systems does this anatomy contain?",
@@ -57,7 +61,7 @@ def test_full_path_reuses_the_answer_for_a_different_question(tmp_path: Path) ->
 
 
 def test_prefix_match_returns_nodes_without_an_answer(tmp_path: Path) -> None:
-    memory = AgentMemory(tmp_path, promote_at=3, max_nodes=32, hot_size=4)
+    memory = _memory(tmp_path)
     memory.remember(
         QueryPath.from_steps("organ systems", ["organ", "digestive"]),
         "The digestive system is included.",
@@ -73,11 +77,8 @@ def test_prefix_match_returns_nodes_without_an_answer(tmp_path: Path) -> None:
 
 
 def test_flush_promotes_a_repeated_path_and_drops_a_one_off(tmp_path: Path) -> None:
-    memory = AgentMemory(tmp_path, promote_at=3, max_nodes=5, hot_size=8)
-    repeated = QueryPath.from_steps(
-        "what organ systems are included?",
-        ["organ", "digestive"],
-    )
+    memory = _memory(tmp_path, short_term_nodes=5, hot_entries=8)
+    repeated = QueryPath.from_steps("what organ systems are included?", ["organ", "digestive"])
     for _ in range(3):
         memory.remember(repeated, "The digestive system is included.")
 
@@ -87,8 +88,36 @@ def test_flush_promotes_a_repeated_path_and_drops_a_one_off(tmp_path: Path) -> N
     assert memory.short.answer_for(("bone",)) is None
     assert memory.lookup_path(repeated) == "The digestive system is included."
     assert memory.long.lookup(("organ", "digestive")) == "The digestive system is included."
+    assert (tmp_path / "hot.json").is_file()
+    assert (tmp_path / "short_term.json").is_file()
+    assert (tmp_path / "long_term.json").is_file()
 
-    restored = AgentMemory(tmp_path, promote_at=3, max_nodes=5, hot_size=8)
+    restored = _memory(tmp_path, short_term_nodes=5, hot_entries=8)
     assert restored.lookup_question(repeated.question) == "The digestive system is included."
-    assert restored.lookup_path(repeated) == "The digestive system is included."
+    assert restored.replay.replay(repeated) == "The digestive system is included."
     assert "digestive" in restored.long.patterns[("organ", "digestive")]["sparql"]
+
+
+def test_replay_returns_a_captured_path_without_the_model(tmp_path: Path) -> None:
+    memory = _memory(tmp_path)
+    captured = QueryPath.from_steps("organ systems", ["organ", "digestive"])
+    memory.remember(captured, "The digestive system is included.")
+    same_path = QueryPath.from_steps("a different question", ["organ", "digestive"])
+
+    assert memory.replay.replay(same_path) == "The digestive system is included."
+    assert memory.replay.replay_prefix(
+        QueryPath.from_steps("what is blood?", ["organ", "blood"])
+    ) == ("organ",)
+
+
+def test_long_term_cap_drops_the_rarer_pattern(tmp_path: Path) -> None:
+    memory = _memory(tmp_path, promote_at=1, long_term_entries=1, short_term_nodes=32)
+    frequent = QueryPath.from_steps("organ systems", ["organ", "digestive"])
+    rare = QueryPath.from_steps("a bone", ["bone"])
+    for _ in range(3):
+        memory.remember(frequent, "The digestive system is included.")
+    memory.remember(rare, "About bone.")
+
+    assert ("bone",) not in memory.long.patterns
+    assert ("organ", "digestive") in memory.long.patterns
+    assert memory.replay.replay(frequent) == "The digestive system is included."

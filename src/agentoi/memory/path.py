@@ -1,4 +1,4 @@
-"""Concept paths stored as SPARQL patterns for query memory."""
+"""Concept paths stored as SPARQL patterns for the query cache."""
 
 from __future__ import annotations
 

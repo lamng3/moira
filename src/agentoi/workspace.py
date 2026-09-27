@@ -219,17 +219,20 @@ class OntologyWorkspace:
         self.last_thought_seconds = None
         self.last_answer_source = None
         self.last_route_note = None
+        started = time.perf_counter()
         _check(control)
         memory = self._query_memory()
         remembered = memory.consult_question(query)
         if remembered.answer:
             self.last_answer_source = remembered.source
+            self.last_thought_seconds = time.perf_counter() - started
             if progress is not None:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
             return remembered.answer
         routed = self._replay_routed_question(query, memory, progress)
         if routed is not None:
+            self.last_thought_seconds = time.perf_counter() - started
             return routed
         graph = self.prepare(progress=progress, control=control)
         model_name = self._model_label(model)
@@ -276,6 +279,7 @@ class OntologyWorkspace:
         remembered = memory.consult_path(path)
         if remembered.answer:
             self.last_answer_source = remembered.source
+            self.last_thought_seconds = time.perf_counter() - started
             if progress is not None:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")

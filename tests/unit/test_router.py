@@ -107,7 +107,8 @@ def test_harness_choice_replays_without_the_answer_model(tmp_path, monkeypatch) 
 
     assert answer == "The mouse has a circulatory system."
     assert workspace.last_answer_source == "route"
-    assert workspace.last_thought_seconds is None
+    assert workspace.last_thought_seconds is not None
+    assert workspace.last_thought_seconds >= 0
     assert "same intent 0.80" in (workspace.last_route_note or "")
     assert "closeness Same question" in (workspace.last_route_note or "")
 
@@ -133,7 +134,8 @@ def test_paraphrase_replays_without_the_answer_model(tmp_path, monkeypatch) -> N
 
     assert answer == "The mouse has a circulatory system."
     assert workspace.last_answer_source == "route"
-    assert workspace.last_thought_seconds is None
+    assert workspace.last_thought_seconds is not None
+    assert workspace.last_thought_seconds >= 0
     assert workspace.last_route_note == f"Routed to a remembered question: {CACHED}."
 
 

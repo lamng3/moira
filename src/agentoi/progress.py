@@ -7,6 +7,12 @@ import threading
 from typing import Protocol, TextIO
 
 
+def computing_status(done: int, total: int) -> str:
+    """Percent line for embedding or loading concepts."""
+    percent = 0 if total <= 0 else round(100 * done / total)
+    return f"Computing {percent}% · {done} / {total} concepts"
+
+
 class Progress(Protocol):
     """Report a named stage and an in-place counter."""
 

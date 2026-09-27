@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,7 +20,8 @@ from agentoi.algorithms.refinement import OntologyRefiner, RefinementOptions
 from agentoi.model_runtime import create_application_agent, create_model_runtime
 from agentoi.memory_store import EmbeddingMemory, default_text_model
 from agentoi.parser import Parser
-from agentoi.progress import Progress, WorkingStatus
+from agentoi.progress import Progress, WorkingStatus, computing_status
+from agentoi.run_control import QuestionCancelled, RunControl
 from agentoi.retrieval import (
     ContextHarness,
     ContextSelection,
@@ -64,6 +66,7 @@ class OntologyWorkspace:
         self._model_name: str | None = None
         self._agent_memory: AgentMemory | None = None
         self.last_answer_source: str | None = None
+        self.last_thought_seconds: float | None = None
         self.last_context_selection: ContextSelection | None = None
 
     @staticmethod
@@ -85,8 +88,13 @@ class OntologyWorkspace:
             relations=len(self.ontology.edges),
         )
 
-    def prepare(self, progress: Progress | None = None) -> ConceptGraph:
+    def prepare(
+        self,
+        progress: Progress | None = None,
+        control: RunControl | None = None,
+    ) -> ConceptGraph:
         """Build and embed the concept graph on first use."""
+        _check(control)
         if self._graph is None:
             concept_count = len(self.ontology.nodes)
             if progress is not None:
@@ -98,17 +106,19 @@ class OntologyWorkspace:
             memory = self._embedding_memory()
             if memory.load(graph):
                 if progress is not None:
+                    progress.stage(computing_status(concept_count, concept_count))
                     progress.stage(
                         f"Loaded {concept_count} concept embeddings from {memory.location()}."
                     )
             else:
-                graph.compute_all_embeddings(alpha=0.5, progress=progress)
+                graph.compute_all_embeddings(alpha=0.5, progress=progress, control=control)
                 if self.save_memory:
                     folder = memory.save(graph)
                     if progress is not None:
                         progress.stage(
                             f"Saved {concept_count} concept embeddings to {folder}."
                         )
+            _check(control)
             self._graph = graph
         return self._graph
 
@@ -163,8 +173,12 @@ class OntologyWorkspace:
         include_neighborhood: bool | None = None,
         progress: Progress | None = None,
         show_log: bool = False,
+        control: RunControl | None = None,
     ) -> str:
         """Answer a question using retrieved ontology context and an LLM."""
+        self.last_thought_seconds = None
+        self.last_answer_source = None
+        _check(control)
         memory = self._query_memory()
         remembered = memory.consult_question(query)
         if remembered.answer:
@@ -173,7 +187,7 @@ class OntologyWorkspace:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
             return remembered.answer
-        graph = self.prepare(progress=progress)
+        graph = self.prepare(progress=progress, control=control)
         model_name = self._model_label(model)
         if self._agent is None:
             if progress is not None:
@@ -189,6 +203,8 @@ class OntologyWorkspace:
                 show_log=show_log,
             )
             self._model_name = model_name
+        _attach_model_client(self._agent, control)
+        _check(control)
         context_harness = harness or create_context_harness()
         expand_neighborhood = (
             context_harness.expands_context
@@ -220,6 +236,7 @@ class OntologyWorkspace:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
             return remembered.answer
+        _check(control)
         prompt = graph.make_prompt_for_query(
             query,
             [query],
@@ -244,12 +261,27 @@ class OntologyWorkspace:
         run_log = getattr(self._agent, "run_log", None)
         if run_log is not None:
             run_log.clear()
+        _check(control)
         working = WorkingStatus(enabled=not show_log)
         working.start()
+        started = time.perf_counter()
         try:
-            response = self._agent.invoke(prompt)
+            try:
+                response = self._agent.invoke(prompt)
+            except QuestionCancelled:
+                raise
+            except Exception:
+                if control is not None and control.cancelled:
+                    raise QuestionCancelled() from None
+                raise
+            if control is not None and control.cancelled:
+                raise QuestionCancelled()
         finally:
             working.stop()
+            if control is not None and control.cancelled:
+                self._agent = None
+                self._model_name = None
+        self.last_thought_seconds = time.perf_counter() - started
         if progress is not None:
             progress.stage("Answer ready.")
         answer = _spoken_answer(response)
@@ -267,6 +299,21 @@ class OntologyWorkspace:
         if self._model_name:
             return self._model_name
         return model or os.getenv("LLM_MODEL") or "the configured model"
+
+
+def _check(control: RunControl | None) -> None:
+    if control is not None:
+        control.raise_if_cancelled()
+
+
+def _attach_model_client(agent: Any, control: RunControl | None) -> None:
+    """Let cancel close the model connection, including the Ollama HTTP client."""
+    if control is None or agent is None:
+        return
+    client = getattr(getattr(agent, "llm", None), "_client", None)
+    close = getattr(client, "close", None)
+    if callable(close):
+        control.attach_closer(close)
 
 
 def _concept_labels(graph: ConceptGraph, concept_ids: tuple[str, ...]) -> list[str]:

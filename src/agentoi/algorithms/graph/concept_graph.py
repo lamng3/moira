@@ -108,6 +108,7 @@ class ConceptGraph:
         graph_params: dict[str, Any] | None = None,
         node2vec_model_path: str | None = None,
         progress: Any | None = None,
+        control: Any | None = None,
     ):
         """
         Creates node2vec embeddings on this graph, text embeddings for each EC,
@@ -132,11 +133,15 @@ class ConceptGraph:
         )
         # ge.embs is already populated in GraphEmbedding.__init__ when cg is provided
 
+        from agentoi.progress import computing_status
+
         nodes = list(self.nodes.values())
         total = len(nodes)
         for index, node in enumerate(nodes, start=1):
+            if control is not None:
+                control.raise_if_cancelled()
             if progress is not None:
-                progress.tick(f"Embedding concepts: {index}/{total}")
+                progress.tick(computing_status(index, total))
             # text
             node.text_embedding = txt.compute_embedding(node)
             # graph

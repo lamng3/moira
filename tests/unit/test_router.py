@@ -42,10 +42,22 @@ def test_replay_names_a_cached_question() -> None:
     route = understand_question(
         PARAPHRASE,
         [CACHED],
-        _LLM('{"action":"replay","question":"What organ systems are part of the mouse?"}'),
+        _LLM(
+            '{"same_intent":{"noul":0.91},"match":{"choice":"q0"},'
+            '"closeness":{"score":"Same question"}}'
+        ),
     )
 
-    assert route == ActionRoute("replay", question=CACHED)
+    assert route == ActionRoute(
+        "replay",
+        question=CACHED,
+        same_intent=0.91,
+        closeness="Same question",
+    )
+    assert route.note() == (
+        f"Routed to a remembered question: {CACHED}. "
+        "(same intent 0.91, closeness Same question)."
+    )
 
 
 def test_unknown_label_and_failed_call_fall_open() -> None:
@@ -53,14 +65,51 @@ def test_unknown_label_and_failed_call_fall_open() -> None:
     unknown = understand_question(
         PARAPHRASE,
         [CACHED],
-        _LLM('{"action":"replay","question":"something else"}'),
+        _LLM('{"match":{"choice":"something else"}}'),
     )
     failed = understand_question(PARAPHRASE, [CACHED], _LLM(error=RuntimeError("down")))
 
+    retrieve = understand_question(
+        PARAPHRASE,
+        [CACHED],
+        _LLM('{"match":{"choice":"retrieve"},"closeness":{"score":"Different"}}'),
+    )
+
     assert missing.action == "retrieve"
     assert unknown.action == "retrieve"
+    assert retrieve.action == "retrieve"
+    assert retrieve.closeness == "Different"
     assert failed.action == "retrieve"
     assert failed.fail_open is True
+
+
+def test_harness_choice_replays_without_the_answer_model(tmp_path, monkeypatch) -> None:
+    ontology = tmp_path / "example.ttl"
+    ontology.write_text(ONTOLOGY, encoding="utf-8")
+    workspace = OntologyWorkspace(ontology)
+    workspace._query_memory().hot.put(CACHED, "The mouse has a circulatory system.")
+
+    class Router:
+        def invoke(self, _prompt: str) -> _Reply:
+            return _Reply(
+                '{"same_intent":{"noul":0.8},"match":{"choice":"q0"},'
+                '"closeness":{"score":"Same question"}}'
+            )
+
+    monkeypatch.setattr(OntologyWorkspace, "_router_llm", lambda self: Router())
+
+    def answer_model(*_args, **_kwargs):
+        raise AssertionError("the answer model should stay unused")
+
+    monkeypatch.setattr("agentoi.workspace.create_application_agent", answer_model)
+
+    answer = workspace.ask(PARAPHRASE)
+
+    assert answer == "The mouse has a circulatory system."
+    assert workspace.last_answer_source == "route"
+    assert workspace.last_thought_seconds is None
+    assert "same intent 0.80" in (workspace.last_route_note or "")
+    assert "closeness Same question" in (workspace.last_route_note or "")
 
 
 def test_paraphrase_replays_without_the_answer_model(tmp_path, monkeypatch) -> None:

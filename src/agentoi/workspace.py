@@ -147,7 +147,7 @@ class OntologyWorkspace:
         if not answer:
             return None
         self.last_answer_source = "route"
-        self.last_route_note = f"Routed to a remembered question: {route.question}."
+        self.last_route_note = route.note()
         if progress is not None:
             progress.stage("Using a remembered answer.")
             progress.stage("Answer ready.")

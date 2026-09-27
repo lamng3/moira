@@ -75,9 +75,9 @@ Embedding memory and the query cache are separate. Embeddings under `results/mem
 flowchart LR
     Ask --> Hot
     Hot -->|same question| Answer
-    Hot -->|miss| Understand
-    Understand -->|replay| Answer
-    Understand -->|retrieve| Retrieve
+    Hot -->|miss| Harness
+    Harness -->|replay| Answer
+    Harness -->|retrieve| Retrieve
     Retrieve --> Replay
     Replay -->|same concepts| Answer
     Replay -->|new concepts| Model
@@ -85,7 +85,7 @@ flowchart LR
     ShortTerm -->|seen 3 times| LongTerm
 ```
 
-The same question hits `hot.json` before retrieval. After a miss, a small understanding model cross-checks the cached questions and can replay one of them before retrieval starts. It runs only when the hot cache already has questions. A failed call, or a name that is not in the cache, continues into retrieval. The default model is `ollama:phi3` (`AGENTOI_ROUTER_MODEL`). Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concept ids, in any order. Replay reads the stored answer and its SPARQL pattern. It does not execute that pattern. A different concept set still calls the model, then the capture is written into the short-term trie. After the same set has been answered 3 times it is copied into `long_term.json`.
+The same question hits `hot.json` before retrieval. After a miss, the Harness asks typed questions about the question the user typed and can replay a cached one before retrieval starts. It runs only when the hot cache already has questions. `same_intent` is a yes-or-no, `match` chooses a cached question or retrieve, and `closeness` scores Different, Related, or Same question. A failed call, or a choice that is not in the cache, continues into retrieval. The default model is `ollama:phi3` (`AGENTOI_ROUTER_MODEL`). Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concept ids, in any order. Replay reads the stored answer and its SPARQL pattern. It does not execute that pattern. A different concept set still calls the model, then the capture is written into the short-term trie. After the same set has been answered 3 times it is copied into `long_term.json`.
 
 | Tier | File | Default cap | Eviction |
 | --- | --- | --- | --- |

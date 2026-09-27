@@ -68,7 +68,7 @@ flowchart LR
       <tr><td><code>algorithms/views/</code></td><td>Hypergraph and multigraph analysis adapters</td></tr>
       <tr><td><code>parser/</code></td><td>One format-selecting facade over RDF, JSON, and text adapters; RDF schema declarations stay outside the concept graph</td></tr>
       <tr><td><code>memory/</code></td><td>Query cache: hot questions, short-term concept sets, and long-term patterns</td></tr>
-      <tr><td><code>routing/</code></td><td>Small understanding model that replays a cached question or continues into retrieval</td></tr>
+      <tr><td><code>routing/</code></td><td>Harness of typed questions that replays a cached question or continues into retrieval</td></tr>
       <tr><td><code>memory_store.py</code></td><td>Saved concept embeddings, separate from the query cache</td></tr>
       <tr><td><code>embeddings/encoders/</code></td><td>Text and Node2Vec graph encoders</td></tr>
       <tr><td><code>embeddings/vector_index/</code></td><td>Backend-neutral vector search with an exact Torch implementation</td></tr>
@@ -122,9 +122,9 @@ flowchart LR
 flowchart LR
     Ask["Ask"] --> Hot["Hot hash"]
     Hot -->|"same question"| Answer["Answer"]
-    Hot -->|"miss"| Understand["Understand"]
-    Understand -->|"replay"| Answer
-    Understand -->|"retrieve"| Retrieve["Retrieve concepts"]
+    Hot -->|"miss"| Harness["Harness"]
+    Harness -->|"replay"| Answer
+    Harness -->|"retrieve"| Retrieve["Retrieve concepts"]
     Retrieve --> Replay["Graph replay"]
     Replay -->|"same concepts"| Answer
     Replay -->|"new concepts"| Model["Model"]
@@ -134,7 +134,7 @@ flowchart LR
     classDef boundary fill:#f6f8fa,stroke:#8c959f,color:#1f2328;
     classDef core fill:#ddf4ff,stroke:#0969da,color:#1f2328;
     class Ask,Answer,Model boundary;
-    class Hot,Understand,Retrieve,Replay,Short,Long core;
+    class Hot,Harness,Retrieve,Replay,Short,Long core;
       </pre>
     </div>
     <p class="diagram-caption">Replay reads a stored capture. It does not send the SPARQL pattern to an endpoint.</p>
@@ -144,7 +144,7 @@ flowchart LR
       <section class="card"><h3>Short-term</h3><p><code>short_term.json</code> is a trie of concept ids, the SPARQL pattern, and the answer. Lookup uses the set of concept ids, so order from retrieval does not matter. The cap is 512 nodes.</p></section>
       <section class="card"><h3>Long-term</h3><p><code>long_term.json</code> is a persistent hash of completed concept sets. A set is copied here after it has been answered 3 times. The cap is 1024 entries. A later question with those concepts replays from here after the short-term trie has dropped them.</p></section>
     </div>
-    <p>One ontology is one directory, <code>results/cache/&lt;sha&gt;/</code>, with <code>hot.json</code>, <code>short_term.json</code>, and <code>long_term.json</code>. The first model answer writes the capture. The same question hits the hot tier before retrieval. After a miss, a small understanding model cross-checks the cached questions and can replay one of them. It runs only when the hot cache already has questions, and a failed or unmatched reply continues into retrieval. The default model is <code>ollama:phi3</code>, overridable with <code>AGENTOI_ROUTER_MODEL</code>. Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concepts. A different concept set still calls the answer model.</p>
+    <p>One ontology is one directory, <code>results/cache/&lt;sha&gt;/</code>, with <code>hot.json</code>, <code>short_term.json</code>, and <code>long_term.json</code>. The first model answer writes the capture. The same question hits the hot tier before retrieval. After a miss, the Harness asks typed questions about the question the user typed and can replay a cached one. It runs only when the hot cache already has questions. A failed call, or a choice that is not in the cache, continues into retrieval. The default model is <code>ollama:phi3</code>, overridable with <code>AGENTOI_ROUTER_MODEL</code>. Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concepts. A different concept set still calls the answer model.</p>
     <h3>Eviction</h3>
     <p>Each tier drops records when it passes its cap. <code>lowest-count</code> removes the least-used record, then the oldest. <code>lru</code> removes the record that was read or written longest ago. Short-term and long-term use <code>AGENTOI_CACHE_EVICTION</code>, which defaults to <code>lowest-count</code>. The hot tier stays least recently used. A new policy is a class with <code>choose(entries)</code> registered under a name. A new tier is a new file under <code>agentoi.memory.cache</code>.</p>
     <p><code>AGENTOI_CACHE_DIR</code> moves the folder. <code>AGENTOI_HOT_ENTRIES</code>, <code>AGENTOI_SHORT_TERM_NODES</code>, and <code>AGENTOI_LONG_TERM_ENTRIES</code> set the three caps.</p>

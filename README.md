@@ -69,7 +69,7 @@ Local Ollama models use the `langchain-ollama` package included in the install.
 
 ## Query cache
 
-Repeated questions can skip the model. The first run captures the concept path, its SPARQL pattern, and the answer. A later question with the same path replays that capture. A shared prefix replays only the stored concepts, and the model still writes the answer. Replay reads the capture. It does not execute the SPARQL.
+Repeated questions can skip the model. The first run captures the concept ids, a SPARQL pattern, and the answer. A later question replays that capture when it retrieves the same concepts, in any order. A different concept set still calls the model. Replay reads the capture. It does not execute the SPARQL.
 
 The cache is separate from embedding memory. One ontology is stored under `results/cache/<sha>/` as `hot.json`, `short_term.json`, and `long_term.json`. Hot entries, short-term trie nodes, and long-term patterns each have a size cap. Short-term and long-term eviction defaults to `lowest-count`. The hot tier uses least recently used. Add another policy by implementing `EvictionPolicy` and registering its name.
 

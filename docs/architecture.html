@@ -114,7 +114,7 @@ flowchart LR
 
     <h2>Query cache</h2>
     <p>Embedding memory and the query cache are separate. Embeddings stay under <code>results/memory</code>. Captured concept paths stay under <code>results/cache/&lt;sha&gt;/</code> as <code>hot.json</code>, <code>short_term.json</code>, and <code>long_term.json</code>.</p>
-    <p>The first answer captures the concept ids, a SPARQL pattern, and the written answer. A later question with the same path replays that capture and skips the model. A shared prefix replays only those concepts. Replay reads the stored pattern. It does not send SPARQL to an endpoint.</p>
+    <p>The first answer captures the concept ids, a SPARQL pattern, and the written answer. A later question replays that capture and skips the model when it retrieves the same concepts, in any order. A different concept set still calls the model. Replay reads the stored pattern. It does not send SPARQL to an endpoint.</p>
     <p>Each tier has a cap: <code>AGENTOI_HOT_ENTRIES</code>, <code>AGENTOI_SHORT_TERM_NODES</code>, and <code>AGENTOI_LONG_TERM_ENTRIES</code>. <code>AGENTOI_CACHE_DIR</code> moves the folder. <code>AGENTOI_CACHE_EVICTION</code> is <code>lowest-count</code> or <code>lru</code>. The hot tier always uses least recently used. A new eviction policy is a class with <code>choose(entries)</code> registered under a name. A new tier is a new file under <code>agentoi.memory.cache</code>.</p>
 
     <h2>Agent runtime</h2>

@@ -57,9 +57,6 @@ class AgentMemory:
         answer = self.lookup_path(path)
         if answer:
             return MemoryDecision(answer=answer, source="path")
-        prefix = self.replay.replay_prefix(path)
-        if prefix:
-            return MemoryDecision(prefix=prefix, source="prefix")
         return MemoryDecision()
 
     def remember(self, path: QueryPath, answer: str) -> TrieNode | None:

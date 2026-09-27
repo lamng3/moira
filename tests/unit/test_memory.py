@@ -60,7 +60,7 @@ def test_full_path_reuses_the_answer_for_a_different_question(tmp_path: Path) ->
     assert memory.consult_path(paraphrased).source == "path"
 
 
-def test_prefix_match_returns_nodes_without_an_answer(tmp_path: Path) -> None:
+def test_a_different_concept_set_does_not_replay(tmp_path: Path) -> None:
     memory = _memory(tmp_path)
     memory.remember(
         QueryPath.from_steps("organ systems", ["organ", "digestive"]),
@@ -71,9 +71,25 @@ def test_prefix_match_returns_nodes_without_an_answer(tmp_path: Path) -> None:
     decision = memory.consult_path(related)
 
     assert decision.answer is None
-    assert decision.source == "prefix"
-    assert decision.prefix == ("organ",)
+    assert decision.source == "miss"
+    assert decision.prefix == ()
     assert memory.lookup_path(related) is None
+
+
+def test_same_concepts_in_another_order_replay(tmp_path: Path) -> None:
+    memory = _memory(tmp_path)
+    memory.remember(
+        QueryPath.from_steps("what organ systems are part of the mouse?", ["organ", "digestive"]),
+        "The digestive system is included.",
+    )
+    reordered = QueryPath.from_steps(
+        "list the organ systems in the mouse",
+        ["digestive", "organ"],
+    )
+
+    assert memory.lookup_question(reordered.question) is None
+    assert memory.lookup_path(reordered) == "The digestive system is included."
+    assert memory.consult_path(reordered).source == "path"
 
 
 def test_flush_promotes_a_repeated_path_and_drops_a_one_off(tmp_path: Path) -> None:
@@ -87,7 +103,7 @@ def test_flush_promotes_a_repeated_path_and_drops_a_one_off(tmp_path: Path) -> N
 
     assert memory.short.answer_for(("bone",)) is None
     assert memory.lookup_path(repeated) == "The digestive system is included."
-    assert memory.long.lookup(("organ", "digestive")) == "The digestive system is included."
+    assert memory.long.lookup(("digestive", "organ")) == "The digestive system is included."
     assert (tmp_path / "hot.json").is_file()
     assert (tmp_path / "short_term.json").is_file()
     assert (tmp_path / "long_term.json").is_file()
@@ -95,7 +111,7 @@ def test_flush_promotes_a_repeated_path_and_drops_a_one_off(tmp_path: Path) -> N
     restored = _memory(tmp_path, short_term_nodes=5, hot_entries=8)
     assert restored.lookup_question(repeated.question) == "The digestive system is included."
     assert restored.replay.replay(repeated) == "The digestive system is included."
-    assert "digestive" in restored.long.patterns[("organ", "digestive")]["sparql"]
+    assert "digestive" in restored.long.patterns[("digestive", "organ")]["sparql"]
 
 
 def test_replay_returns_a_captured_path_without_the_model(tmp_path: Path) -> None:
@@ -105,9 +121,9 @@ def test_replay_returns_a_captured_path_without_the_model(tmp_path: Path) -> Non
     same_path = QueryPath.from_steps("a different question", ["organ", "digestive"])
 
     assert memory.replay.replay(same_path) == "The digestive system is included."
-    assert memory.replay.replay_prefix(
-        QueryPath.from_steps("what is blood?", ["organ", "blood"])
-    ) == ("organ",)
+    assert memory.replay.replay(
+        QueryPath.from_steps("list the organ systems", ["digestive", "organ"])
+    ) == "The digestive system is included."
 
 
 def test_long_term_cap_drops_the_rarer_pattern(tmp_path: Path) -> None:
@@ -119,5 +135,5 @@ def test_long_term_cap_drops_the_rarer_pattern(tmp_path: Path) -> None:
     memory.remember(rare, "About bone.")
 
     assert ("bone",) not in memory.long.patterns
-    assert ("organ", "digestive") in memory.long.patterns
+    assert ("digestive", "organ") in memory.long.patterns
     assert memory.replay.replay(frequent) == "The digestive system is included."

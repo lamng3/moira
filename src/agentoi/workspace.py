@@ -11,7 +11,6 @@ from typing import Any
 
 from agentoi.memory import (
     AgentMemory,
-    cached_prefix_note,
     config_for,
     query_path_from_graph,
 )
@@ -245,15 +244,6 @@ class OntologyWorkspace:
             selected_ids=concept_ids,
         )
         prompt = _append_web_context(prompt, selection)
-        if remembered.prefix:
-            labels = _concept_labels(graph, remembered.prefix)
-            note = cached_prefix_note(labels)
-            if note:
-                prompt = f"{prompt}\n{note}"
-            if progress is not None:
-                progress.stage(
-                    f"Using {len(remembered.prefix)} concepts remembered from earlier questions."
-                )
         if progress is not None:
             progress.stage(
                 f"Asking {self._model_name or model_name}. Waiting for the model to answer."
@@ -314,17 +304,6 @@ def _attach_model_client(agent: Any, control: RunControl | None) -> None:
     close = getattr(client, "close", None)
     if callable(close):
         control.attach_closer(close)
-
-
-def _concept_labels(graph: ConceptGraph, concept_ids: tuple[str, ...]) -> list[str]:
-    labels: list[str] = []
-    for concept_id in concept_ids:
-        node = graph.nodes.get(concept_id)
-        if node is None:
-            labels.append(concept_id)
-        else:
-            labels.append(node.members(return_label=True))
-    return labels
 
 
 def _spoken_answer(result: Any) -> str:

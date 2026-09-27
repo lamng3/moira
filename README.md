@@ -22,6 +22,24 @@ source .venv/bin/activate
 agentoi --help
 ```
 
+## Use it from another program
+
+Install the package from this repository. Python 3.12 is required.
+
+```bash
+pip install "agentoi @ git+https://github.com/lamng3/agentoi.git"
+```
+
+```python
+from agentoi import OntologyWorkspace
+
+workspace = OntologyWorkspace("ontology.owl")
+print(workspace.summary.concepts)
+print(workspace.ask("Which concepts describe the heart?", model="ollama:llama3.1"))
+```
+
+Install that same command again to pick up a later update. The version is `agentoi.__version__`.
+
 Inspect an OWL, RDF/XML, Turtle, N-Triples, TriG, TriX, or JSON-LD file without
 an LLM:
 

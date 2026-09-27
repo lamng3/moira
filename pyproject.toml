@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentoi"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Agentic ontology integration with budgeted LLM inference"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -63,6 +63,9 @@ agentoi-lint = "agentoi.validation.ontology_lint:main"
 [project.urls]
 Documentation = "https://lamng3.github.io/agentoi-docs/"
 Repository = "https://github.com/lamng3/agentoi"
+
+[tool.setuptools.dynamic]
+version = {attr = "agentoi.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["src"]

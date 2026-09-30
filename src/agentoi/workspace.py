@@ -266,10 +266,9 @@ class OntologyWorkspace:
         started = time.perf_counter()
         _check(control)
         memory = self._query_memory()
-        remembered = memory.consult_question(query)
-        hot_answer = _presentable(remembered.answer or "")
+        hot_answer = _converged_hot(memory, query)
         if hot_answer:
-            self.last_answer_source = remembered.source
+            self.last_answer_source = "hot"
             self.last_thought_seconds = time.perf_counter() - started
             if progress is not None:
                 progress.stage("Using a remembered answer.")
@@ -475,6 +474,31 @@ def _attach_model_client(agent: Any, control: RunControl | None) -> None:
 _NO_ANSWER = "The ontology did not yield an answer."
 
 
+def _converged_hot(memory: AgentMemory, question: str) -> str:
+    """One answer for wordings that keep the same content words."""
+    from agentoi.memory.path import content_key
+
+    asked = memory.lookup_question(question)
+    key = content_key(question)
+    group: list[str] = []
+    if key:
+        for entry in memory.hot.to_list():
+            stored_question = entry.get("question")
+            stored_answer = entry.get("answer")
+            if (
+                isinstance(stored_question, str)
+                and isinstance(stored_answer, str)
+                and content_key(stored_question) == key
+            ):
+                group.append(stored_answer)
+    if asked and asked not in group:
+        group.append(asked)
+    shown = [text for text in (_presentable(item) for item in group) if text]
+    if not shown:
+        return ""
+    return max(shown, key=len)
+
+
 def _concept_name(token: str, graph: Any) -> str | None:
     """The ontology label for a matched concept. Internal equivalence ids stay hidden."""
     nodes = getattr(graph, "nodes", None) if graph is not None else None
@@ -535,6 +559,8 @@ _ECHO_MARKERS = (
     "concept clusters",
     "from cluster",
     "(cluster",
+    "most relevant concepts",
+    "relevant concepts",
 )
 
 

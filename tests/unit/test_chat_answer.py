@@ -41,6 +41,22 @@ def test_prompt_headings_are_left_out_of_the_answer() -> None:
     assert _usable_prose(narration) == ""
 
 
+def test_a_concept_list_footer_is_left_out() -> None:
+    stored = (
+        "The organ systems in the mouse include:\n\n"
+        "* Visceral organ system\n"
+        "* Digestive system (which is a part of the visceral organ system)\n\n"
+        'The relevant concepts used to answer this question include "organ system", '
+        '"visceral organ system", and "digestive system".'
+    )
+
+    shown = _presentable(stored)
+
+    assert "Visceral organ system" in shown
+    assert "Digestive system" in shown
+    assert "relevant concepts" not in shown.lower()
+
+
 def test_a_tool_plan_is_not_usable_prose() -> None:
     plan = 'I will use the tools provided. {"tool_name": "search_term_context"}'
 

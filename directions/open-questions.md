@@ -23,6 +23,12 @@ The order that runs today:
 
 Paraphrase matching stays open. A definition that does not share those three-word windows still misses the checksum.
 
+## Answer convergence
+
+“What are the organ systems in the mouse?” and “list the organ systems in the mouse” are one request with a different frame. Each wording had its own hot entry, so the chat showed two answers.
+
+Questions that keep the same content words now share one hot answer. Frame words such as list, what, are, and the do not open a second entry. When several stored answers share that key, the fuller one is returned. A paraphrase that changes the content words, such as “which body systems does a mouse have”, still stays open. The Harness can replay those after the content-word key misses, when it judges the intent to be the same.
+
 ## Bloom and cuckoo in front of the checksum
 
 The per-answer checksum names the concept. A bloom filter or a cuckoo filter only answers whether a shingle might have been seen. That is useful once the index is larger than the 32 hot answers: a question whose shingles are all absent can skip the scan. A hit still has to rank the per-answer checksums, because the filter cannot say which answer matched.

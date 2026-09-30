@@ -5,6 +5,7 @@ from agentoi.memory.cache.hot import HotCache
 from agentoi.memory.config import MemoryConfig
 from agentoi.memory.path import SUBCLASS_OF, QueryPath
 from agentoi.memory.service import AgentMemory
+from agentoi.workspace import _converged_hot
 from agentoi.memory.trie import PrefixTrie
 
 
@@ -112,6 +113,34 @@ def test_flush_promotes_a_repeated_path_and_drops_a_one_off(tmp_path: Path) -> N
     assert restored.lookup_question(repeated.question) == "The digestive system is included."
     assert restored.replay.replay(repeated) == "The digestive system is included."
     assert "digestive" in restored.long.patterns[("digestive", "organ")]["sparql"]
+
+
+def test_the_same_content_words_share_one_hot_answer(tmp_path: Path) -> None:
+    memory = _memory(tmp_path)
+    short = (
+        'The organ systems in the mouse include:\n\n'
+        'The most relevant concepts that answer the question are "organ system" and "visceral organ system".'
+    )
+    full = (
+        "The organ systems in the mouse include:\n\n"
+        "* Visceral organ system\n"
+        "* Digestive system (which is a part of the visceral organ system)\n\n"
+        'The relevant concepts used to answer this question include "organ system" and "digestive system".'
+    )
+    memory.hot.put("What are the organ systems in the mouse?", short)
+    memory.hot.put("list the organ systems in the mouse", full)
+    memory.hot.put("What is the heart?", "A heart is an organ.")
+    memory.hot.put("Where is the heart?", "In the chest.")
+
+    listed = _converged_hot(memory, "list the organ systems in the mouse")
+    asked = _converged_hot(memory, "What are the organ systems in the mouse?")
+
+    assert listed == asked
+    assert "Visceral organ system" in listed
+    assert "Digestive system" in listed
+    assert "relevant concepts" not in listed.lower()
+    assert _converged_hot(memory, "Where is the heart?") == "In the chest."
+    assert _converged_hot(memory, "What is the heart?") == "A heart is an organ."
 
 
 def test_replay_returns_a_captured_path_without_the_model(tmp_path: Path) -> None:

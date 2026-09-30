@@ -18,6 +18,43 @@ def normalize_question(text: str) -> str:
     return collapsed.strip(" ?.!")
 
 
+_FRAME = frozenset(
+    {
+        "a",
+        "an",
+        "are",
+        "did",
+        "do",
+        "does",
+        "give",
+        "in",
+        "is",
+        "list",
+        "lists",
+        "me",
+        "please",
+        "show",
+        "tell",
+        "the",
+        "there",
+        "what",
+        "which",
+    }
+)
+_CONTENT_WORD = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+
+
+def content_key(text: str) -> frozenset[str]:
+    """Content words shared by wordings of one request.
+
+    Frame words such as ``list`` and ``what are`` do not distinguish a question.
+    ``where`` and ``how`` stay, because they change the request.
+    """
+    return frozenset(
+        word for word in _CONTENT_WORD.findall(normalize_question(text)) if word not in _FRAME
+    )
+
+
 def _term(value: str) -> str:
     if value.startswith(("http://", "https://")):
         iri = value.replace(">", "%3E")

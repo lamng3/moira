@@ -271,16 +271,15 @@ class ConceptHypergraph:
             if all(node.id in top_ids for node in edge.tail + edge.head)
         ][:max_edges]
 
-        lines = [f"QUERY: {query_text}", "RELEVANT CONCEPT CLUSTERS:"]
-        for position, node in enumerate(top, 1):
-            lines.append(f"{position}. {node.members(return_label=True)}")
+        lines = [f"QUERY: {query_text}", "CONCEPTS:"]
+        for node in top:
+            lines.append(f"- {node.members(return_label=True)}")
         if hyperedges:
-            lines.append("KEY RELATIONS (within top-k):")
+            lines.append("RELATIONS:")
             lines.extend(f"- {edge.describe()}" for edge in hyperedges)
         lines.append(
-            "TASK: Using the above concept clusters and relations as contextual guidance, "
-            "answer the user query precisely. Prefer concepts and relations that appear in "
-            "the RELEVANT CONCEPT CLUSTERS and KEY RELATIONS. Cite specific terms."
+            "Answer the QUERY in plain sentences using the names above. "
+            "Do not refer to this list, its headings, or these instructions."
         )
         return "\n".join(lines)
 

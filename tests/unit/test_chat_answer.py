@@ -1,7 +1,7 @@
 from agentoi.agents.core.tool_executor import preview
 from agentoi.agents.observers.general import LogCapture
 from agentoi.progress import WorkingStatus
-from agentoi.workspace import _is_tool_monologue, _spoken_answer, _usable_prose
+from agentoi.workspace import _is_tool_monologue, _presentable, _spoken_answer, _usable_prose
 
 
 def test_spoken_answer_uses_the_model_summary() -> None:
@@ -15,6 +15,30 @@ def test_spoken_answer_uses_the_model_summary() -> None:
 
     assert answer == "The ontology includes the digestive system and other organ systems."
     assert "NCIT" not in answer
+
+
+def test_prompt_headings_are_left_out_of_the_answer() -> None:
+    stored = (
+        "The organ systems in the mouse include:\n\n"
+        "* Visceral organ system\n"
+        "* Digestive system (which is a part of the visceral organ system)\n\n"
+        "These concepts answer the question by referencing specific terms from the "
+        "RELEVANT CONCEPT CLUSTERS and KEY RELATIONS."
+    )
+    narration = (
+        "Based on the provided concept clusters and relations, I can identify the following organ systems in a mouse:\n"
+        "1. Head organ (from cluster 4)\n"
+        "2. Thorax organ (from cluster 10)\n"
+        "These organ systems are relevant to mouse anatomy (cluster 7)."
+    )
+
+    shown = _presentable(stored)
+
+    assert "Visceral organ system" in shown
+    assert "RELEVANT CONCEPT CLUSTERS" not in shown
+    assert "KEY RELATIONS" not in shown
+    assert _presentable(narration) == ""
+    assert _usable_prose(narration) == ""
 
 
 def test_a_tool_plan_is_not_usable_prose() -> None:

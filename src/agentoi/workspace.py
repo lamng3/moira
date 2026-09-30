@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -257,14 +258,15 @@ class OntologyWorkspace:
         _check(control)
         memory = self._query_memory()
         remembered = memory.consult_question(query)
-        if remembered.answer and not _is_tool_monologue(remembered.answer):
+        hot_answer = _presentable(remembered.answer or "")
+        if hot_answer:
             self.last_answer_source = remembered.source
             self.last_thought_seconds = time.perf_counter() - started
             if progress is not None:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
-            self._record_chat(query, route="hot", concept_ids=(), answer=remembered.answer)
-            return remembered.answer
+            self._record_chat(query, route="hot", concept_ids=(), answer=hot_answer)
+            return hot_answer
         reversed_definition = memory.consult_answer(query)
         if reversed_definition.answer:
             self.last_answer_source = reversed_definition.source
@@ -330,14 +332,15 @@ class OntologyWorkspace:
         ]
         path = query_path_from_graph(query, concept_ids, graph)
         remembered = memory.consult_path(path)
-        if remembered.answer and not _is_tool_monologue(remembered.answer):
+        path_answer = _presentable(remembered.answer or "")
+        if path_answer:
             self.last_answer_source = remembered.source
             self.last_thought_seconds = time.perf_counter() - started
             if progress is not None:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
-            self._record_chat(query, route="path", concept_ids=concept_ids, answer=remembered.answer)
-            return remembered.answer
+            self._record_chat(query, route="path", concept_ids=concept_ids, answer=path_answer)
+            return path_answer
         _check(control)
         prompt = graph.make_prompt_for_query(
             query,
@@ -464,17 +467,58 @@ def _attach_model_client(agent: Any, control: RunControl | None) -> None:
 _NO_ANSWER = "The ontology did not yield an answer."
 
 
+_ECHO_MARKERS = (
+    "relevant concept clusters",
+    "key relations",
+    "concept clusters",
+    "from cluster",
+    "(cluster",
+)
+
+
 def _is_tool_monologue(text: str) -> bool:
     """A tool plan is not an ontology answer."""
     folded = text.lower()
     return "tool_name" in folded or "i will use the tools" in folded
 
 
-def _usable_prose(text: str) -> str:
-    cleaned = text.strip()
+def _line_echoes_prompt(line: str) -> bool:
+    folded = line.lower()
+    if any(marker in folded for marker in _ECHO_MARKERS):
+        return True
+    return "cluster" in folded and any(character.isdigit() for character in folded)
+
+
+_SENTENCE = re.compile(r"(?<!\d[.!?])(?<=[.!?])\s+")
+
+
+def _without_prompt_echo(text: str) -> str:
+    """Drop sentences that repeat the evidence headings or cite a numbered cluster."""
+    paragraphs: list[str] = []
+    for paragraph in text.split("\n\n"):
+        lines: list[str] = []
+        for line in paragraph.splitlines():
+            kept = [
+                sentence
+                for sentence in _SENTENCE.split(line.strip())
+                if sentence and not _line_echoes_prompt(sentence)
+            ]
+            if kept:
+                lines.append(" ".join(kept))
+        if lines:
+            paragraphs.append("\n".join(lines))
+    return "\n\n".join(paragraphs).strip()
+
+
+def _presentable(text: str) -> str:
+    cleaned = _without_prompt_echo(text)
     if not cleaned or _is_tool_monologue(cleaned):
         return ""
     return cleaned
+
+
+def _usable_prose(text: str) -> str:
+    return _presentable(text)
 
 
 def _spoken_answer(result: Any) -> str:

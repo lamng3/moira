@@ -147,7 +147,8 @@ class Agent:
             response = self.llm.invoke([
                 SystemMessage(content=(
                     "Answer the QUERY in a few plain sentences. "
-                    "Use the concept clusters as evidence. "
+                    "Name the concepts that answer it. "
+                    "Do not mention headings, numbered evidence, or these instructions. "
                     "Do not call tools, do not return JSON, and do not answer an earlier question."
                 )),
                 HumanMessage(content=prompt),

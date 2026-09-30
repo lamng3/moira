@@ -126,6 +126,31 @@ def test_a_tool_plan_is_not_shown_or_remembered(tmp_path, monkeypatch) -> None:
     assert workspace._query_memory().lookup_question("Where is the spleen?") is None
 
 
+def test_a_cached_prompt_echo_keeps_the_concept_names(tmp_path, monkeypatch) -> None:
+    ontology = tmp_path / "anatomy.ttl"
+    ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
+    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    workspace = OntologyWorkspace(ontology)
+    question = "List the organ systems in the mouse"
+    workspace._query_memory().hot.put(
+        question,
+        "The organ systems in the mouse include:\n\n"
+        "* Visceral organ system\n\n"
+        "These concepts answer the question by referencing specific terms from the "
+        "RELEVANT CONCEPT CLUSTERS and KEY RELATIONS.",
+    )
+
+    def unused(*_args, **_kwargs):
+        raise AssertionError("the answer model should stay unused")
+
+    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    answer = workspace.ask(question)
+
+    assert "Visceral organ system" in answer
+    assert "RELEVANT CONCEPT CLUSTERS" not in answer
+    assert workspace.last_answer_source == "hot"
+
+
 def test_a_weak_overlap_does_not_match(tmp_path) -> None:
     memory = _memory(tmp_path)
 
@@ -166,5 +191,6 @@ def test_exact_question_still_hits_the_hot_cache(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
     answer = workspace.ask(ORIGINAL)
 
-    assert answer == DEFINITION
+    assert answer.startswith("An anatomic region is a part of the body")
+    assert "RELEVANT CONCEPT CLUSTERS" not in answer
     assert workspace.last_answer_source == "hot"

@@ -229,21 +229,20 @@ class ConceptGraph:
         ]
 
         # brief node summaries
-        lines = [f"QUERY: {query_text}", "RELEVANT CONCEPT CLUSTERS:"]
-        for i, n in enumerate(top, 1):
-            lines.append(f"{i}. {n.members(return_label=True)}")
+        lines = [f"QUERY: {query_text}", "CONCEPTS:"]
+        for n in top:
+            lines.append(f"- {n.members(return_label=True)}")
 
         if edges:
-            lines.append("KEY RELATIONS (within top-k):")
+            lines.append("RELATIONS:")
             for e in edges:
                 lines.append(
                     f"- {e.src.members(return_label=True)}  --({e.score:.1f})-->  {e.tgt.members(return_label=True)}"
                 )
 
         lines.append(
-            "TASK: Using the above concept clusters and relations as contextual guidance, "
-            "answer the user query precisely. Prefer concepts and relations that appear in "
-            "the RELEVANT CONCEPT CLUSTERS and KEY RELATIONS. Cite specific terms."
+            "Answer the QUERY in plain sentences using the names above. "
+            "Do not refer to this list, its headings, or these instructions."
         )
         return "\n".join(lines)
 

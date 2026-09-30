@@ -143,6 +143,15 @@ def test_the_same_content_words_share_one_hot_answer(tmp_path: Path) -> None:
     assert _converged_hot(memory, "What is the heart?") == "A heart is an organ."
 
 
+def test_a_plural_wording_reuses_the_stored_model_answer(tmp_path: Path) -> None:
+    memory = _memory(tmp_path)
+    answer = "The digestive system of a mouse consists of the esophagus and the stomach."
+    memory.hot.put("describe for me the digestive system of a mouse", answer)
+
+    assert _converged_hot(memory, "describe for me digestive systems of a mouse") == answer
+    assert _converged_hot(memory, "where is the digestive system of a mouse") == ""
+
+
 def test_replay_returns_a_captured_path_without_the_model(tmp_path: Path) -> None:
     memory = _memory(tmp_path)
     captured = QueryPath.from_steps("organ systems", ["organ", "digestive"])

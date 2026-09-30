@@ -26,12 +26,14 @@ _FRAME = frozenset(
         "did",
         "do",
         "does",
+        "for",
         "give",
         "in",
         "is",
         "list",
         "lists",
         "me",
+        "of",
         "please",
         "show",
         "tell",
@@ -51,8 +53,19 @@ def content_key(text: str) -> frozenset[str]:
     ``where`` and ``how`` stay, because they change the request.
     """
     return frozenset(
-        word for word in _CONTENT_WORD.findall(normalize_question(text)) if word not in _FRAME
+        _stem(word)
+        for word in _CONTENT_WORD.findall(normalize_question(text))
+        if word not in _FRAME
     )
+
+
+def _stem(word: str) -> str:
+    """Fold a trailing plural so system and systems share a key."""
+    if len(word) > 5 and word.endswith("ies"):
+        return word[:-3] + "y"
+    if len(word) > 4 and word.endswith("s") and not word.endswith("ss"):
+        return word[:-1]
+    return word
 
 
 def _term(value: str) -> str:

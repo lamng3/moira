@@ -27,7 +27,7 @@ Paraphrase matching stays open. A definition that does not share those three-wor
 
 “What are the organ systems in the mouse?” and “list the organ systems in the mouse” are one request with a different frame. Each wording had its own hot entry, so the chat showed two answers.
 
-Questions that keep the same content words now share one hot answer. Frame words such as list, what, are, and the do not open a second entry. When several stored answers share that key, the fuller one is returned. A paraphrase that changes the content words, such as “which body systems does a mouse have”, still stays open. The Harness can replay those after the content-word key misses, when it judges the intent to be the same.
+Questions that keep the same content words now share one hot answer. Frame words such as list, what, are, and the do not open a second entry. A trailing plural, such as system and systems, shares that key too. When several stored answers share that key, the fuller one is returned. A paraphrase that changes the content words, such as “which body systems does a mouse have”, still stays open. The Harness can replay those after the content-word key misses, when it judges the intent to be the same.
 
 ## Bloom and cuckoo in front of the checksum
 

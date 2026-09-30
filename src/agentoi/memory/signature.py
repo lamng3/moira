@@ -26,6 +26,7 @@ class AnswerSignature:
     """Hashes of one answer and the concept path that produced it."""
 
     hashes: frozenset[int]
+    words: tuple[str, ...]
     concept_ids: tuple[str, ...]
 
 
@@ -41,34 +42,43 @@ class AnswerIndex:
     def add(self, answer: str, concept_ids: tuple[str, ...]) -> None:
         if not answer.strip() or not concept_ids:
             return
-        hashes = shingle_hashes(answer)
+        words = tuple(_words(answer))
+        hashes = _hashes_from_words(words)
         if len(hashes) < MIN_SHINGLES:
             return
         key = tuple(concept_ids)
         self._rows = [row for row in self._rows if row.concept_ids != key]
-        self._rows.append(AnswerSignature(hashes, key))
+        self._rows.append(AnswerSignature(hashes, words, key))
 
     def match(self, question: str) -> str | None:
         """Return the concept label when the question is mostly one stored answer."""
-        query = shingle_hashes(question)
+        query_words = _words(question)
+        query = _hashes_from_words(query_words)
         if len(query) < MIN_SHINGLES or not self._rows:
             return None
         scored = sorted(
-            ((len(query & row.hashes) / len(query), row) for row in self._rows),
+            ((_overlap(query, row.hashes), row) for row in self._rows),
             key=lambda item: item[0],
             reverse=True,
         )
         best, winner = scored[0]
         second = scored[1][0] if len(scored) > 1 else 0.0
         if best < MIN_SCORE or best - second < MIN_MARGIN:
-            return None
+            scored = sorted(
+                ((_tolerant_overlap(query_words, row), row) for row in self._rows),
+                key=lambda item: item[0],
+                reverse=True,
+            )
+            best, winner = scored[0]
+            second = scored[1][0] if len(scored) > 1 else 0.0
+            if best < MIN_SCORE or best - second < MIN_MARGIN:
+                return None
         return short_label(winner.concept_ids[-1])
 
 
 def shingle_hashes(text: str) -> frozenset[int]:
     """Stable checksum of every three-word window in the text."""
-    words = _words(text)
-    return frozenset(_hash(" ".join(words[index : index + 3])) for index in range(len(words) - 2))
+    return _hashes_from_words(_words(text))
 
 
 def rebuild_index(
@@ -91,6 +101,58 @@ def rebuild_index(
 def _words(text: str) -> list[str]:
     folded = normalize_question(text).replace("relevant concept clusters", " ")
     return [word for word in _WORD.findall(folded) if word not in _STOP]
+
+
+def _hashes_from_words(words: list[str] | tuple[str, ...]) -> frozenset[int]:
+    return frozenset(_hash(" ".join(words[index : index + 3])) for index in range(len(words) - 2))
+
+
+def _overlap(query: frozenset[int], answer: frozenset[int]) -> float:
+    if not query:
+        return 0.0
+    return len(query & answer) / len(query)
+
+
+def _tolerant_overlap(query_words: list[str], row: AnswerSignature) -> float:
+    """Rescore after correcting one misspelled word of length 5 or more."""
+    corrected = _correct_one(query_words, row.words)
+    if corrected is None:
+        return _overlap(_hashes_from_words(query_words), row.hashes)
+    return _overlap(_hashes_from_words(corrected), row.hashes)
+
+
+def _correct_one(query_words: list[str], answer_words: tuple[str, ...]) -> list[str] | None:
+    pool = set(answer_words)
+    missing = [index for index, word in enumerate(query_words) if word not in pool]
+    if len(missing) != 1:
+        return None
+    index = missing[0]
+    word = query_words[index]
+    if len(word) < 5:
+        return None
+    neighbors = [item for item in pool if _edit_distance(word, item) == 1]
+    if len(neighbors) != 1:
+        return None
+    corrected = list(query_words)
+    corrected[index] = neighbors[0]
+    return corrected
+
+
+def _edit_distance(left: str, right: str) -> int:
+    if abs(len(left) - len(right)) > 1:
+        return 2
+    previous = list(range(len(right) + 1))
+    for left_char in left:
+        current = [previous[0] + 1]
+        row_min = current[0]
+        for index, right_char in enumerate(right, 1):
+            cost = 0 if left_char == right_char else 1
+            current.append(min(current[-1] + 1, previous[index] + 1, previous[index - 1] + cost))
+            row_min = min(row_min, current[-1])
+        if row_min > 1:
+            return 2
+        previous = current
+    return previous[-1]
 
 
 def _hash(text: str) -> int:

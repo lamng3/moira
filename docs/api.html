@@ -52,7 +52,7 @@
 workspace = OntologyWorkspace("ontology.owl", refine=True)
 matches = workspace.search("freshwater temperature", top_k=8)
 answer = workspace.ask("Which concepts describe freshwater temperature?")</code></pre>
-      <p>After the exact question hash misses, a checksum of three-word shingles on each remembered answer can name the last concept on that path and skip retrieval. The overlap must be at least 0.75 and lead the next answer by 0.15. A question with fewer than 4 shingles continues into the Harness. <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/memory/signature.py">signature.py</a></p>
+      <p>After the exact question hash misses, a checksum of three-word shingles on each remembered answer can name the last concept on that path and skip retrieval. The overlap must be at least 0.75 and lead the next answer by 0.15. A single misspelled word can still match. A question with fewer than 4 shingles continues into the Harness. <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/memory/signature.py">signature.py</a></p>
       <p><span class="badge">OWL/RDF path</span><span class="badge">Natural language</span><span class="badge">Cached graph</span> <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/workspace.py">View source →</a></p>
     </section>
 

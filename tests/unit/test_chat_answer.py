@@ -1,7 +1,7 @@
 from agentoi.agents.core.tool_executor import preview
 from agentoi.agents.observers.general import LogCapture
 from agentoi.progress import WorkingStatus
-from agentoi.workspace import _spoken_answer
+from agentoi.workspace import _is_tool_monologue, _spoken_answer, _usable_prose
 
 
 def test_spoken_answer_uses_the_model_summary() -> None:
@@ -15,6 +15,14 @@ def test_spoken_answer_uses_the_model_summary() -> None:
 
     assert answer == "The ontology includes the digestive system and other organ systems."
     assert "NCIT" not in answer
+
+
+def test_a_tool_plan_is_not_usable_prose() -> None:
+    plan = 'I will use the tools provided. {"tool_name": "search_term_context"}'
+
+    assert _is_tool_monologue(plan)
+    assert _usable_prose(plan) == ""
+    assert _usable_prose("The visceral organ system sits in the body cavity.")
 
 
 def test_log_capture_keeps_the_run_for_later() -> None:

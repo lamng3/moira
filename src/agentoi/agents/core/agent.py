@@ -134,6 +134,28 @@ class Agent:
             "- Do not invent arguments or fields."
         )
 
+    def answer_plain(self, prompt: str) -> str:
+        """Answer from retrieved concepts without offering tools."""
+        original = self.llm
+        try:
+            router = self._active_model_router()
+            if router is not None:
+                fallback = str(getattr(self.llm, "model", "unknown"))
+                replacement, _route = router.select(prompt, fallback)
+                if replacement is not None:
+                    self.llm = replacement
+            response = self.llm.invoke([
+                SystemMessage(content=(
+                    "Answer the QUERY in a few plain sentences. "
+                    "Use the concept clusters as evidence. "
+                    "Do not call tools, do not return JSON, and do not answer an earlier question."
+                )),
+                HumanMessage(content=prompt),
+            ])
+            return getattr(response, "content", str(response)).strip()
+        finally:
+            self.llm = original
+
     def _coerce_tool_call(self, tool_call: dict[str, Any]) -> dict[str, Any]:
         return coerce_tool_call(tool_call, self._tool_registry, FALLBACK_MODULES)
 

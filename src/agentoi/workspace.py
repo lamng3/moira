@@ -257,7 +257,7 @@ class OntologyWorkspace:
         _check(control)
         memory = self._query_memory()
         remembered = memory.consult_question(query)
-        if remembered.answer:
+        if remembered.answer and not _is_tool_monologue(remembered.answer):
             self.last_answer_source = remembered.source
             self.last_thought_seconds = time.perf_counter() - started
             if progress is not None:
@@ -330,7 +330,7 @@ class OntologyWorkspace:
         ]
         path = query_path_from_graph(query, concept_ids, graph)
         remembered = memory.consult_path(path)
-        if remembered.answer:
+        if remembered.answer and not _is_tool_monologue(remembered.answer):
             self.last_answer_source = remembered.source
             self.last_thought_seconds = time.perf_counter() - started
             if progress is not None:
@@ -361,7 +361,8 @@ class OntologyWorkspace:
         started = time.perf_counter()
         try:
             try:
-                response = self._agent.invoke(prompt)
+                speaker = getattr(self._agent, "answer_plain", None)
+                response = speaker(prompt) if callable(speaker) else self._agent.invoke(prompt)
             except QuestionCancelled:
                 raise
             except Exception:
@@ -378,9 +379,12 @@ class OntologyWorkspace:
         self.last_thought_seconds = time.perf_counter() - started
         if progress is not None:
             progress.stage("Answer ready.")
-        answer = _spoken_answer(response)
+        answer = _usable_prose(_spoken_answer(response))
         self.last_answer_source = "model"
-        memory.remember(path, answer)
+        if answer:
+            memory.remember(path, answer)
+        else:
+            answer = _NO_ANSWER
         self._record_chat(query, route="retrieve", concept_ids=concept_ids, answer=answer)
         return answer
 
@@ -434,11 +438,11 @@ def _chat_turns(
 def _with_chat(prompt: str, turns: Sequence[tuple[str, str]]) -> str:
     if not turns:
         return prompt
-    lines = ["EARLIER IN THIS CHAT:"]
+    lines = [prompt, "EARLIER IN THIS CHAT, FOR BACKGROUND ONLY:"]
     for question, answer in turns:
         lines.append(f"Q: {question}")
         lines.append(f"A: {answer}")
-    lines.append(prompt)
+    lines.append("Answer the QUERY above. Do not answer an earlier question.")
     return "\n".join(lines)
 
 
@@ -455,6 +459,22 @@ def _attach_model_client(agent: Any, control: RunControl | None) -> None:
     close = getattr(client, "close", None)
     if callable(close):
         control.attach_closer(close)
+
+
+_NO_ANSWER = "The ontology did not yield an answer."
+
+
+def _is_tool_monologue(text: str) -> bool:
+    """A tool plan is not an ontology answer."""
+    folded = text.lower()
+    return "tool_name" in folded or "i will use the tools" in folded
+
+
+def _usable_prose(text: str) -> str:
+    cleaned = text.strip()
+    if not cleaned or _is_tool_monologue(cleaned):
+        return ""
+    return cleaned
 
 
 def _spoken_answer(result: Any) -> str:

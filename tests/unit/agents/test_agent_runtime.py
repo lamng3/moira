@@ -45,6 +45,25 @@ def _agent(tmp_path, **kwargs):
     )
 
 
+def test_plain_answer_does_not_offer_tools(tmp_path):
+    agent = _agent(tmp_path, save_traces=False)
+    seen: list[list] = []
+
+    class PlainLLM:
+        model = "fake-model"
+
+        def invoke(self, messages):
+            seen.append(messages)
+            return types.SimpleNamespace(content="The heart is an organ.")
+
+    agent.llm = PlainLLM()
+
+    assert agent.answer_plain("QUERY: What is the heart?") == "The heart is an organ."
+    blob = " ".join(str(message.content) for message in seen[0])
+    assert "Tools list" not in blob
+    assert "QUERY: What is the heart?" in blob
+
+
 def test_agent_invokes_registered_tool_and_returns_oot_trace(tmp_path):
     agent = _agent(tmp_path, save_traces=False)
 

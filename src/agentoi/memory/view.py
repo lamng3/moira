@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 
 
 def memory_snapshot(
@@ -11,6 +11,7 @@ def memory_snapshot(
     concepts: Mapping[str, object],
     long_term: Sequence[Mapping[str, object]],
     chat: Mapping[str, object] | None = None,
+    names: Callable[[str], str] | None = None,
 ) -> dict[str, object]:
     """Hot questions, the concept trie, long-term paths, and this chat."""
     hot_rows = [
@@ -21,7 +22,7 @@ def memory_snapshot(
     hot_rows.sort(key=lambda row: int(row["hits"]), reverse=True)
     long_rows = [
         {
-            "label": " / ".join(short_label(str(item)) for item in ids),
+            "label": " / ".join(_named(str(item), names) for item in ids),
             "hits": _hits(item),
         }
         for item in long_term
@@ -30,26 +31,39 @@ def memory_snapshot(
     long_rows.sort(key=lambda row: int(row["hits"]), reverse=True)
     return {
         "hot": hot_rows,
-        "concepts": _concept_node(concepts, root=True),
+        "concepts": _concept_node(concepts, names, root=True),
         "long_term": long_rows,
         "chat": _chat_node(chat or {}),
     }
 
 
-def _concept_node(node: Mapping[str, object], *, root: bool = False) -> dict[str, object]:
+def _concept_node(
+    node: Mapping[str, object],
+    names: Callable[[str], str] | None,
+    *,
+    root: bool = False,
+) -> dict[str, object]:
     raw_children = node.get("children") or {}
     children = [
-        _concept_node(child)
+        _concept_node(child, names)
         for child in raw_children.values()
         if isinstance(child, Mapping)
     ]
     children.sort(key=lambda row: int(row["hits"]), reverse=True)
     concept_id = node.get("concept_id")
     return {
-        "label": "Concepts" if root or not concept_id else short_label(str(concept_id)),
+        "label": "Concepts" if root or not concept_id else _named(str(concept_id), names),
         "hits": _hits(node),
         "children": children,
     }
+
+
+def _named(concept_id: str, names: Callable[[str], str] | None) -> str:
+    if names is not None:
+        label = names(concept_id)
+        if label:
+            return label
+    return short_label(concept_id)
 
 
 def _chat_node(node: Mapping[str, object]) -> dict[str, object]:

@@ -185,11 +185,20 @@ class OntologyWorkspace:
         from agentoi.memory.view import memory_snapshot
 
         memory = self._query_memory()
+        graph = self._graph or self.prepare()
+
+        def names(concept_id: str) -> str:
+            named = _concept_name(concept_id, graph)
+            if not named or named == concept_id:
+                return ""
+            return named
+
         return memory_snapshot(
             hot=memory.hot.to_list(),
             concepts=memory.short.to_dict(),
             long_term=memory.long.to_list(),
             chat=self.chat_trie.to_dict(),
+            names=names,
         )
 
     def _query_memory(self) -> AgentMemory:

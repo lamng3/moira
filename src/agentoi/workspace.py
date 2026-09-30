@@ -265,6 +265,23 @@ class OntologyWorkspace:
                 progress.stage("Answer ready.")
             self._record_chat(query, route="hot", concept_ids=(), answer=remembered.answer)
             return remembered.answer
+        reversed_definition = memory.consult_answer(query)
+        if reversed_definition.answer:
+            self.last_answer_source = reversed_definition.source
+            self.last_route_note = (
+                f"Matched a remembered definition: {reversed_definition.answer}."
+            )
+            self.last_thought_seconds = time.perf_counter() - started
+            if progress is not None:
+                progress.stage("Using a remembered answer.")
+                progress.stage("Answer ready.")
+            self._record_chat(
+                query,
+                route="reverse",
+                concept_ids=(),
+                answer=reversed_definition.answer,
+            )
+            return reversed_definition.answer
         routed = self._replay_routed_question(query, memory, progress, chat_turns)
         if routed is not None:
             self.last_thought_seconds = time.perf_counter() - started

@@ -13,6 +13,7 @@ from agentoi.memory.config import MemoryConfig
 from agentoi.memory.eviction import policy_for
 from agentoi.memory.path import QueryPath
 from agentoi.memory.replay import GraphReplay
+from agentoi.memory.signature import AnswerIndex, rebuild_index
 from agentoi.memory.trie import TrieNode
 
 
@@ -35,6 +36,7 @@ class AgentMemory:
         self.short = ShortTermMemory(config.short_term_nodes, policy_for(config.eviction))
         self.long = LongTermMemory(config.long_term_entries, policy_for(config.eviction))
         self.replay = GraphReplay(self.short, self.long, promote_at=config.promote_at)
+        self.answers = AnswerIndex()
         self.load()
 
     def lookup_question(self, question: str) -> str | None:
@@ -52,6 +54,13 @@ class AgentMemory:
             return MemoryDecision(answer=answer, source="hot")
         return MemoryDecision()
 
+    def consult_answer(self, question: str) -> MemoryDecision:
+        """Name the concept when the question is a stored definition."""
+        label = self.answers.match(question)
+        if label:
+            return MemoryDecision(answer=label, source="reverse")
+        return MemoryDecision()
+
     def consult_path(self, path: QueryPath) -> MemoryDecision:
         answer = self.lookup_path(path)
         if answer:
@@ -63,6 +72,7 @@ class AgentMemory:
             return None
         self.hot.put(path.question, answer)
         node = self.replay.capture(path, answer)
+        self._reindex()
         self.save()
         return node
 
@@ -82,6 +92,10 @@ class AgentMemory:
             self.short.load(short["trie"])
         if isinstance(long, dict) and isinstance(long.get("patterns"), list):
             self.long.load(long["patterns"])
+        self._reindex()
+
+    def _reindex(self) -> None:
+        rebuild_index(self.answers, self.short.trie.root, self.long.to_list())
 
 
 def cached_prefix_note(labels: list[str]) -> str:

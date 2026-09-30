@@ -122,14 +122,26 @@ def _prompt(state: Mapping[str, str] | str, questions: Mapping[str, Question]) -
     for name, question in questions.items():
         lines.append(f"- {name}: {question.instructions}")
         if isinstance(question, Choice):
-            lines.append("  Reply with one option key.")
+            lines.append("  Reply with the option key, a probability for each option, and a confidence.")
             for key, description in question.criteria.items():
                 lines.append(f"  {key}: {description}")
-            shape[name] = {"choice": "retrieve"}
+            shape[name] = {
+                "choice": "retrieve",
+                "probabilities": {"retrieve": 1.0},
+                "confidence": 0.0,
+            }
         elif isinstance(question, Score):
             labels = ", ".join(question.criteria)
-            lines.append(f"  Reply with one of: {labels}.")
-            shape[name] = {"score": question.criteria[0] if question.criteria else ""}
+            lines.append(
+                "  Reply with one level, a probability for each level, and a confidence."
+            )
+            lines.append(f"  Levels: {labels}.")
+            first = question.criteria[0] if question.criteria else ""
+            shape[name] = {
+                "score": first,
+                "probabilities": {first: 1.0} if first else {},
+                "confidence": 0.0,
+            }
         else:
             lines.append("  Reply with a probability from 0 to 1 that the statement is true.")
             shape[name] = {"noul": 0.0}
@@ -227,8 +239,15 @@ def _score_label(value: object, labels: list[str]) -> tuple[str | None, float | 
 
 
 def _match_key(chosen: str, criteria: Mapping[str, str]) -> str | None:
+    text = chosen.strip().casefold()
     folded = {key.casefold(): key for key in criteria}
-    return folded.get(chosen.strip().casefold())
+    direct = folded.get(text)
+    if direct:
+        return direct
+    for key, description in criteria.items():
+        if description.casefold() == text:
+            return key
+    return None
 
 
 def _float_map(value: object) -> dict[str, float]:

@@ -14,6 +14,7 @@ from agentoi.memory import (
     config_for,
     query_path_from_graph,
 )
+from agentoi.routing.chat_trie import ChatTrie
 from agentoi.algorithms.graph import ConceptGraph, Ontology
 from agentoi.algorithms.refinement import OntologyRefiner, RefinementOptions
 from agentoi.model_runtime import create_application_agent, create_model_runtime
@@ -68,8 +69,10 @@ class OntologyWorkspace:
         self._router_model_name: str | None = None
         self.last_answer_source: str | None = None
         self.last_route_note: str | None = None
+        self.last_route: Any | None = None
         self.last_thought_seconds: float | None = None
         self.last_context_selection: ContextSelection | None = None
+        self.chat_trie = ChatTrie()
 
     @staticmethod
     def _refine(ontology: Ontology) -> Ontology:
@@ -129,18 +132,21 @@ class OntologyWorkspace:
         query: str,
         memory: AgentMemory,
         progress: Progress | None,
+        turns: Sequence[tuple[str, str]],
     ) -> str | None:
-        """Ask the small router to cross-check cached questions before retrieval."""
+        """Ask the small router once, then replay when the local policy says so."""
+        from agentoi.routing.understand import ActionRoute, understand_question
+
         cached = [
             str(entry["question"])
             for entry in memory.hot.to_list()
             if isinstance(entry.get("question"), str)
         ]
-        if not cached:
+        if not cached and not turns:
+            self.last_route = ActionRoute("retrieve")
             return None
-        from agentoi.routing.understand import understand_question
-
-        route = understand_question(query, cached, self._router_llm())
+        route = understand_question(query, cached, self._router_llm(), turns)
+        self.last_route = route
         if route.action != "replay" or not route.question:
             return None
         answer = memory.lookup_question(route.question)
@@ -214,11 +220,16 @@ class OntologyWorkspace:
         progress: Progress | None = None,
         show_log: bool = False,
         control: RunControl | None = None,
+        turns: Sequence[tuple[str, str] | Mapping[str, str]] | None = None,
     ) -> str:
         """Answer a question using retrieved ontology context and an LLM."""
         self.last_thought_seconds = None
         self.last_answer_source = None
         self.last_route_note = None
+        self.last_route = None
+        chat_turns = _chat_turns(turns)
+        if not chat_turns:
+            self.chat_trie = ChatTrie()
         started = time.perf_counter()
         _check(control)
         memory = self._query_memory()
@@ -229,10 +240,12 @@ class OntologyWorkspace:
             if progress is not None:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
+            self._record_chat(query, route="hot", concept_ids=(), answer=remembered.answer)
             return remembered.answer
-        routed = self._replay_routed_question(query, memory, progress)
+        routed = self._replay_routed_question(query, memory, progress, chat_turns)
         if routed is not None:
             self.last_thought_seconds = time.perf_counter() - started
+            self._record_chat(query, route="replay", concept_ids=(), answer=routed)
             return routed
         graph = self.prepare(progress=progress, control=control)
         model_name = self._model_label(model)
@@ -283,6 +296,7 @@ class OntologyWorkspace:
             if progress is not None:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
+            self._record_chat(query, route="path", concept_ids=concept_ids, answer=remembered.answer)
             return remembered.answer
         _check(control)
         prompt = graph.make_prompt_for_query(
@@ -293,6 +307,7 @@ class OntologyWorkspace:
             selected_ids=concept_ids,
         )
         prompt = _append_web_context(prompt, selection)
+        prompt = _with_chat(prompt, chat_turns)
         if progress is not None:
             progress.stage(
                 f"Asking {self._model_name or model_name}. Waiting for the model to answer."
@@ -326,7 +341,25 @@ class OntologyWorkspace:
         answer = _spoken_answer(response)
         self.last_answer_source = "model"
         memory.remember(path, answer)
+        self._record_chat(query, route="retrieve", concept_ids=concept_ids, answer=answer)
         return answer
+
+    def _record_chat(
+        self,
+        question: str,
+        *,
+        route: str,
+        concept_ids: Sequence[str],
+        answer: str,
+    ) -> None:
+        continues = bool(getattr(self.last_route, "continues", False))
+        self.chat_trie.record(
+            question,
+            continues=continues,
+            route=route,
+            concept_ids=concept_ids,
+            answer=answer,
+        )
 
 
     @staticmethod
@@ -338,6 +371,35 @@ class OntologyWorkspace:
         if self._model_name:
             return self._model_name
         return model or os.getenv("LLM_MODEL") or "the configured model"
+
+
+def _chat_turns(
+    turns: Sequence[tuple[str, str] | Mapping[str, str]] | None,
+) -> list[tuple[str, str]]:
+    rows: list[tuple[str, str]] = []
+    for item in turns or []:
+        if isinstance(item, Mapping):
+            question = str(item.get("question") or "").strip()
+            answer = str(item.get("answer") or "").strip()
+        elif isinstance(item, (tuple, list)) and len(item) >= 2:
+            question = str(item[0]).strip()
+            answer = str(item[1]).strip()
+        else:
+            continue
+        if question and answer:
+            rows.append((question, answer))
+    return rows[-4:]
+
+
+def _with_chat(prompt: str, turns: Sequence[tuple[str, str]]) -> str:
+    if not turns:
+        return prompt
+    lines = ["EARLIER IN THIS CHAT:"]
+    for question, answer in turns:
+        lines.append(f"Q: {question}")
+        lines.append(f"A: {answer}")
+    lines.append(prompt)
+    return "\n".join(lines)
 
 
 def _check(control: RunControl | None) -> None:

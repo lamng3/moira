@@ -22,6 +22,7 @@
         <a href="#refinement">Refinement</a>
         <a href="#embeddings">Embeddings</a>
         <a href="#retrieval">Retrieval</a>
+        <a href="#harness">Harness</a>
         <a href="#agents">Agents</a>
         <a href="#validation">Validation</a>
         <a href="#prompting">Prompting</a>
@@ -174,6 +175,17 @@ provider = create_web_search("mediawiki", lang="en", project="wikipedia")
 print(describe_web_search("mediawiki"))
 count = provider.search_count("ontology matching")</code></pre>
       <p><a class="source-link" href="https://github.com/lamng3/agentoi/tree/master/src/agentoi/retrieval">Retrieval source →</a> <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/examples/retrieval_plugins.py">Plugin example →</a></p>
+
+      <h2 id="harness">Harness</h2>
+      <p>One small model answers typed questions about the current question and the last few turns of this chat. A local policy reads those answers and chooses replay or retrieve. The reasoner is the only model that writes the answer.</p>
+      <table>
+        <tr><th>Type</th><th>Returns</th><th>Used for</th></tr>
+        <tr><td><code>Choice</code></td><td><code>choice</code>, <code>probabilities</code>, <code>confidence</code></td><td>Which cached question this one matches, or retrieve.</td></tr>
+        <tr><td><code>Score</code></td><td><code>score</code>, <code>probabilities</code>, <code>confidence</code></td><td>How close the wording is, from different to the same question.</td></tr>
+        <tr><td><code>Noul</code></td><td>A probability from 0 to 1</td><td>Whether the intent is the same, and whether this turn continues the previous one.</td></tr>
+      </table>
+      <p>Replay happens when the choice names a cached question, or when same-intent is at least 0.8, the score is “Same question,” and one cached question is the nearest choice. A failed call falls open to retrieve. A follow-up hangs under the previous question when the continuation probability is at least 0.8. A new topic hangs from a virtual root. Under each question the trie records the route, the ontology concept ids, and the answer. That trie is this chat only. The answer cache stays the memory shared across chats.</p>
+      <p class="note">Jev model routing (<code>AGENTOI_MODEL_ROUTING=jev</code>) and the Jev context harness (<code>AGENTOI_CONTEXT_HARNESS=jev</code>) stay optional extras. They are separate from this call.</p>
 
       <h2>Context harness</h2>
       <p>Retrieval remains responsible for recall. The harness decides which retrieved concepts, neighbors, and web passages enter the prompt.</p>

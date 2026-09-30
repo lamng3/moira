@@ -7,14 +7,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from agentoi.routing.harness import (
-    Choice,
-    ChoiceAnswer,
-    Harness,
-    NoulAnswer,
-    ScoreAnswer,
-    ontology_questions,
-)
+from agentoi.routing.harness import Harness, Noul, ontology_questions
 
 DEFAULT_ROUTER_MODEL = "ollama:phi3"
 
@@ -34,6 +27,7 @@ class ActionRoute:
     error: str | None = None
     same_intent: float | None = None
     closeness: str | None = None
+    continues: bool = False
 
     def note(self) -> str:
         """Run-log line for a replay, including the other typed answers."""
@@ -52,48 +46,29 @@ def understand_question(
     question: str,
     cached_questions: Sequence[str],
     llm: Any,
+    turns: Sequence[tuple[str, str]] | None = None,
 ) -> ActionRoute:
-    """Ask the Harness whether this question matches one in the cache.
+    """Ask the Harness once, then let the local policy choose replay or retrieve.
 
-    A failed call falls open to retrieve. Replay is accepted only when the
-    choice names a question that is actually cached.
+    A failed call falls open to retrieve. Prior turns are the last few
+    question and answer pairs from this chat.
     """
+    from agentoi.routing.policy import RoutePolicy
+
     cached = [item for item in cached_questions if item]
-    if not cached:
+    recent = list(turns or [])[-4:]
+    questions = ontology_questions(cached) if cached else {}
+    if recent:
+        questions["continues"] = Noul(
+            instructions=(
+                "Does this question continue the previous turn in the chat, "
+                "rather than start a new topic?"
+            )
+        )
+    if not questions:
         return ActionRoute("retrieve")
-    questions = ontology_questions(cached)
-    reading = Harness().ask({"question": question}, questions, llm)
-    same_intent = _same_intent(reading.answers.get("same_intent"))
-    closeness = _closeness(reading.answers.get("closeness"))
-    if reading.fail_open:
-        return ActionRoute(
-            "retrieve",
-            fail_open=True,
-            error=reading.error,
-            same_intent=same_intent,
-            closeness=closeness,
-        )
-    match = questions["match"]
-    choice = reading.answers.get("match")
-    key = choice.choice if isinstance(choice, ChoiceAnswer) else None
-    named = match.criteria.get(key) if isinstance(match, Choice) and key else None
-    if key and key != "retrieve" and isinstance(named, str) and named in cached:
-        return ActionRoute(
-            "replay",
-            question=named,
-            same_intent=same_intent,
-            closeness=closeness,
-        )
-    return ActionRoute("retrieve", same_intent=same_intent, closeness=closeness)
-
-
-def _same_intent(answer: object) -> float | None:
-    if isinstance(answer, NoulAnswer):
-        return answer.noul
-    return None
-
-
-def _closeness(answer: object) -> str | None:
-    if isinstance(answer, ScoreAnswer):
-        return answer.label
-    return None
+    state = {"question": question}
+    if recent:
+        state["chat"] = "\n".join(f"Q: {prior}\nA: {answer}" for prior, answer in recent)
+    reading = Harness().ask(state, questions, llm)
+    return RoutePolicy().decide(reading, questions, cached)

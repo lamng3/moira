@@ -277,16 +277,12 @@ class OntologyWorkspace:
             self._record_chat(query, route="hot", concept_ids=(), answer=hot_answer)
             return hot_answer
         reversed_definition = memory.consult_answer(query)
-        named = _concept_name(reversed_definition.answer or "", self._graph)
-        if (
-            named is None
-            and (reversed_definition.answer or "").startswith("eq_")
-            and self._graph is None
+        graph = self._graph
+        if graph is None and any(
+            concept_id.startswith("eq_") for concept_id in reversed_definition.concept_ids
         ):
-            named = _concept_name(
-                reversed_definition.answer or "",
-                self.prepare(progress=progress, control=control),
-            )
+            graph = self.prepare(progress=progress, control=control)
+        named = _named_match(reversed_definition, graph)
         if named:
             self.last_answer_source = reversed_definition.source
             self.last_route_note = f"Matched a remembered definition: {named}."
@@ -498,6 +494,39 @@ def _concept_name(token: str, graph: Any) -> str | None:
     if token.startswith("eq_"):
         return None
     return token or None
+
+
+def _named_match(decision: Any, graph: Any) -> str | None:
+    """Pick the concept the stored answer names, not the last id on the path."""
+    from agentoi.memory.view import short_label
+
+    if getattr(decision, "source", "") != "reverse":
+        return None
+    labels: list[str] = []
+    for concept_id in getattr(decision, "concept_ids", ()):
+        label = _concept_name(str(concept_id), graph)
+        if not label:
+            continue
+        if label == concept_id:
+            label = short_label(str(concept_id))
+        if label.startswith("eq_"):
+            continue
+        labels.append(label)
+    if not labels:
+        return None
+    if len(labels) == 1:
+        return labels[0]
+    text = str(getattr(decision, "stored_answer", "") or "").lower()
+    mentioned: list[tuple[int, int, str]] = []
+    for label in labels:
+        folded = label.lower()
+        position = text.find(folded)
+        if position >= 0:
+            mentioned.append((position, -len(folded), label))
+    if not mentioned:
+        return None
+    mentioned.sort()
+    return mentioned[0][2]
 
 
 _ECHO_MARKERS = (

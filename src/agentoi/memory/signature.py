@@ -28,6 +28,7 @@ class AnswerSignature:
     hashes: frozenset[int]
     words: tuple[str, ...]
     concept_ids: tuple[str, ...]
+    answer: str
 
 
 class AnswerIndex:
@@ -48,10 +49,17 @@ class AnswerIndex:
             return
         key = tuple(concept_ids)
         self._rows = [row for row in self._rows if row.concept_ids != key]
-        self._rows.append(AnswerSignature(hashes, words, key))
+        self._rows.append(AnswerSignature(hashes, words, key, answer))
 
     def match(self, question: str) -> str | None:
-        """Return the concept label when the question is mostly one stored answer."""
+        """Return one concept id when the question is mostly one stored answer."""
+        row = self.match_row(question)
+        if row is None:
+            return None
+        return short_label(row.concept_ids[-1])
+
+    def match_row(self, question: str) -> AnswerSignature | None:
+        """Return the stored answer whose wording contains the question."""
         query_words = _words(question)
         query = _hashes_from_words(query_words)
         if len(query) < MIN_SHINGLES or not self._rows:
@@ -73,7 +81,7 @@ class AnswerIndex:
             second = scored[1][0] if len(scored) > 1 else 0.0
             if best < MIN_SCORE or best - second < MIN_MARGIN:
                 return None
-        return short_label(winner.concept_ids[-1])
+        return winner
 
 
 def shingle_hashes(text: str) -> frozenset[int]:

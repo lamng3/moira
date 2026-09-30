@@ -160,6 +160,54 @@ def test_a_reverse_match_names_the_ontology_label(tmp_path, monkeypatch) -> None
     assert workspace.last_answer_source == "reverse"
 
 
+def test_a_reverse_match_names_the_concept_in_the_answer(tmp_path, monkeypatch) -> None:
+    ontology = tmp_path / "anatomy.ttl"
+    ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
+    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    workspace = OntologyWorkspace(ontology)
+    region = "eq_region"
+    system = "eq_system"
+    stored = (
+        "The visceral organ system is a group of organs located within the body cavity, "
+        "including the peritoneal cavity greater sac and thoracic cavity organs, which are "
+        "surrounded by connective tissue in the thoracic cavity."
+    )
+    question = (
+        "What refers to a group of organs located within the body cavity, including the "
+        "peritoneal cavity greater sac and thoracic cavity organs, which are surrounded "
+        "by connective tissue in the thoracic cavity?"
+    )
+    workspace._query_memory().remember(QueryPath.from_steps(ORIGINAL, [system, region]), stored)
+
+    class Region:
+        ground_set = {"labels": ["anatomic region"]}
+        name = "http://example.org/anatomic_region"
+
+    class System:
+        ground_set = {"labels": ["visceral organ system"]}
+        name = "http://example.org/visceral_organ_system"
+
+    class RegionNode:
+        equiv_concepts = [Region()]
+
+    class SystemNode:
+        equiv_concepts = [System()]
+
+    class Graph:
+        nodes = {region: RegionNode(), system: SystemNode()}
+
+    workspace._graph = Graph()
+
+    def unused(*_args, **_kwargs):
+        raise AssertionError("the answer model should stay unused")
+
+    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    answer = workspace.ask(question)
+
+    assert answer == "visceral organ system"
+    assert workspace.last_answer_source == "reverse"
+
+
 def test_a_cached_prompt_echo_keeps_the_concept_names(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")

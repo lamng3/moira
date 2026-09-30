@@ -14,6 +14,7 @@ from agentoi.memory.eviction import policy_for
 from agentoi.memory.path import QueryPath
 from agentoi.memory.replay import GraphReplay
 from agentoi.memory.signature import AnswerIndex, rebuild_index
+from agentoi.memory.view import short_label
 from agentoi.memory.trie import TrieNode
 
 
@@ -24,6 +25,8 @@ class MemoryDecision:
     answer: str | None = None
     prefix: tuple[str, ...] = ()
     source: str = "miss"
+    concept_ids: tuple[str, ...] = ()
+    stored_answer: str = ""
 
 
 class AgentMemory:
@@ -56,9 +59,14 @@ class AgentMemory:
 
     def consult_answer(self, question: str) -> MemoryDecision:
         """Name the concept when the question is a stored definition."""
-        label = self.answers.match(question)
-        if label:
-            return MemoryDecision(answer=label, source="reverse")
+        row = self.answers.match_row(question)
+        if row is not None:
+            return MemoryDecision(
+                answer=short_label(row.concept_ids[-1]),
+                source="reverse",
+                concept_ids=row.concept_ids,
+                stored_answer=row.answer,
+            )
         return MemoryDecision()
 
     def consult_path(self, path: QueryPath) -> MemoryDecision:

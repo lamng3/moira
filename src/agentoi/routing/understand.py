@@ -7,14 +7,21 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from agentoi.routing.harness import Harness, Noul, ontology_questions
+from agentoi.routing.harness import DEFAULT_HARNESS_URL, Harness, Noul, ontology_questions
 
 DEFAULT_ROUTER_MODEL = "ollama:phi3"
 
 
 def router_model_name() -> str:
-    """Small model used only to name the next action."""
+    """Small model used only when the System One server is turned off."""
     return os.getenv("AGENTOI_ROUTER_MODEL", DEFAULT_ROUTER_MODEL) or DEFAULT_ROUTER_MODEL
+
+
+def harness_base_url() -> str | None:
+    """SGLang /v1/systemone address. An empty value keeps the Ollama router."""
+    raw = os.environ.get("AGENTOI_HARNESS_URL", DEFAULT_HARNESS_URL)
+    text = raw.strip()
+    return text or None
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,6 +54,7 @@ def understand_question(
     cached_questions: Sequence[str],
     llm: Any,
     turns: Sequence[tuple[str, str]] | None = None,
+    harness_url: str | None = None,
 ) -> ActionRoute:
     """Ask the Harness once, then let the local policy choose replay or retrieve.
 
@@ -70,5 +78,9 @@ def understand_question(
     state = {"question": question}
     if recent:
         state["chat"] = "\n".join(f"Q: {prior}\nA: {answer}" for prior, answer in recent)
-    reading = Harness().ask(state, questions, llm)
+    harness = Harness()
+    if harness_url:
+        reading = harness.ask_systemone(state, questions, harness_url)
+    else:
+        reading = harness.ask(state, questions, llm)
     return RoutePolicy().decide(reading, questions, cached)

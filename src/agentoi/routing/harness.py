@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 _JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
 
@@ -35,6 +38,9 @@ class Score:
 
 
 Question = Noul | Choice | Score
+CHOICE_LIMIT = 26
+DEFAULT_HARNESS_URL = "http://127.0.0.1:30000"
+DEFAULT_HARNESS_MODEL = "mlx-community/Qwen3-4B-4bit"
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,11 +76,15 @@ class HarnessReading:
 
 
 def ontology_questions(cached_questions: Sequence[str]) -> dict[str, Question]:
-    """Questions that decide whether a typed question matches the hot cache."""
+    """Questions that decide whether a typed question matches the hot cache.
+
+    The choice stays within 26 options, including retrieve. A longer hot
+    cache keeps the most recent questions that fit.
+    """
+    remembered = [question for question in cached_questions if question]
     criteria = {
         f"q{index}": question
-        for index, question in enumerate(cached_questions)
-        if question
+        for index, question in enumerate(remembered[: CHOICE_LIMIT - 1])
     }
     criteria["retrieve"] = "None of these questions match. Look up concepts."
     return {
@@ -109,6 +119,78 @@ class Harness:
             return HarnessReading(fail_open=True, error=str(exc))
         text = getattr(response, "content", str(response))
         return _parse(text, questions)
+
+    def ask_systemone(
+        self,
+        state: Mapping[str, str] | str,
+        questions: Mapping[str, Question],
+        base_url: str,
+    ) -> HarnessReading:
+        """Read Choice, Score, and Noul probabilities from /v1/systemone."""
+        if not questions:
+            return HarnessReading()
+        body = {
+            "model": os.getenv("AGENTOI_HARNESS_MODEL", DEFAULT_HARNESS_MODEL)
+            or DEFAULT_HARNESS_MODEL,
+            "state": state if isinstance(state, str) else dict(state),
+            "questions": _systemone_questions(questions),
+        }
+        try:
+            payload = _post_json(base_url.rstrip("/") + "/v1/systemone", body)
+        except (
+            HTTPError,
+            URLError,
+            TimeoutError,
+            OSError,
+            json.JSONDecodeError,
+            ValueError,
+        ) as exc:
+            return HarnessReading(fail_open=True, error=str(exc))
+        raw_answers = payload.get("answers") if isinstance(payload, dict) else None
+        if not isinstance(raw_answers, dict):
+            return HarnessReading(fail_open=True, error="systemone response had no answers")
+        return HarnessReading(
+            answers={
+                name: _answer(question, raw_answers.get(name))
+                for name, question in questions.items()
+            }
+        )
+
+
+def _systemone_questions(questions: Mapping[str, Question]) -> dict[str, object]:
+    payload: dict[str, object] = {}
+    for name, question in questions.items():
+        if isinstance(question, Choice):
+            options = list(question.criteria.items())[:CHOICE_LIMIT]
+            payload[name] = {
+                "type": "choice",
+                "instructions": question.instructions,
+                "criteria": {key: description or None for key, description in options},
+            }
+        elif isinstance(question, Score):
+            payload[name] = {
+                "type": "score",
+                "instructions": question.instructions,
+                "criteria": list(question.criteria),
+            }
+        else:
+            payload[name] = {"type": "noul", "instructions": question.instructions}
+    return payload
+
+
+def _post_json(url: str, body: Mapping[str, object]) -> object:
+    request = Request(
+        url,
+        data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=30) as response:
+            return json.loads(response.read().decode())
+    except HTTPError as exc:
+        detail = exc.read().decode(errors="replace")
+        raise ValueError(detail or str(exc)) from exc
 
 
 def _prompt(state: Mapping[str, str] | str, questions: Mapping[str, Question]) -> str:

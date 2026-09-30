@@ -177,7 +177,7 @@ count = provider.search_count("ontology matching")</code></pre>
       <p><a class="source-link" href="https://github.com/lamng3/agentoi/tree/master/src/agentoi/retrieval">Retrieval source →</a> <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/examples/retrieval_plugins.py">Plugin example →</a></p>
 
       <h2 id="harness">Harness</h2>
-      <p>One small model answers typed questions about the current question and the last few turns of this chat. A local policy reads those answers and chooses replay or retrieve. The reasoner is the only model that writes the answer.</p>
+      <p>One small model answers typed questions about the current question and the last few turns of this chat. The call is SGLang <code>POST /v1/systemone</code> at <code>http://127.0.0.1:30000</code> (<code>AGENTOI_HARNESS_URL</code>). An empty value keeps the Ollama router, <code>ollama:phi3</code>. A local policy reads those answers and chooses replay or retrieve. The choice list stays at 26 options, including retrieve. The reasoner is the only model that writes the answer, and it stays the chat model.</p>
       <table>
         <tr><th>Type</th><th>Returns</th><th>Used for</th></tr>
         <tr><td><code>Choice</code></td><td><code>choice</code>, <code>probabilities</code>, <code>confidence</code></td><td>Which cached question this one matches, or retrieve.</td></tr>

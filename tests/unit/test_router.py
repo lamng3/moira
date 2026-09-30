@@ -1,7 +1,17 @@
 """Understanding router: replay a paraphrase, otherwise retrieve."""
 
+import json
+
+import pytest
+
+from agentoi.routing.harness import CHOICE_LIMIT, ontology_questions
 from agentoi.routing.understand import ActionRoute, understand_question
 from agentoi.workspace import OntologyWorkspace
+
+
+@pytest.fixture(autouse=True)
+def _keep_router_tests_on_the_injected_model(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AGENTOI_HARNESS_URL", "")
 
 
 ONTOLOGY = """
@@ -93,6 +103,87 @@ def test_a_follow_up_continues_the_previous_turn() -> None:
     assert "Q: " in llm.prompts[0]
 
 
+def test_choice_stays_within_twenty_six_options() -> None:
+    questions = ontology_questions([f"cached question {index}" for index in range(40)])
+    criteria = questions["match"].criteria
+
+    assert len(criteria) == CHOICE_LIMIT
+    assert criteria["retrieve"].startswith("None of these")
+    assert "q24" in criteria
+    assert "q25" not in criteria
+
+
+def test_systemone_probabilities_replay_a_cached_question(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    class _Response:
+        def read(self) -> bytes:
+            return json.dumps(
+                {
+                    "answers": {
+                        "same_intent": {"type": "noul", "noul": 0.91},
+                        "match": {
+                            "type": "choice",
+                            "choice": "q0",
+                            "probabilities": {"q0": 0.8, "retrieve": 0.2},
+                            "confidence": 0.8,
+                        },
+                        "closeness": {
+                            "type": "score",
+                            "score": 2,
+                            "probabilities": {"2": 0.9},
+                            "confidence": 0.8,
+                        },
+                    }
+                }
+            ).encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args) -> bool:
+            return False
+
+    def fake_urlopen(request, timeout=None):
+        captured["body"] = json.loads(request.data.decode())
+        captured["url"] = request.full_url
+        return _Response()
+
+    monkeypatch.setattr("agentoi.routing.harness.urlopen", fake_urlopen)
+    route = understand_question(
+        PARAPHRASE,
+        [CACHED],
+        None,
+        harness_url="http://127.0.0.1:30000",
+    )
+
+    assert route.action == "replay"
+    assert route.question == CACHED
+    assert route.same_intent == 0.91
+    assert route.closeness == "Same question"
+    assert captured["url"] == "http://127.0.0.1:30000/v1/systemone"
+    body = captured["body"]
+    assert body["questions"]["match"]["type"] == "choice"
+    assert body["questions"]["same_intent"]["type"] == "noul"
+    assert body["questions"]["closeness"]["type"] == "score"
+
+
+def test_a_down_systemone_server_falls_open(monkeypatch) -> None:
+    def fake_urlopen(_request, timeout=None):
+        raise OSError("down")
+
+    monkeypatch.setattr("agentoi.routing.harness.urlopen", fake_urlopen)
+    route = understand_question(
+        PARAPHRASE,
+        [CACHED],
+        None,
+        harness_url="http://127.0.0.1:30000",
+    )
+
+    assert route.action == "retrieve"
+    assert route.fail_open is True
+
+
 def test_unknown_label_and_failed_call_fall_open() -> None:
     missing = understand_question(PARAPHRASE, [CACHED], _LLM("not json"))
     unknown = understand_question(
@@ -153,7 +244,7 @@ def test_paraphrase_replays_without_the_answer_model(tmp_path, monkeypatch) -> N
     workspace._query_memory().hot.put(CACHED, "The mouse has a circulatory system.")
     monkeypatch.setattr(OntologyWorkspace, "_router_llm", lambda self: object())
 
-    def route(_question, cached, _llm, _turns=None):
+    def route(_question, cached, _llm, _turns=None, harness_url=None):
         return ActionRoute("replay", question=cached[0])
 
     monkeypatch.setattr("agentoi.routing.understand.understand_question", route)

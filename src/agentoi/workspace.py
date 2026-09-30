@@ -135,7 +135,11 @@ class OntologyWorkspace:
         turns: Sequence[tuple[str, str]],
     ) -> str | None:
         """Ask the small router once, then replay when the local policy says so."""
-        from agentoi.routing.understand import ActionRoute, understand_question
+        from agentoi.routing.understand import (
+            ActionRoute,
+            harness_base_url,
+            understand_question,
+        )
 
         cached = [
             str(entry["question"])
@@ -145,7 +149,14 @@ class OntologyWorkspace:
         if not cached and not turns:
             self.last_route = ActionRoute("retrieve")
             return None
-        route = understand_question(query, cached, self._router_llm(), turns)
+        harness_url = harness_base_url()
+        route = understand_question(
+            query,
+            cached,
+            None if harness_url else self._router_llm(),
+            turns,
+            harness_url=harness_url,
+        )
         self.last_route = route
         if route.action != "replay" or not route.question:
             return None
@@ -167,6 +178,18 @@ class OntologyWorkspace:
             self._router = create_model_runtime(model_name=name, temperature=0).llm
             self._router_model_name = name
         return self._router
+
+    def memory_view(self) -> dict[str, object]:
+        """Hot questions, concept-trie hits, long-term paths, and this chat."""
+        from agentoi.memory.view import memory_snapshot
+
+        memory = self._query_memory()
+        return memory_snapshot(
+            hot=memory.hot.to_list(),
+            concepts=memory.short.to_dict(),
+            long_term=memory.long.to_list(),
+            chat=self.chat_trie.to_dict(),
+        )
 
     def _query_memory(self) -> AgentMemory:
         if self._agent_memory is None:

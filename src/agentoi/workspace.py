@@ -268,22 +268,25 @@ class OntologyWorkspace:
             self._record_chat(query, route="hot", concept_ids=(), answer=hot_answer)
             return hot_answer
         reversed_definition = memory.consult_answer(query)
-        if reversed_definition.answer:
-            self.last_answer_source = reversed_definition.source
-            self.last_route_note = (
-                f"Matched a remembered definition: {reversed_definition.answer}."
+        named = _concept_name(reversed_definition.answer or "", self._graph)
+        if (
+            named is None
+            and (reversed_definition.answer or "").startswith("eq_")
+            and self._graph is None
+        ):
+            named = _concept_name(
+                reversed_definition.answer or "",
+                self.prepare(progress=progress, control=control),
             )
+        if named:
+            self.last_answer_source = reversed_definition.source
+            self.last_route_note = f"Matched a remembered definition: {named}."
             self.last_thought_seconds = time.perf_counter() - started
             if progress is not None:
                 progress.stage("Using a remembered answer.")
                 progress.stage("Answer ready.")
-            self._record_chat(
-                query,
-                route="reverse",
-                concept_ids=(),
-                answer=reversed_definition.answer,
-            )
-            return reversed_definition.answer
+            self._record_chat(query, route="reverse", concept_ids=(), answer=named)
+            return named
         routed = self._replay_routed_question(query, memory, progress, chat_turns)
         if routed is not None:
             self.last_thought_seconds = time.perf_counter() - started
@@ -465,6 +468,27 @@ def _attach_model_client(agent: Any, control: RunControl | None) -> None:
 
 
 _NO_ANSWER = "The ontology did not yield an answer."
+
+
+def _concept_name(token: str, graph: Any) -> str | None:
+    """The ontology label for a matched concept. Internal equivalence ids stay hidden."""
+    nodes = getattr(graph, "nodes", None) if graph is not None else None
+    node = nodes.get(token) if isinstance(nodes, dict) else None
+    if node is not None:
+        for concept in getattr(node, "equiv_concepts", ()):
+            ground = getattr(concept, "ground_set", {}) or {}
+            found = ground.get("labels") or ground.get("alt_labels") or []
+            if found:
+                return str(found[0]).strip()
+            name = str(getattr(concept, "name", "")).rstrip("/").rsplit("/", 1)[-1]
+            if "#" in name:
+                name = name.rsplit("#", 1)[-1]
+            name = name.replace("_", " ").strip()
+            if name and not name.startswith("eq "):
+                return name
+    if token.startswith("eq_"):
+        return None
+    return token or None
 
 
 _ECHO_MARKERS = (

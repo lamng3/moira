@@ -126,6 +126,40 @@ def test_a_tool_plan_is_not_shown_or_remembered(tmp_path, monkeypatch) -> None:
     assert workspace._query_memory().lookup_question("Where is the spleen?") is None
 
 
+def test_a_reverse_match_names_the_ontology_label(tmp_path, monkeypatch) -> None:
+    ontology = tmp_path / "anatomy.ttl"
+    ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
+    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    workspace = OntologyWorkspace(ontology)
+    concept_id = "eq_Nf956502f12724437e22bc380e0cfd99e"
+    workspace._query_memory().remember(
+        QueryPath.from_steps(ORIGINAL, [concept_id]),
+        SHORT_DEFINITION,
+    )
+
+    class Concept:
+        ground_set = {"labels": ["visceral organ system"]}
+        name = "http://example.org/visceral_organ_system"
+
+    class Node:
+        equiv_concepts = [Concept()]
+
+    class Graph:
+        nodes = {concept_id: Node()}
+
+    workspace._graph = Graph()
+
+    def unused(*_args, **_kwargs):
+        raise AssertionError("the answer model should stay unused")
+
+    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    answer = workspace.ask(SHORT_TYPO)
+
+    assert answer == "visceral organ system"
+    assert concept_id not in answer
+    assert workspace.last_answer_source == "reverse"
+
+
 def test_a_cached_prompt_echo_keeps_the_concept_names(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")

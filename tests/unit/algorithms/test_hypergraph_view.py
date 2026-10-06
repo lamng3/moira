@@ -1,7 +1,7 @@
 import pytest
 
-from agentoi.algorithms.graph import Concept, EquivalentClass
-from agentoi.algorithms.views import HypergraphView
+from moira.algorithms.graph import Concept, EquivalentClass
+from moira.algorithms.views import HypergraphView
 
 
 class DummyGraph:

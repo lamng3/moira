@@ -3,7 +3,7 @@
 import argparse
 import json
 
-from agentoi.agents.tools.ontology.ontology_lookup import OntologyLookup
+from moira.agents.tools.ontology.ontology_lookup import OntologyLookup
 
 
 def main() -> None:

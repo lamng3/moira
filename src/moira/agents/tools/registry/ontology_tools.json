@@ -1,0 +1,50 @@
+{
+  "ontology_term_info": {
+    "tool_name": "ontology_term_info",
+    "arguments": {
+      "term": ["head"],
+      "ontologies": [],
+      "exact": false,
+      "max_results": 5,
+      "include_fields": ["label", "synonyms", "description", "iri", "short_form", "ontology_prefix", "xrefs", "aliases", "annotations", "definitions"]
+    },
+    "return": "dict[str, Any]",
+    "docstring": "Lookup ontology labels/synonyms/descriptions via OLS4 (BioPortal fallback).",
+    "dependencies": ["requests", "typing", "os"],
+    "module_path": "moira.agents.tools.ontology.ontology_lookup",
+    "tool_type": "module"
+  },
+  "search_term_context": {
+    "tool_name": "search_term_context",
+    "arguments": {
+      "term": ["mouse", "head", "anatomy"],
+      "top_k": 5,
+      "site_filters": [],
+      "include_wikipedia": true,
+      "region": null,
+      "time_range": null,
+      "max_chars": 4000
+    },
+    "return": "dict[str, Any]",
+    "docstring": "General web search + light ETL (summary/synonyms) via Tavily + Wikipedia.",
+    "dependencies": ["os", "re", "requests", "tavily", "typing"],
+    "module_path": "moira.agents.tools.website.website_lookup",
+    "tool_type": "module"
+  },
+  "search_knowledge_graph": {
+    "tool_name": "search_knowledge_graph",
+    "arguments": {
+      "term": ["heart septum"],
+      "top_k": 5,
+      "include_public": null,
+      "only_kgs": null,
+      "max_merged": null,
+      "opts": null
+    },
+    "return": "dict[str, Any]",
+    "docstring": "Search knowledge graph.",
+    "dependencies": ["os", "requests", "typing"],
+    "module_path": "moira.agents.tools.knowledge_graph.knowledge_graph_lookup",
+    "tool_type": "module"
+  }
+}

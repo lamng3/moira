@@ -2,29 +2,29 @@ import os
 import subprocess
 import sys
 
-from agentoi.algorithms.graph import (
+from moira.algorithms.graph import (
     Concept,
     ConceptGraph,
     ConceptHypergraph,
     EquivalentClass,
     Ontology,
 )
-from agentoi.algorithms.graph.predicates import (
+from moira.algorithms.graph.predicates import (
     canonicalize_predicate,
     is_equivalence_predicate,
     is_hierarchy_predicate,
 )
-from agentoi.algorithms.views import HypergraphView, MultigraphView
+from moira.algorithms.views import HypergraphView, MultigraphView
 
 
 def test_classes_are_owned_by_new_packages():
-    assert Concept.__module__ == "agentoi.algorithms.graph.concept"
-    assert Ontology.__module__ == "agentoi.algorithms.graph.ontology"
-    assert EquivalentClass.__module__ == "agentoi.algorithms.graph.equivalence"
-    assert ConceptGraph.__module__ == "agentoi.algorithms.graph.concept_graph"
-    assert ConceptHypergraph.__module__ == "agentoi.algorithms.graph.hypergraph"
-    assert HypergraphView.__module__ == "agentoi.algorithms.views.hypergraph"
-    assert MultigraphView.__module__ == "agentoi.algorithms.views.multigraph"
+    assert Concept.__module__ == "moira.algorithms.graph.concept"
+    assert Ontology.__module__ == "moira.algorithms.graph.ontology"
+    assert EquivalentClass.__module__ == "moira.algorithms.graph.equivalence"
+    assert ConceptGraph.__module__ == "moira.algorithms.graph.concept_graph"
+    assert ConceptHypergraph.__module__ == "moira.algorithms.graph.hypergraph"
+    assert HypergraphView.__module__ == "moira.algorithms.views.hypergraph"
+    assert MultigraphView.__module__ == "moira.algorithms.views.multigraph"
 
 
 def test_predicates_share_canonicalization():
@@ -52,8 +52,8 @@ def test_empty_hypergraph_view_has_hierarchy_maps():
 
 def test_graph_import_does_not_load_embedding_modules():
     code = (
-        "import sys; from agentoi.algorithms.graph import Concept, Ontology; "
-        "assert not any(name.startswith('agentoi.embeddings') for name in sys.modules)"
+        "import sys; from moira.algorithms.graph import Concept, Ontology; "
+        "assert not any(name.startswith('moira.embeddings') for name in sys.modules)"
     )
     env = {
         **os.environ,

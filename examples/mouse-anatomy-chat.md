@@ -3,15 +3,15 @@
 Local `llama3.1` chat over the adult mouse anatomy ontology.
 
 ```bash
-LLM_MODEL=ollama:llama3.1 agentoi chat data/MouseHuman/mouse.owl
+LLM_MODEL=ollama:llama3.1 moira chat data/MouseHuman/mouse.owl
 ```
 
 ```text
 Loaded swift-bison-3418: 3089 concepts, 3202 relations.
 The first question builds embeddings, saves them, and later runs reuse that memory.
-Delete saved embeddings with: agentoi memory clear data/MouseHuman/mouse.owl
+Delete saved embeddings with: moira memory clear data/MouseHuman/mouse.owl
 Progress is shown below. Type 'exit' to stop.
-agentoi> What is the heart part of?
+moira> What is the heart part of?
 Building the concept graph from 3089 concepts.
 Loading the text embedding model. The first run may download it.
 Learning graph structure embeddings.
@@ -40,7 +40,7 @@ KEY RELATIONS (within top-k):
 - left ventricle muscular part  --(2.0)-->  heart ventricle muscular part
 - right ventricle muscular part  --(2.0)-->  heart ventricle muscular part
 TASK: Using the above concept clusters and relations as contextual guidance, answer the user query precisely. Prefer concepts and relations that appear in the RELEVANT CONCEPT CLUSTERS and KEY RELATIONS. Cite specific terms.
-- Tools list: {"ontology_term_info": {"tool_name": "ontology_term_info", "module_path": "agentoi.agents.tools.ontology.ontology_lookup", "tool_type": "module", "arguments": {"term": ["head"], "ontologies": [], "exact": false, "max_results": 5, "include_fields": ["label", "synonyms", "description", "iri", "short_form", "ontology_prefix", "xrefs", "aliases", "annotations", "definitions"]}, "aliases": []}, "search_term_context": {"tool_name": "search_term_context", "module_path": "agentoi.agents.tools.website.website_lookup", "tool_type": "module", "arguments": {"term": ["mouse", "head", "anatomy"], "top_k": 5, "site_filters": [], "include_wikipedia": true, "region": null, "time_range": null, "max_chars": 4000}, "aliases": []}, "search_knowledge_graph": {"tool_name": "search_knowledge_graph", "module_path": "agentoi.agents.tools.knowledge_graph.knowledge_graph_lookup", "tool_type": "module", "arguments": {"term": ["heart septum"], "top_k": 5, "include_public": null, "only_kgs": null, "max_merged": null, "opts": null}, "aliases": []}}
+- Tools list: {"ontology_term_info": {"tool_name": "ontology_term_info", "module_path": "moira.agents.tools.ontology.ontology_lookup", "tool_type": "module", "arguments": {"term": ["head"], "ontologies": [], "exact": false, "max_results": 5, "include_fields": ["label", "synonyms", "description", "iri", "short_form", "ontology_prefix", "xrefs", "aliases", "annotations", "definitions"]}, "aliases": []}, "search_term_context": {"tool_name": "search_term_context", "module_path": "moira.agents.tools.website.website_lookup", "tool_type": "module", "arguments": {"term": ["mouse", "head", "anatomy"], "top_k": 5, "site_filters": [], "include_wikipedia": true, "region": null, "time_range": null, "max_chars": 4000}, "aliases": []}, "search_knowledge_graph": {"tool_name": "search_knowledge_graph", "module_path": "moira.agents.tools.knowledge_graph.knowledge_graph_lookup", "tool_type": "module", "arguments": {"term": ["heart septum"], "top_k": 5, "include_public": null, "only_kgs": null, "max_merged": null, "opts": null}, "aliases": []}}
 ------------------------
 Instructions:
 - Answer naturally if no tool is required.
@@ -77,11 +77,11 @@ Using this information, I will use the ontology_term_info tool to look up the co
       "definitions"
     ]
   },
-  "module_path": "agentoi.agents.tools.ontology.ontology_lookup"
+  "module_path": "moira.agents.tools.ontology.ontology_lookup"
 }
 
 This tool will provide information about the concept "heart ventricle muscular part", which is likely to include a description of what it is a part of, if any.
-🛠️  Tool parsed: ontology_term_info (agentoi.agents.tools.ontology.ontology_lookup) args={'term': ['heart ventricle muscular part'], 'ontologies': [], 'exact': False, 'max_results': 5, 'include_fields': ['label', 'synonyms', 'description', 'iri', 'short_form', 'ontology_prefix', 'xrefs', 'aliases', 'annotations', 'definitions']}
+🛠️  Tool parsed: ontology_term_info (moira.agents.tools.ontology.ontology_lookup) args={'term': ['heart ventricle muscular part'], 'ontologies': [], 'exact': False, 'max_results': 5, 'include_fields': ['label', 'synonyms', 'description', 'iri', 'short_form', 'ontology_prefix', 'xrefs', 'aliases', 'annotations', 'definitions']}
 ⚙️  Executing tool: ontology_term_info …
 ✅ Tool result: heart ventricle muscular part (MA_0001879), interventricular septum (BTO_0002483), abnormal heart interventricular foramen morphology (MP_0031565, also UPHENO). Source: ols4. Count: 4.
 ✔ Run finished.
@@ -101,5 +101,5 @@ Failure to close the interventricular foramen leads to an interventricular septa
 
 Overall
 The tool result provides information on four terms related to the heart, including the heart ventricle muscular part, interventricular septum, and abnormal heart interventricular foramen morphology.
-agentoi>
+moira>
 ```

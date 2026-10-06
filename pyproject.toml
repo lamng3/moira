@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentoi"
+name = "moira"
 dynamic = ["version"]
 description = "Agentic ontology integration with budgeted LLM inference"
 readme = "README.md"
@@ -53,27 +53,27 @@ uq = ["uqlm"]
 website = ["tavily-python"]
 dev = ["pre-commit", "pytest"]
 all = [
-  "agentoi[google,groq,huggingface,jev,knowledge-graph,ollama,openai,tracking,traces,uq,website]",
+  "moira[google,groq,huggingface,jev,knowledge-graph,ollama,openai,tracking,traces,uq,website]",
 ]
 
 [project.scripts]
-agentoi = "agentoi.cli:main"
-agentoi-hypergraph = "agentoi.hypergraph:main"
-agentoi-lint = "agentoi.validation.ontology_lint:main"
+moira = "moira.cli:main"
+moira-hypergraph = "moira.hypergraph:main"
+moira-lint = "moira.validation.ontology_lint:main"
 
 [project.urls]
 Documentation = "https://lamng3.github.io/agentoi-docs/"
-Repository = "https://github.com/lamng3/agentoi"
+Repository = "https://github.com/lamng3/moira"
 
 [tool.setuptools.dynamic]
-version = {attr = "agentoi.__version__"}
+version = {attr = "moira.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["agentoi*"]
+include = ["moira*"]
 
 [tool.setuptools.package-data]
-agentoi = [
+moira = [
   "parser/namespaces/*.json",
   "agents/tools/registry/*.json",
   "agents/tools/knowledge_graph/*.json",

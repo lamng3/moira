@@ -1,6 +1,6 @@
 """Build an Ontology-of-Thought trace."""
 
-from agentoi.agents.ontology_of_thought import ConversationTrace, ThoughtGraph
+from moira.agents.ontology_of_thought import ConversationTrace, ThoughtGraph
 
 
 def main() -> None:

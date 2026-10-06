@@ -3,14 +3,14 @@ from pathlib import Path
 
 import pytest
 
-from agentoi.memory.cache.hot import HotCache
-from agentoi.memory.cache.long_term import LongTermMemory
-from agentoi.memory.cache.short_term import ShortTermMemory
-from agentoi.memory.config import MemoryConfig
-from agentoi.memory.eviction import LeastFrequentlyUsed, LeastRecentlyUsed, TwoQueue, policy_for
-from agentoi.memory.path import QueryPath
-from agentoi.memory.service import AgentMemory
-from agentoi.memory.trie import TrieNode
+from moira.memory.cache.hot import HotCache
+from moira.memory.cache.long_term import LongTermMemory
+from moira.memory.cache.short_term import ShortTermMemory
+from moira.memory.config import MemoryConfig
+from moira.memory.eviction import LeastFrequentlyUsed, LeastRecentlyUsed, TwoQueue, policy_for
+from moira.memory.path import QueryPath
+from moira.memory.service import AgentMemory
+from moira.memory.trie import TrieNode
 
 
 def test_a_read_increments_frequency_and_leaves_the_promotion_count() -> None:

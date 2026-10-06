@@ -1,7 +1,7 @@
-from agentoi.agents.core.tool_executor import preview
-from agentoi.agents.observers.general import LogCapture
-from agentoi.progress import WorkingStatus
-from agentoi.workspace import _is_tool_monologue, _presentable, _spoken_answer, _usable_prose
+from moira.agents.core.tool_executor import preview
+from moira.agents.observers.general import LogCapture
+from moira.progress import WorkingStatus
+from moira.workspace import _is_tool_monologue, _presentable, _spoken_answer, _usable_prose
 
 
 def test_spoken_answer_uses_the_model_summary() -> None:

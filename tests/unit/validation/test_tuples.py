@@ -2,7 +2,7 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from agentoi.validation import (
+from moira.validation import (
     NormalizationRule,
     TupleEvaluator,
     TupleNormalizer,

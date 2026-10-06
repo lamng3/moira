@@ -8,8 +8,8 @@ import pytest
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS
 
-import agentoi.parser as public_api
-from agentoi.parser import (
+import moira.parser as public_api
+from moira.parser import (
     InputFormat,
     JSONParser,
     ParseError,

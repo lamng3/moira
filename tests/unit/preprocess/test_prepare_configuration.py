@@ -1,8 +1,8 @@
 import pytest
 
-from agentoi.agents import Agent
-from agentoi.algorithms.graph import Ontology
-from agentoi.preprocess.prepare_configuration import (
+from moira.agents import Agent
+from moira.algorithms.graph import Ontology
+from moira.preprocess.prepare_configuration import (
     OntologyMatchingConfiguration,
     build_configuration_w,
 )

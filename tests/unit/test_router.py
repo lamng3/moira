@@ -4,14 +4,14 @@ import json
 
 import pytest
 
-from agentoi.routing.harness import CHOICE_LIMIT, ontology_questions
-from agentoi.routing.understand import ActionRoute, understand_question
-from agentoi.workspace import OntologyWorkspace
+from moira.routing.harness import CHOICE_LIMIT, ontology_questions
+from moira.routing.understand import ActionRoute, understand_question
+from moira.workspace import OntologyWorkspace
 
 
 @pytest.fixture(autouse=True)
 def _keep_router_tests_on_the_injected_model(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("AGENTOI_HARNESS_URL", "")
+    monkeypatch.setenv("MOIRA_HARNESS_URL", "")
 
 
 ONTOLOGY = """
@@ -149,7 +149,7 @@ def test_systemone_probabilities_replay_a_cached_question(monkeypatch) -> None:
         captured["url"] = request.full_url
         return _Response()
 
-    monkeypatch.setattr("agentoi.routing.harness.urlopen", fake_urlopen)
+    monkeypatch.setattr("moira.routing.harness.urlopen", fake_urlopen)
     route = understand_question(
         PARAPHRASE,
         [CACHED],
@@ -172,7 +172,7 @@ def test_a_down_systemone_server_falls_open(monkeypatch) -> None:
     def fake_urlopen(_request, timeout=None):
         raise OSError("down")
 
-    monkeypatch.setattr("agentoi.routing.harness.urlopen", fake_urlopen)
+    monkeypatch.setattr("moira.routing.harness.urlopen", fake_urlopen)
     route = understand_question(
         PARAPHRASE,
         [CACHED],
@@ -225,7 +225,7 @@ def test_harness_choice_replays_without_the_answer_model(tmp_path, monkeypatch) 
     def answer_model(*_args, **_kwargs):
         raise AssertionError("the answer model should stay unused")
 
-    monkeypatch.setattr("agentoi.workspace.create_application_agent", answer_model)
+    monkeypatch.setattr("moira.workspace.create_application_agent", answer_model)
 
     answer = workspace.ask(PARAPHRASE)
 
@@ -247,12 +247,12 @@ def test_paraphrase_replays_without_the_answer_model(tmp_path, monkeypatch) -> N
     def route(_question, cached, _llm, _turns=None, harness_url=None):
         return ActionRoute("replay", question=cached[0])
 
-    monkeypatch.setattr("agentoi.routing.understand.understand_question", route)
+    monkeypatch.setattr("moira.routing.understand.understand_question", route)
 
     def answer_model(*_args, **_kwargs):
         raise AssertionError("the answer model should stay unused")
 
-    monkeypatch.setattr("agentoi.workspace.create_application_agent", answer_model)
+    monkeypatch.setattr("moira.workspace.create_application_agent", answer_model)
 
     answer = workspace.ask(PARAPHRASE)
 
@@ -264,7 +264,7 @@ def test_paraphrase_replays_without_the_answer_model(tmp_path, monkeypatch) -> N
 
 
 def _stub_answer_path(monkeypatch, answer: str) -> None:
-    from agentoi.algorithms.graph import ConceptGraph
+    from moira.algorithms.graph import ConceptGraph
 
     def skip_embeddings(self, alpha=0.5, progress=None, control=None):
         return self
@@ -275,7 +275,7 @@ def _stub_answer_path(monkeypatch, answer: str) -> None:
 
     monkeypatch.setattr(ConceptGraph, "compute_all_embeddings", skip_embeddings)
     monkeypatch.setattr(
-        "agentoi.workspace.build_context_candidates",
+        "moira.workspace.build_context_candidates",
         lambda *_args, **_kwargs: [],
     )
     monkeypatch.setattr(
@@ -283,9 +283,9 @@ def _stub_answer_path(monkeypatch, answer: str) -> None:
         "make_prompt_for_query",
         lambda self, *_args, **_kwargs: "prompt",
     )
-    monkeypatch.setattr("agentoi.workspace.create_model_runtime", lambda **_kwargs: object())
+    monkeypatch.setattr("moira.workspace.create_model_runtime", lambda **_kwargs: object())
     monkeypatch.setattr(
-        "agentoi.workspace.create_application_agent",
+        "moira.workspace.create_application_agent",
         lambda *_args, **_kwargs: Agent(),
     )
 
@@ -297,7 +297,7 @@ def test_retrieve_still_calls_the_answer_model(tmp_path, monkeypatch) -> None:
     workspace._query_memory().hot.put(CACHED, "cached")
     monkeypatch.setattr(OntologyWorkspace, "_router_llm", lambda self: object())
     monkeypatch.setattr(
-        "agentoi.routing.understand.understand_question",
+        "moira.routing.understand.understand_question",
         lambda *_args, **_kwargs: ActionRoute("retrieve"),
     )
     _stub_answer_path(monkeypatch, "From the model.")
@@ -345,7 +345,7 @@ def test_prior_turns_reach_the_reasoner_and_the_trie(tmp_path, monkeypatch) -> N
     monkeypatch.setattr(OntologyWorkspace, "_router_llm", lambda self: Router())
     _stub_answer_path(monkeypatch, "unused")
     monkeypatch.setattr(
-        "agentoi.workspace.create_application_agent",
+        "moira.workspace.create_application_agent",
         lambda *_args, **_kwargs: Agent(),
     )
 
@@ -380,7 +380,7 @@ def test_exact_question_skips_the_router(tmp_path, monkeypatch) -> None:
     def router(*_args, **_kwargs):
         raise AssertionError("an exact hot hit should skip the router")
 
-    monkeypatch.setattr("agentoi.routing.understand.understand_question", router)
+    monkeypatch.setattr("moira.routing.understand.understand_question", router)
     monkeypatch.setattr(OntologyWorkspace, "_router_llm", lambda self: object())
 
     answer = workspace.ask("What organ systems are part of the mouse?")

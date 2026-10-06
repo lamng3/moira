@@ -1,6 +1,6 @@
 from rdflib import Graph, Literal, Namespace, OWL, RDF, RDFS, SKOS
 
-from agentoi.validation.ontology_lint import exit_code, lint_graph
+from moira.validation.ontology_lint import exit_code, lint_graph
 
 
 EX = Namespace("https://example.org/")

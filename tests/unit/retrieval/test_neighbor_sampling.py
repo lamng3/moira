@@ -1,11 +1,11 @@
 import pytest
-from agentoi.algorithms.graph import (
+from moira.algorithms.graph import (
     Concept,
     EquivalentClass,
     EquivalentClassRelation,
     ConceptGraph,
 )
-from agentoi.retrieval import NeighborhoodSampler, sample_neighborhood
+from moira.retrieval import NeighborhoodSampler, sample_neighborhood
 
 
 def make_equiv_class(name: str) -> EquivalentClass:

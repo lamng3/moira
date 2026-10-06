@@ -3,25 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reference · AgentOI</title>
+  <title>Reference · MOIRA</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header><a href="index.html"><strong>AgentOI</strong></a><nav><a href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a href="api.html">API</a><a href="experiments.html">Experiments</a><a class="active" href="reference.html">Reference</a></nav></header>
+  <header><a href="index.html"><strong>MOIRA</strong></a><nav><a href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a href="api.html">API</a><a href="experiments.html">Experiments</a><a class="active" href="reference.html">Reference</a></nav></header>
   <main>
     <p class="eyebrow">Guide 04 · Commands</p>
     <h1>Reference</h1>
 
     <h2>Command-line interfaces</h2>
-    <pre><code>agentoi --help
-agentoi inspect ONTOLOGY.owl
-agentoi search ONTOLOGY.owl "natural-language text"
-agentoi query ONTOLOGY.owl "question"
-agentoi chat ONTOLOGY.owl [--log]
-agentoi memory clear ONTOLOGY.owl
-agentoi run --help
-agentoi-hypergraph --help
-agentoi-lint ONTOLOGY.ttl
+    <pre><code>moira --help
+moira inspect ONTOLOGY.owl
+moira search ONTOLOGY.owl "natural-language text"
+moira query ONTOLOGY.owl "question"
+moira chat ONTOLOGY.owl [--log]
+moira memory clear ONTOLOGY.owl
+moira run --help
+moira-hypergraph --help
+moira-lint ONTOLOGY.ttl
 ./scripts/run_experiments.sh SUITE --dry-run</code></pre>
 
     <h2>Supported ontology inputs</h2>
@@ -36,13 +36,13 @@ agentoi-lint ONTOLOGY.ttl
       <tr><td><code>register_vector_index(name, factory)</code></td><td>Register a vector-index adapter</td></tr>
       <tr><td><code>OnlineOntologyRefiner.refine(graph, updates)</code></td><td>Apply streamed ontology updates and return deferred validation cases</td></tr>
       <tr><td><code>Parser(path).to_ontology()</code></td><td>Parse supported RDF or relation-dataset formats through one facade</td></tr>
-      <tr><td><code>create_model_router()</code></td><td>Choose <code>local</code>, <code>standard</code>, or <code>careful</code> once per run when <code>AGENTOI_MODEL_ROUTING=jev</code></td></tr>
-      <tr><td><code>create_tool_gate()</code></td><td>Block configured external tool calls when <code>AGENTOI_TOOL_GATE=jev</code></td></tr>
+      <tr><td><code>create_model_router()</code></td><td>Choose <code>local</code>, <code>standard</code>, or <code>careful</code> once per run when <code>MOIRA_MODEL_ROUTING=jev</code></td></tr>
+      <tr><td><code>create_tool_gate()</code></td><td>Block configured external tool calls when <code>MOIRA_TOOL_GATE=jev</code></td></tr>
     </table>
 
     <h2>Repository layout</h2>
     <table>
-      <tr><td><code>src/agentoi/</code></td><td>Installable library</td></tr>
+      <tr><td><code>src/moira/</code></td><td>Installable library</td></tr>
       <tr><td><code>tests/</code></td><td>Automated tests</td></tr>
       <tr><td><code>examples/</code></td><td>Runnable examples</td></tr>
       <tr><td><code>experiments/</code></td><td>Runner and maintained configurations</td></tr>
@@ -56,9 +56,9 @@ agentoi-lint ONTOLOGY.ttl
     <table>
       <tr><th>Variable</th><th>Purpose</th></tr>
       <tr><td><code>JEV_API_KEY</code></td><td>TypeSafe key. Copied to <code>TYPESAFE_API_KEY</code> when that variable is empty.</td></tr>
-      <tr><td><code>AGENTOI_CONTEXT_HARNESS</code></td><td>Set to <code>jev</code> to score retrieved context. <code>AGENTOI_CONTEXT_MODE</code> is <code>shadow</code> or <code>live</code>.</td></tr>
-      <tr><td><code>AGENTOI_MODEL_ROUTING</code></td><td>Set to <code>jev</code> to route each run. Pair with <code>AGENTOI_ROUTE_LOCAL</code>, <code>AGENTOI_ROUTE_STANDARD</code>, and <code>AGENTOI_ROUTE_CAREFUL</code>.</td></tr>
-      <tr><td><code>AGENTOI_TOOL_GATE</code></td><td>Set to <code>jev</code> to gate tools. <code>AGENTOI_GATED_TOOLS</code> lists names, and <code>AGENTOI_TOOL_RISK_THRESHOLD</code> defaults to <code>0.5</code>.</td></tr>
+      <tr><td><code>MOIRA_CONTEXT_HARNESS</code></td><td>Set to <code>jev</code> to score retrieved context. <code>MOIRA_CONTEXT_MODE</code> is <code>shadow</code> or <code>live</code>.</td></tr>
+      <tr><td><code>MOIRA_MODEL_ROUTING</code></td><td>Set to <code>jev</code> to route each run. Pair with <code>MOIRA_ROUTE_LOCAL</code>, <code>MOIRA_ROUTE_STANDARD</code>, and <code>MOIRA_ROUTE_CAREFUL</code>.</td></tr>
+      <tr><td><code>MOIRA_TOOL_GATE</code></td><td>Set to <code>jev</code> to gate tools. <code>MOIRA_GATED_TOOLS</code> lists names, and <code>MOIRA_TOOL_RISK_THRESHOLD</code> defaults to <code>0.5</code>.</td></tr>
     </table>
     <p>Routing fails open to <code>LLM_MODEL</code>. An enabled tool gate fails closed for gated tools only. Query text and redacted tool arguments are sent to TypeSafe. Decisions appear on the existing trace as <code>model.routed</code> and <code>tool.blocked</code>.</p>
 

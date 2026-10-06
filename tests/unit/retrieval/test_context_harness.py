@@ -1,19 +1,19 @@
 import pytest
 
-from agentoi.algorithms.graph import (
+from moira.algorithms.graph import (
     Concept,
     ConceptGraph,
     EquivalentClass,
     EquivalentClassRelation,
 )
-from agentoi.retrieval import (
+from moira.retrieval import (
     ContextCandidate,
     JevContextHarness,
     PassthroughHarness,
     build_context_candidates,
     create_context_harness,
 )
-from agentoi.workspace import _append_web_context
+from moira.workspace import _append_web_context
 
 
 def _candidate(identifier: str, source: str = "concept") -> ContextCandidate:
@@ -169,14 +169,14 @@ def test_selected_concepts_and_web_passages_shape_the_prompt():
 
 
 def test_factory_defaults_to_shadow_mode(monkeypatch):
-    monkeypatch.delenv("AGENTOI_CONTEXT_MODE", raising=False)
+    monkeypatch.delenv("MOIRA_CONTEXT_MODE", raising=False)
 
     assert isinstance(create_context_harness(), PassthroughHarness)
     harness = create_context_harness("jev")
     assert isinstance(harness, JevContextHarness)
     assert harness.shadow is True
 
-    monkeypatch.setenv("AGENTOI_CONTEXT_MODE", "live")
+    monkeypatch.setenv("MOIRA_CONTEXT_MODE", "live")
     assert create_context_harness("jev").shadow is False
     with pytest.raises(ValueError, match="passthrough"):
         create_context_harness("unknown")

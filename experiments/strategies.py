@@ -48,7 +48,7 @@ class StandardExperimentStrategy(ExperimentStrategy):
         if spec.entrypoint:
             command = [sys.executable, str(project_root / spec.entrypoint)]
         else:
-            command = [sys.executable, "-m", "agentoi.cli", "run"]
+            command = [sys.executable, "-m", "moira.cli", "run"]
         command.extend(["--ontology", *spec.ontology])
         command.extend(_option_arguments(spec.options))
         return command

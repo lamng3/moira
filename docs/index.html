@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AgentOI Documentation</title>
+  <title>MOIRA Documentation</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
-    <a href="index.html"><strong>AgentOI</strong></a>
+    <a href="index.html"><strong>MOIRA</strong></a>
     <nav>
       <a href="getting-started.html">Get started</a>
       <a href="architecture.html">Architecture</a>
@@ -20,10 +20,10 @@
   <main class="hero">
     <section class="hero-layout">
       <div>
-        <p class="eyebrow">AgentOI documentation</p>
-        <h1>Ontology integration with AgentOI</h1>
+        <p class="eyebrow">MOIRA documentation</p>
+        <h1>Ontology integration with MOIRA</h1>
         <p class="lede">
-          Learn how to install, configure, extend, and evaluate AgentOI for
+          Learn how to install, configure, extend, and evaluate MOIRA for
           ontology matching and entity integration.
         </p>
         <div class="actions">
@@ -31,13 +31,13 @@
           <a class="button secondary" href="architecture.html">Architecture</a>
         </div>
       </div>
-      <div class="terminal" aria-label="AgentOI installation commands">
-        <pre><code><span class="prompt">$</span> git clone https://github.com/lamng3/agentoi.git
-cd agentoi
+      <div class="terminal" aria-label="MOIRA installation commands">
+        <pre><code><span class="prompt">$</span> git clone https://github.com/lamng3/moira.git
+cd moira
 ./setup.sh
 source .venv/bin/activate
-<span class="prompt">$</span> agentoi inspect ontology.owl
-<span class="prompt">$</span> agentoi chat ontology.owl</code></pre>
+<span class="prompt">$</span> moira inspect ontology.owl
+<span class="prompt">$</span> moira chat ontology.owl</code></pre>
       </div>
     </section>
 
@@ -50,7 +50,7 @@ source .venv/bin/activate
     <h2>Demo</h2>
     <p><a href="chat-log.html">What is the heart part of?</a></p>
     <p>Local <code>llama3.1</code> chats with the adult mouse anatomy ontology. The title opens the full run log.</p>
-    <a href="chat-log.html"><img class="demo-shot" src="images/chat-demo.jpg" alt="AgentOI chat: llama3.1 chooses an ontology lookup for the heart question"></a>
+    <a href="chat-log.html"><img class="demo-shot" src="images/chat-demo.jpg" alt="MOIRA chat: llama3.1 chooses an ontology lookup for the heart question"></a>
 
     <h2>Workflow</h2>
     <div class="flow">
@@ -65,12 +65,12 @@ source .venv/bin/activate
       <section class="card">
         <span class="number">01 / CORE</span>
         <h3>Library</h3>
-        <p><code>src/agentoi/</code> contains all installable product code.</p>
+        <p><code>src/moira/</code> contains all installable product code.</p>
       </section>
       <section class="card">
         <span class="number">02 / CONTEXT</span>
         <h3>Tools</h3>
-        <p>Only ontology, knowledge-graph, and web retrieval tools used by AgentOI.</p>
+        <p>Only ontology, knowledge-graph, and web retrieval tools used by MOIRA.</p>
       </section>
       <section class="card">
         <span class="number">03 / EVALUATION</span>
@@ -86,13 +86,13 @@ source .venv/bin/activate
 
     <h2>Documentation</h2>
     <div class="grid">
-      <a class="card" href="getting-started.html"><span class="number">GUIDE 01</span><h3>Getting started →</h3><p>Install, configure, and run AgentOI.</p></a>
+      <a class="card" href="getting-started.html"><span class="number">GUIDE 01</span><h3>Getting started →</h3><p>Install, configure, and run MOIRA.</p></a>
       <a class="card" href="architecture.html"><span class="number">GUIDE 02</span><h3>Architecture →</h3><p>Understand modules and extension points.</p></a>
       <a class="card" href="api.html"><span class="number">GUIDE 03</span><h3>API reference →</h3><p>Classes, signatures, supported types, examples, and source links.</p></a>
       <a class="card" href="experiments.html"><span class="number">GUIDE 04</span><h3>Experiments →</h3><p>Run reproducible suites and ablations.</p></a>
       <a class="card" href="reference.html"><span class="number">GUIDE 05</span><h3>Reference →</h3><p>Commands, environment, tests, and security.</p></a>
     </div>
   </main>
-  <footer>AgentOI · Ontology integration built by Lam Nguyen and Ethan Frakes</footer>
+  <footer>MOIRA · Ontology integration built by Lam Nguyen and Ethan Frakes</footer>
 </body>
 </html>

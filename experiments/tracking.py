@@ -47,7 +47,7 @@ class WandbTracker(ExperimentTracker):
 
     is_remote = True
 
-    def __init__(self, project: str = "agentoi", entity: str | None = None) -> None:
+    def __init__(self, project: str = "moira", entity: str | None = None) -> None:
         self.project = project
         self.entity = entity
 
@@ -106,7 +106,7 @@ class WandbTracker(ExperimentTracker):
 def create_tracker(
     name: str,
     *,
-    project: str = "agentoi",
+    project: str = "moira",
     entity: str | None = None,
 ) -> ExperimentTracker:
     """Create a tracker without importing optional SDKs prematurely."""

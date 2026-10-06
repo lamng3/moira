@@ -4,21 +4,21 @@ import sys
 import pytest
 import torch
 
-from agentoi.embeddings import (
+from moira.embeddings import (
     MultiQuerySearchService,
     TorchExactVectorIndex,
     create_vector_index,
     fuse_embeddings,
 )
-from agentoi.embeddings.vector_index import VectorIndexRegistry
+from moira.embeddings.vector_index import VectorIndexRegistry
 
 
 def test_public_packages_are_lazy():
     code = """
 import sys
 sys.path.insert(0, "src")
-import agentoi.embeddings
-import agentoi.algorithms.graph
+import moira.embeddings
+import moira.algorithms.graph
 assert "torch" not in sys.modules
 assert "transformers" not in sys.modules
 """

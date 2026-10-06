@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Architecture · AgentOI</title>
+  <title>Architecture · MOIRA</title>
   <link rel="stylesheet" href="styles.css">
   <script type="module">
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.0/dist/mermaid.esm.min.mjs";
@@ -16,14 +16,14 @@
   </script>
 </head>
 <body>
-  <header><a href="index.html"><strong>AgentOI</strong></a><nav><a href="getting-started.html">Get started</a><a class="active" href="architecture.html">Architecture</a><a href="api.html">API</a><a href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
+  <header><a href="index.html"><strong>MOIRA</strong></a><nav><a href="getting-started.html">Get started</a><a class="active" href="architecture.html">Architecture</a><a href="api.html">API</a><a href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
   <main>
     <p class="eyebrow">Guide 02 · System design</p>
     <h1>Architecture</h1>
-    <p class="lede">The installable package is isolated under <code>src/agentoi/</code>. Everything else is support material.</p>
+    <p class="lede">The installable package is isolated under <code>src/moira/</code>. Everything else is support material.</p>
 
     <h2>System overview</h2>
-    <div class="diagram" aria-label="AgentOI system architecture">
+    <div class="diagram" aria-label="MOIRA system architecture">
       <pre class="mermaid">
 flowchart LR
     Input["OWL / RDF / JSON-LD"] --> Parser["Parser"]
@@ -116,7 +116,7 @@ flowchart LR
     <p>Use <code>create_web_search</code> with <code>static</code>, <code>dataset</code>, <code>mediawiki</code>, or <code>google-cse</code>. Each provider has visible metadata describing network access and required environment variables. Use <code>register_web_search</code> for a project-specific index. Normalized Google Distance receives the selected provider explicitly and does not hide a network service inside similarity code.</p>
 
     <h2>Memory and cache</h2>
-    <p>AgentOI keeps two stores for one ontology. Embedding memory holds the concept vectors so the next run can skip embedding. The query cache holds answers so a repeated question can skip the model. They live in different folders and are not interchangeable.</p>
+    <p>MOIRA keeps two stores for one ontology. Embedding memory holds the concept vectors so the next run can skip embedding. The query cache holds answers so a repeated question can skip the model. They live in different folders and are not interchangeable.</p>
     <div class="diagram" aria-label="Query cache replay">
       <pre class="mermaid">
 flowchart LR
@@ -141,18 +141,18 @@ flowchart LR
     </div>
     <p class="diagram-caption">Replay reads a stored capture. It does not send the SPARQL pattern to an endpoint.</p>
     <div class="grid">
-      <section class="card"><h3>Embedding memory</h3><p><code>results/memory</code> stores one folder per ontology: <code>manifest.json</code> and <code>embeddings.pt</code>. <code>agentoi memory clear</code> deletes that folder. <code>--no-save-memory</code> keeps the vectors in the current process only.</p></section>
+      <section class="card"><h3>Embedding memory</h3><p><code>results/memory</code> stores one folder per ontology: <code>manifest.json</code> and <code>embeddings.pt</code>. <code>moira memory clear</code> deletes that folder. <code>--no-save-memory</code> keeps the vectors in the current process only.</p></section>
       <section class="card"><h3>Hot</h3><p><code>hot.json</code> maps a normalized question to its answer. Matching ignores case and extra spaces. The cap is 32 entries. The default policy drops the least frequently read question.</p></section>
       <section class="card"><h3>Short-term</h3><p><code>short_term.json</code> is a trie of concept ids, the SPARQL pattern, and the answer. Lookup uses the set of concept ids, so order from retrieval does not matter. The cap is 512 nodes.</p></section>
       <section class="card"><h3>Long-term</h3><p><code>long_term.json</code> is a persistent hash of completed concept sets. A set is copied here after it has been answered 3 times. The cap is 1024 entries. A later question with those concepts replays from here after the short-term trie has dropped them.</p></section>
     </div>
-    <p>One ontology is one directory, <code>results/cache/&lt;sha&gt;/</code>, with <code>hot.json</code>, <code>short_term.json</code>, and <code>long_term.json</code>. The first model answer writes the capture. The same question hits the hot tier before retrieval. After a miss, a checksum of three-word shingles on each remembered answer can name the last concept on that path and skip retrieval. The overlap must be at least 0.75 and lead the next answer by 0.15. A single misspelled word can still match. A question with fewer than 4 shingles continues. That checksum is rebuilt in memory from the concept trie and the long-term patterns. It is not a new cache file. The Harness then asks typed questions about the question the user typed and can replay a cached one. It runs only when the hot cache already has questions. A failed call, or a choice that is not in the cache, continues into retrieval. The default call is SGLang <code>/v1/systemone</code> at <code>http://127.0.0.1:30000</code> (<code>AGENTOI_HARNESS_URL</code>). An empty value keeps the Ollama router, <code>ollama:phi3</code> (<code>AGENTOI_ROUTER_MODEL</code>). Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concepts. A different concept set still calls the answer model.</p>
+    <p>One ontology is one directory, <code>results/cache/&lt;sha&gt;/</code>, with <code>hot.json</code>, <code>short_term.json</code>, and <code>long_term.json</code>. The first model answer writes the capture. The same question hits the hot tier before retrieval. After a miss, a checksum of three-word shingles on each remembered answer can name the last concept on that path and skip retrieval. The overlap must be at least 0.75 and lead the next answer by 0.15. A single misspelled word can still match. A question with fewer than 4 shingles continues. That checksum is rebuilt in memory from the concept trie and the long-term patterns. It is not a new cache file. The Harness then asks typed questions about the question the user typed and can replay a cached one. It runs only when the hot cache already has questions. A failed call, or a choice that is not in the cache, continues into retrieval. The default call is SGLang <code>/v1/systemone</code> at <code>http://127.0.0.1:30000</code> (<code>MOIRA_HARNESS_URL</code>). An empty value keeps the Ollama router, <code>ollama:phi3</code> (<code>MOIRA_ROUTER_MODEL</code>). Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concepts. A different concept set still calls the answer model.</p>
     <h3>Eviction</h3>
-    <p>Each tier drops records when it passes its cap. <code>lfu</code> removes the least frequently read record, then the one touched longest ago. <code>lru</code> removes the record that was read or written longest ago. <code>2q</code> removes a one-time record before a repeated one. Hot, short-term, and long-term use <code>AGENTOI_CACHE_EVICTION</code>, which defaults to <code>lfu</code>. A new policy is a class with <code>choose(entries)</code> registered under a name. A new tier is a new file under <code>agentoi.memory.cache</code>.</p>
-    <p><code>AGENTOI_CACHE_DIR</code> moves the folder. <code>AGENTOI_HOT_ENTRIES</code>, <code>AGENTOI_SHORT_TERM_NODES</code>, and <code>AGENTOI_LONG_TERM_ENTRIES</code> set the three caps.</p>
+    <p>Each tier drops records when it passes its cap. <code>lfu</code> removes the least frequently read record, then the one touched longest ago. <code>lru</code> removes the record that was read or written longest ago. <code>2q</code> removes a one-time record before a repeated one. Hot, short-term, and long-term use <code>MOIRA_CACHE_EVICTION</code>, which defaults to <code>lfu</code>. A new policy is a class with <code>choose(entries)</code> registered under a name. A new tier is a new file under <code>moira.memory.cache</code>.</p>
+    <p><code>MOIRA_CACHE_DIR</code> moves the folder. <code>MOIRA_HOT_ENTRIES</code>, <code>MOIRA_SHORT_TERM_NODES</code>, and <code>MOIRA_LONG_TERM_ENTRIES</code> set the three caps.</p>
 
     <h2>Agent runtime</h2>
-    <p>The public <code>agentoi.agents</code> API exposes the agent, observers, Ontology-of-Thought models, and supported tools. Internally, the agent emits each event once, the OOT observer owns conversation memory, and the thought graph is derived from that memory for persistence and query optimization. Optional Jev routing and gating add <code>model.routed</code> and <code>tool.blocked</code> to that same event stream. They stay off unless configured, and they do not replace the context harness that selects evidence before prompting.</p>
+    <p>The public <code>moira.agents</code> API exposes the agent, observers, Ontology-of-Thought models, and supported tools. Internally, the agent emits each event once, the OOT observer owns conversation memory, and the thought graph is derived from that memory for persistence and query optimization. Optional Jev routing and gating add <code>model.routed</code> and <code>tool.blocked</code> to that same event stream. They stay off unless configured, and they do not replace the context harness that selects evidence before prompting.</p>
     <div class="diagram" aria-label="Agent runtime architecture">
       <pre class="mermaid">
 flowchart TB
@@ -191,11 +191,11 @@ flowchart TB
       <section class="card"><h3>Gating</h3><p>Configured external lookups can be refused before execution. The refusal is <code>tool.blocked</code> on the same trace.</p></section>
       <section class="card"><h3>Events</h3><p>Observers receive one event stream without depending on the agent implementation.</p></section>
       <section class="card"><h3>Memory</h3><p><code>MemoryTrace</code> is the canonical record used to derive a <code>ThoughtGraph</code>.</p></section>
-      <section class="card"><h3>Persistence</h3><p><code>AGENTOI_TRACE_STORE=duckdb</code> writes each thought graph to <code>results/traces/agentoi.duckdb</code>. DynamoDB is used when a table is configured.</p></section>
+      <section class="card"><h3>Persistence</h3><p><code>MOIRA_TRACE_STORE=duckdb</code> writes each thought graph to <code>results/traces/moira.duckdb</code>. DynamoDB is used when a table is configured.</p></section>
     </div>
 
     <h2>Agent tools</h2>
-    <p>AgentOI intentionally includes only tools used by ontology integration:</p>
+    <p>MOIRA intentionally includes only tools used by ontology integration:</p>
     <ul>
       <li>Ontology repository lookup through OLS4, BioPortal, LOV, GitHub RDF, and SPARQL.</li>
       <li>Knowledge-graph lookup through Wikidata, DBpedia, and Neo4j.</li>

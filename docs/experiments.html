@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Experiments · AgentOI</title>
+  <title>Experiments · MOIRA</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header><a href="index.html"><strong>AgentOI</strong></a><nav><a href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a href="api.html">API</a><a class="active" href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
+  <header><a href="index.html"><strong>MOIRA</strong></a><nav><a href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a href="api.html">API</a><a class="active" href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
   <main>
     <p class="eyebrow">Guide 03 · Reproducibility</p>
     <h1>Experiments</h1>
@@ -23,12 +23,12 @@ cat results/experiments/smoke/summary.md</code></pre>
     <pre><code>uv sync --extra tracking
 uv run wandb login
 ./scripts/run_experiments.sh smoke --tracker wandb</code></pre>
-    <p>AgentOI publishes a comparison table, scalar metrics, logs, manifests, and generated figures to Weights &amp; Biases. Temporary local artifacts are deleted after a successful upload. Set <code>WANDB_PROJECT</code> and optional <code>WANDB_ENTITY</code> to choose the destination, or add <code>--keep-local</code> to retain both copies.</p>
+    <p>MOIRA publishes a comparison table, scalar metrics, logs, manifests, and generated figures to Weights &amp; Biases. Temporary local artifacts are deleted after a successful upload. Set <code>WANDB_PROJECT</code> and optional <code>WANDB_ENTITY</code> to choose the destination, or add <code>--keep-local</code> to retain both copies.</p>
     <p class="note">Hosted artifacts can contain ontology-derived output. Use a private W&amp;B project and confirm your data policy before enabling remote tracking.</p>
 
     <h2>Compare context selection</h2>
     <pre><code>./scripts/run_experiments.sh context</code></pre>
-    <p>This local comparison scores the same retrieved shortlist with passthrough context and a shadow Jev policy. It reports selection precision, recall, F1, returned context size, and rejection rate without calling the Jev API. Live Jev scoring remains opt-in through <code>AGENTOI_CONTEXT_HARNESS=jev</code>.</p>
+    <p>This local comparison scores the same retrieved shortlist with passthrough context and a shadow Jev policy. It reports selection precision, recall, F1, returned context size, and rejection rate without calling the Jev API. Live Jev scoring remains opt-in through <code>MOIRA_CONTEXT_HARNESS=jev</code>.</p>
 
     <h2>Fetch benchmark data</h2>
     <pre><code>git lfs install
@@ -74,7 +74,7 @@ git lfs pull</code></pre>
     ├── manifest.json
     └── summary.md</code></pre>
     <p>Run directories are immutable, so repeated experiments never overwrite one another. Start with <code>summary.md</code>: it presents one row per experiment with precision, recall, F1, runtime, and reproducibility. Use <code>metrics.csv</code> for plotting and <code>*.latest.md</code> only when you need details.</p>
-    <p>For suites with two or more variants, AgentOI generates <code>figures/quality.svg</code> automatically. A single run stays table-only because a comparison chart would be redundant.</p>
+    <p>For suites with two or more variants, MOIRA generates <code>figures/quality.svg</code> automatically. A single run stays table-only because a comparison chart would be redundant.</p>
     <p>The manifest records the command, timestamps, duration, Git revision, dirty-worktree state, configuration fingerprint, and metrics fingerprint. Timing does not affect reproducibility comparison. Standard pipeline experiments also receive a distinct output path for each run.</p>
     <p class="note">The local tracker is the default. Generated results remain ignored by Git and are reproducible from configuration.</p>
   </main>

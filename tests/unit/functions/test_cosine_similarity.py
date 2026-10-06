@@ -7,12 +7,12 @@ import pytest
 from typing import List, Dict
 from unittest.mock import Mock, patch
 
-from agentoi.functions.similarity import (
+from moira.functions.similarity import (
     CosineSimilarityPlugin, 
     compute_cosine_similarity_matrix,
     compute_similarity_to_query
 )
-from agentoi.algorithms.graph import ConceptGraph, EquivalentClass, Concept
+from moira.algorithms.graph import ConceptGraph, EquivalentClass, Concept
 
 
 class TestCosineSimilarityPlugin:
@@ -78,7 +78,7 @@ class TestCosineSimilarityPlugin:
         assert plugin.alpha == 0.7
         assert plugin.normalize == False
     
-    @patch('agentoi.algorithms.graph.EquivalentClass.compute_embedding')
+    @patch('moira.algorithms.graph.EquivalentClass.compute_embedding')
     def test_get_node_embeddings(self, mock_compute_embedding):
         """Test extraction of node embeddings from concept graph."""
         # Mock the compute_embedding method
@@ -106,7 +106,7 @@ class TestCosineSimilarityPlugin:
         assert "equiv2" in node_ids
         assert "equiv3" in node_ids
     
-    @patch('agentoi.algorithms.graph.EquivalentClass.compute_embedding')
+    @patch('moira.algorithms.graph.EquivalentClass.compute_embedding')
     def test_get_node_embeddings_subset(self, mock_compute_embedding):
         """Test extraction of embeddings for a subset of nodes."""
         # Set up mock embeddings
@@ -123,7 +123,7 @@ class TestCosineSimilarityPlugin:
         assert embeddings.shape == (2, 3)
         assert node_ids == ["equiv1", "equiv3"]
     
-    @patch('agentoi.algorithms.graph.EquivalentClass.compute_embedding')
+    @patch('moira.algorithms.graph.EquivalentClass.compute_embedding')
     def test_compute_pairwise_similarity(self, mock_compute_embedding):
         """Test pairwise similarity matrix computation."""
         # Set up mock embeddings
@@ -142,7 +142,7 @@ class TestCosineSimilarityPlugin:
         diagonal = torch.diag(similarity_matrix)
         assert torch.allclose(diagonal, torch.ones(3), atol=1e-6)
     
-    @patch('agentoi.algorithms.graph.EquivalentClass.compute_embedding')
+    @patch('moira.algorithms.graph.EquivalentClass.compute_embedding')
     def test_compute_similarity_to_query(self, mock_compute_embedding):
         """Test similarity computation between query and nodes."""
         # Set up mock embeddings
@@ -163,7 +163,7 @@ class TestCosineSimilarityPlugin:
         assert similarities[0] > similarities[1]  # equiv1 > equiv2
         assert similarities[0] > similarities[2]  # equiv1 > equiv3
     
-    @patch('agentoi.algorithms.graph.EquivalentClass.compute_embedding')
+    @patch('moira.algorithms.graph.EquivalentClass.compute_embedding')
     def test_get_top_similar_pairs(self, mock_compute_embedding):
         """Test getting top similar node pairs."""
         # Set up mock embeddings
@@ -181,7 +181,7 @@ class TestCosineSimilarityPlugin:
             assert node_id_1 != node_id_2  # No self-pairs
             assert 0.0 <= similarity <= 1.0
     
-    @patch('agentoi.algorithms.graph.EquivalentClass.compute_embedding')
+    @patch('moira.algorithms.graph.EquivalentClass.compute_embedding')
     def test_get_most_similar_nodes(self, mock_compute_embedding):
         """Test getting most similar nodes to a query."""
         # Set up mock embeddings

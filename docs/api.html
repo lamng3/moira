@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>API Reference · AgentOI</title>
+  <title>API Reference · MOIRA</title>
   <link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
-  <header><a href="index.html"><strong>AgentOI</strong></a><nav><a href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a class="active" href="api.html">API</a><a href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
+  <header><a href="index.html"><strong>MOIRA</strong></a><nav><a href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a class="active" href="api.html">API</a><a href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
   <main>
     <p class="eyebrow">Python API</p>
     <h1>API reference</h1>
@@ -31,7 +31,7 @@
       <div class="api-content">
 
     <section id="workspace" class="api-section">
-      <p class="eyebrow">agentoi.workspace</p>
+      <p class="eyebrow">moira.workspace</p>
       <h2>OntologyWorkspace</h2>
       <p>High-level interface for loading one local ontology, retrieving concepts, and asking ontology-grounded questions.</p>
       <pre class="signature"><code>OntologyWorkspace(
@@ -47,17 +47,17 @@
         <tr><td><code>search(query, *, top_k=10)</code></td><td><code>list[dict[str, Any]]</code></td><td>Retrieve concepts without invoking an LLM.</td></tr>
         <tr><td><code>ask(query, *, top_k=10, model=None, temperature=0.2, save_traces=False, harness=None, web_passages=None)</code></td><td><code>str</code></td><td>Generate an answer from retrieved context. An optional harness can select that context.</td></tr>
       </table>
-      <pre><code>from agentoi.workspace import OntologyWorkspace
+      <pre><code>from moira.workspace import OntologyWorkspace
 
 workspace = OntologyWorkspace("ontology.owl", refine=True)
 matches = workspace.search("freshwater temperature", top_k=8)
 answer = workspace.ask("Which concepts describe freshwater temperature?")</code></pre>
-      <p>After the exact question hash misses, a checksum of three-word shingles on each remembered answer can name the last concept on that path and skip retrieval. The overlap must be at least 0.75 and lead the next answer by 0.15. A single misspelled word can still match. A question with fewer than 4 shingles continues into the Harness. <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/memory/signature.py">signature.py</a></p>
-      <p><span class="badge">OWL/RDF path</span><span class="badge">Natural language</span><span class="badge">Cached graph</span> <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/workspace.py">View source →</a></p>
+      <p>After the exact question hash misses, a checksum of three-word shingles on each remembered answer can name the last concept on that path and skip retrieval. The overlap must be at least 0.75 and lead the next answer by 0.15. A single misspelled word can still match. A question with fewer than 4 shingles continues into the Harness. <a class="source-link" href="https://github.com/lamng3/moira/blob/master/src/moira/memory/signature.py">signature.py</a></p>
+      <p><span class="badge">OWL/RDF path</span><span class="badge">Natural language</span><span class="badge">Cached graph</span> <a class="source-link" href="https://github.com/lamng3/moira/blob/master/src/moira/workspace.py">View source →</a></p>
     </section>
 
     <section id="parsing" class="api-section">
-      <p class="eyebrow">agentoi.parser</p>
+      <p class="eyebrow">moira.parser</p>
       <h2>Parser</h2>
       <p>Format-selecting facade over RDF, JSON, and relation-text adapters.</p>
       <pre class="signature"><code>Parser(
@@ -78,28 +78,28 @@ answer = workspace.ask("Which concepts describe freshwater temperature?")</code>
         <tr><td>Relation text</td><td><code>.txt</code></td><td><code>TextParser</code></td></tr>
         <tr><td>Compression</td><td><code>.gz</code>, <code>.bz2</code></td><td>Detected from the preceding suffix</td></tr>
       </table>
-      <pre><code>from agentoi.parser import Parser
+      <pre><code>from moira.parser import Parser
 
 ontology = Parser("domain.ttl", name="domain", version="1.0").to_ontology()
 triples = Parser("domain.owl").extract_triples()</code></pre>
-      <p><a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/parser/parser.py">Parser source →</a> <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/parser/formats.py">Format definitions →</a></p>
+      <p><a class="source-link" href="https://github.com/lamng3/moira/blob/master/src/moira/parser/parser.py">Parser source →</a> <a class="source-link" href="https://github.com/lamng3/moira/blob/master/src/moira/parser/formats.py">Format definitions →</a></p>
     </section>
 
     <section id="graphs" class="api-section">
-      <p class="eyebrow">agentoi.algorithms.graph</p>
+      <p class="eyebrow">moira.algorithms.graph</p>
       <h2>Graph data model</h2>
       <table>
         <tr><th>Class</th><th>Role</th><th>Source</th></tr>
-        <tr><td><code>Concept</code></td><td>Ontology concept with labels, synonyms, definitions, and typed adjacency.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/concept.py">concept.py</a></td></tr>
-        <tr><td><code>ConceptRelation</code></td><td>Directed predicate between two concepts.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/concept.py">concept.py</a></td></tr>
-        <tr><td><code>Ontology</code></td><td>Mutable concept and relation collection with union, noise, serialization, and lookup operations.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/ontology.py">ontology.py</a></td></tr>
-        <tr><td><code>EquivalentClass</code></td><td>One or more semantically equivalent concepts represented as a graph node.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/equivalence.py">equivalence.py</a></td></tr>
-        <tr><td><code>ConceptGraph</code></td><td>Pairwise equivalent-class graph with embedding search and rank computation.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/concept_graph.py">concept_graph.py</a></td></tr>
-        <tr><td><code>ConceptHypergraph</code></td><td>Hyperedge representation with pairwise projection for embeddings and retrieval.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/hypergraph.py">hypergraph.py</a></td></tr>
-        <tr><td><code>OntologyStructureBuilder</code></td><td>Shared builder for graph representations.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/builder.py">builder.py</a></td></tr>
+        <tr><td><code>Concept</code></td><td>Ontology concept with labels, synonyms, definitions, and typed adjacency.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/graph/concept.py">concept.py</a></td></tr>
+        <tr><td><code>ConceptRelation</code></td><td>Directed predicate between two concepts.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/graph/concept.py">concept.py</a></td></tr>
+        <tr><td><code>Ontology</code></td><td>Mutable concept and relation collection with union, noise, serialization, and lookup operations.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/graph/ontology.py">ontology.py</a></td></tr>
+        <tr><td><code>EquivalentClass</code></td><td>One or more semantically equivalent concepts represented as a graph node.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/graph/equivalence.py">equivalence.py</a></td></tr>
+        <tr><td><code>ConceptGraph</code></td><td>Pairwise equivalent-class graph with embedding search and rank computation.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/graph/concept_graph.py">concept_graph.py</a></td></tr>
+        <tr><td><code>ConceptHypergraph</code></td><td>Hyperedge representation with pairwise projection for embeddings and retrieval.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/graph/hypergraph.py">hypergraph.py</a></td></tr>
+        <tr><td><code>OntologyStructureBuilder</code></td><td>Shared builder for graph representations.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/graph/builder.py">builder.py</a></td></tr>
       </table>
-      <pre><code>from agentoi.algorithms.graph import ConceptGraph
-from agentoi.parser import Parser
+      <pre><code>from moira.algorithms.graph import ConceptGraph
+from moira.parser import Parser
 
 ontology = Parser("domain.owl").to_ontology()
 graph = ConceptGraph(nodes=[], edges=[])
@@ -109,17 +109,17 @@ neighbors = graph.nearest_nodes("material fatigue", k=10)</code></pre>
     </section>
 
     <section id="refinement" class="api-section">
-      <p class="eyebrow">agentoi.algorithms.refinement</p>
+      <p class="eyebrow">moira.algorithms.refinement</p>
       <h2>Ontology refinement</h2>
       <table>
         <tr><th>Class</th><th>Signature / behavior</th><th>Source</th></tr>
-        <tr><td><code>OntologyRefiner</code></td><td><code>refine(ontology, options=None, *, fallback_if_expanded=False) -&gt; Ontology</code><br>Rule-based relation and ontology rebuilding.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/ontology.py">ontology.py</a></td></tr>
-        <tr><td><code>OfflineGraphRefiner</code></td><td><code>refine(graph) -&gt; ConceptGraph</code><br>Complete-graph partition refinement and safe bisimilar collapse.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/offline.py">offline.py</a></td></tr>
-        <tr><td><code>OnlineOntologyRefiner</code></td><td><code>refine(graph, updates, *, copy_graph=True) -&gt; OnlineRefinementResult</code><br>Rank-aware streamed maintenance with applied and deferred updates.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/online.py">online.py</a></td></tr>
-        <tr><td><code>GraphUpdate</code></td><td>Typed source, target, relation, score, confidence, and optional semantic judgment.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/online.py">online.py</a></td></tr>
-        <tr><td><code>RelationRefiner</code></td><td>Configurable rule pipeline returning structured diagnostics.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/pipeline.py">pipeline.py</a></td></tr>
+        <tr><td><code>OntologyRefiner</code></td><td><code>refine(ontology, options=None, *, fallback_if_expanded=False) -&gt; Ontology</code><br>Rule-based relation and ontology rebuilding.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/refinement/ontology.py">ontology.py</a></td></tr>
+        <tr><td><code>OfflineGraphRefiner</code></td><td><code>refine(graph) -&gt; ConceptGraph</code><br>Complete-graph partition refinement and safe bisimilar collapse.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/refinement/offline.py">offline.py</a></td></tr>
+        <tr><td><code>OnlineOntologyRefiner</code></td><td><code>refine(graph, updates, *, copy_graph=True) -&gt; OnlineRefinementResult</code><br>Rank-aware streamed maintenance with applied and deferred updates.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/refinement/online.py">online.py</a></td></tr>
+        <tr><td><code>GraphUpdate</code></td><td>Typed source, target, relation, score, confidence, and optional semantic judgment.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/refinement/online.py">online.py</a></td></tr>
+        <tr><td><code>RelationRefiner</code></td><td>Configurable rule pipeline returning structured diagnostics.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/algorithms/refinement/pipeline.py">pipeline.py</a></td></tr>
       </table>
-      <pre><code>from agentoi.algorithms.refinement import (
+      <pre><code>from moira.algorithms.refinement import (
     GraphUpdate,
     OfflineGraphRefiner,
     OnlineOntologyRefiner,
@@ -137,19 +137,19 @@ print(result.applied_updates, result.deferred_updates)</code></pre>
     </section>
 
     <section id="embeddings" class="api-section">
-      <p class="eyebrow">agentoi.embeddings</p>
+      <p class="eyebrow">moira.embeddings</p>
       <h2>Embeddings and vector indexes</h2>
       <table>
         <tr><th>API</th><th>Supported behavior</th><th>Source</th></tr>
-        <tr><td><code>TextEmbedding(model_name="Qwen/Qwen3-Embedding-0.6B", device=None)</code></td><td>Replaceable text encoder backed by Sentence Transformers.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/encoders/text.py">text.py</a></td></tr>
-        <tr><td><code>GraphEmbedding(..., dimensions=128, **node2vec_options)</code></td><td>Node2Vec graph encoder for concept graphs and projected hypergraphs.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/encoders/graph.py">graph.py</a></td></tr>
-        <tr><td><code>fuse_embeddings(...)</code></td><td>Validated weighted graph/text vector fusion.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/fusion.py">fusion.py</a></td></tr>
-        <tr><td><code>TorchExactVectorIndex(dimension=None)</code></td><td>Built-in deterministic cosine index with ID filtering.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/vector_index/torch_exact.py">torch_exact.py</a></td></tr>
-        <tr><td><code>BaseVectorIndex</code></td><td>Adapter base for ANN, DiskANN, or vector-database integrations.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/vector_index/base.py">base.py</a></td></tr>
-        <tr><td><code>register_vector_index(name, factory)</code></td><td>Register a named backend used by <code>create_vector_index</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/vector_index/registry.py">registry.py</a></td></tr>
+        <tr><td><code>TextEmbedding(model_name="Qwen/Qwen3-Embedding-0.6B", device=None)</code></td><td>Replaceable text encoder backed by Sentence Transformers.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/embeddings/encoders/text.py">text.py</a></td></tr>
+        <tr><td><code>GraphEmbedding(..., dimensions=128, **node2vec_options)</code></td><td>Node2Vec graph encoder for concept graphs and projected hypergraphs.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/embeddings/encoders/graph.py">graph.py</a></td></tr>
+        <tr><td><code>fuse_embeddings(...)</code></td><td>Validated weighted graph/text vector fusion.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/embeddings/fusion.py">fusion.py</a></td></tr>
+        <tr><td><code>TorchExactVectorIndex(dimension=None)</code></td><td>Built-in deterministic cosine index with ID filtering.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/embeddings/vector_index/torch_exact.py">torch_exact.py</a></td></tr>
+        <tr><td><code>BaseVectorIndex</code></td><td>Adapter base for ANN, DiskANN, or vector-database integrations.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/embeddings/vector_index/base.py">base.py</a></td></tr>
+        <tr><td><code>register_vector_index(name, factory)</code></td><td>Register a named backend used by <code>create_vector_index</code>.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/embeddings/vector_index/registry.py">registry.py</a></td></tr>
       </table>
       <p class="note"><strong>Built in:</strong> <code>torch-exact</code>. ANN, DiskANN, and vector-database backends are supported as adapters but are not bundled implementations.</p>
-      <pre><code>from agentoi.retrieval import create_vector_index, register_vector_index
+      <pre><code>from moira.retrieval import create_vector_index, register_vector_index
 
 index = create_vector_index("torch-exact", dimension=768)
 index.add(ids, vectors, metadata)
@@ -157,7 +157,7 @@ results = index.search(query_vector, k=10)</code></pre>
     </section>
 
     <section id="retrieval" class="api-section">
-      <p class="eyebrow">agentoi.retrieval</p>
+      <p class="eyebrow">moira.retrieval</p>
       <h2>Retrieval providers</h2>
       <table>
         <tr><th>Provider</th><th>Network</th><th>Configuration</th></tr>
@@ -166,7 +166,7 @@ results = index.search(query_vector, k=10)</code></pre>
         <tr><td><code>mediawiki</code></td><td>Yes</td><td>Language and Wikimedia project.</td></tr>
         <tr><td><code>google-cse</code></td><td>Yes</td><td><code>GOOGLE_API_KEY</code> and <code>GOOGLE_CSE_CX</code>.</td></tr>
       </table>
-      <pre><code>from agentoi.retrieval import (
+      <pre><code>from moira.retrieval import (
     create_web_search,
     describe_web_search,
     register_web_search,
@@ -175,10 +175,10 @@ results = index.search(query_vector, k=10)</code></pre>
 provider = create_web_search("mediawiki", lang="en", project="wikipedia")
 print(describe_web_search("mediawiki"))
 count = provider.search_count("ontology matching")</code></pre>
-      <p><a class="source-link" href="https://github.com/lamng3/agentoi/tree/master/src/agentoi/retrieval">Retrieval source →</a> <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/examples/retrieval_plugins.py">Plugin example →</a></p>
+      <p><a class="source-link" href="https://github.com/lamng3/moira/tree/master/src/moira/retrieval">Retrieval source →</a> <a class="source-link" href="https://github.com/lamng3/moira/blob/master/examples/retrieval_plugins.py">Plugin example →</a></p>
 
       <h2 id="harness">Harness</h2>
-      <p>One small model answers typed questions about the current question and the last few turns of this chat. The call is SGLang <code>POST /v1/systemone</code> at <code>http://127.0.0.1:30000</code> (<code>AGENTOI_HARNESS_URL</code>). An empty value keeps the Ollama router, <code>ollama:phi3</code>. A local policy reads those answers and chooses replay or retrieve. The choice list stays at 26 options, including retrieve. The reasoner is the only model that writes the answer, and it stays the chat model.</p>
+      <p>One small model answers typed questions about the current question and the last few turns of this chat. The call is SGLang <code>POST /v1/systemone</code> at <code>http://127.0.0.1:30000</code> (<code>MOIRA_HARNESS_URL</code>). An empty value keeps the Ollama router, <code>ollama:phi3</code>. A local policy reads those answers and chooses replay or retrieve. The choice list stays at 26 options, including retrieve. The reasoner is the only model that writes the answer, and it stays the chat model.</p>
       <table>
         <tr><th>Type</th><th>Returns</th><th>Used for</th></tr>
         <tr><td><code>Choice</code></td><td><code>choice</code>, <code>probabilities</code>, <code>confidence</code></td><td>Which cached question this one matches, or retrieve.</td></tr>
@@ -186,17 +186,17 @@ count = provider.search_count("ontology matching")</code></pre>
         <tr><td><code>Noul</code></td><td>A probability from 0 to 1</td><td>Whether the intent is the same, and whether this turn continues the previous one.</td></tr>
       </table>
       <p>Replay happens when the choice names a cached question, or when same-intent is at least 0.8, the score is “Same question,” and one cached question is the nearest choice. A failed call falls open to retrieve. A follow-up hangs under the previous question when the continuation probability is at least 0.8. A new topic hangs from a virtual root. Under each question the trie records the route, the ontology concept ids, and the answer. That trie is this chat only. The answer cache stays the memory shared across chats.</p>
-      <p class="note">Jev model routing (<code>AGENTOI_MODEL_ROUTING=jev</code>) and the Jev context harness (<code>AGENTOI_CONTEXT_HARNESS=jev</code>) stay optional extras. They are separate from this call.</p>
+      <p class="note">Jev model routing (<code>MOIRA_MODEL_ROUTING=jev</code>) and the Jev context harness (<code>MOIRA_CONTEXT_HARNESS=jev</code>) stay optional extras. They are separate from this call.</p>
 
       <h2>Context harness</h2>
       <p>Retrieval remains responsible for recall. The harness decides which retrieved concepts, neighbors, and web passages enter the prompt.</p>
       <table>
         <tr><th>Class</th><th>Behavior</th><th>Source</th></tr>
-        <tr><td><code>PassthroughHarness</code></td><td>Returns the original shortlist. This is the default.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/retrieval/context.py">context.py</a></td></tr>
-        <tr><td><code>JevContextHarness</code></td><td>Uses Jev contextual scoring to filter and rerank. Shadow mode records the proposal while still returning the original shortlist.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/retrieval/context.py">context.py</a></td></tr>
-        <tr><td><code>create_context_harness(name=None)</code></td><td>Reads <code>AGENTOI_CONTEXT_HARNESS</code>. <code>jev</code> starts in shadow mode unless <code>AGENTOI_CONTEXT_MODE=live</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/retrieval/context.py">context.py</a></td></tr>
+        <tr><td><code>PassthroughHarness</code></td><td>Returns the original shortlist. This is the default.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/retrieval/context.py">context.py</a></td></tr>
+        <tr><td><code>JevContextHarness</code></td><td>Uses Jev contextual scoring to filter and rerank. Shadow mode records the proposal while still returning the original shortlist.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/retrieval/context.py">context.py</a></td></tr>
+        <tr><td><code>create_context_harness(name=None)</code></td><td>Reads <code>MOIRA_CONTEXT_HARNESS</code>. <code>jev</code> starts in shadow mode unless <code>MOIRA_CONTEXT_MODE=live</code>.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/retrieval/context.py">context.py</a></td></tr>
       </table>
-      <pre><code>from agentoi.retrieval import JevContextHarness
+      <pre><code>from moira.retrieval import JevContextHarness
 
 harness = JevContextHarness(shadow=True, min_relevance=0.2)
 answer = workspace.ask(question, harness=harness)
@@ -205,19 +205,19 @@ print(workspace.last_context_selection.metrics())</code></pre>
     </section>
 
     <section id="agents" class="api-section">
-      <p class="eyebrow">agentoi.agents</p>
+      <p class="eyebrow">moira.agents</p>
       <h2>Agent runtime</h2>
       <table>
         <tr><th>Class / function</th><th>Purpose</th><th>Source</th></tr>
-        <tr><td><code>Agent</code></td><td>Model invocation, registered tool execution, events, traces, and optional persistence.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/core/agent.py">agent.py</a></td></tr>
-        <tr><td><code>JevModelRouter</code></td><td>Asks Jev one choice question and selects <code>local</code>, <code>standard</code>, or <code>careful</code> for the rest of the run. Unavailable Jev fails open to the current model.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/decisions.py">decisions.py</a></td></tr>
-        <tr><td><code>ToolRiskGate</code></td><td>Asks Jev whether a configured tool call is unsafe. A probability at or above the threshold returns a refusal and does not call the tool.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/decisions.py">decisions.py</a></td></tr>
-        <tr><td><code>create_oot_enhanced_agent(...)</code></td><td>Construct an agent with Ontology-of-Thought observation.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/observers/oot.py">oot.py</a></td></tr>
-        <tr><td><code>ThoughtGraph</code></td><td>Structured thought representation and query-node optimization.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/ontology_of_thought/graph.py">graph.py</a></td></tr>
-        <tr><td><code>QueryOptimizer</code></td><td>HumanGS-style candidate selection over thought graphs.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/ontology_of_thought/optimizer.py">optimizer.py</a></td></tr>
-        <tr><td><code>Trace</code>, <code>TraceStep</code></td><td>Typed execution trace records.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/runtime/trace.py">trace.py</a></td></tr>
+        <tr><td><code>Agent</code></td><td>Model invocation, registered tool execution, events, traces, and optional persistence.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/agents/core/agent.py">agent.py</a></td></tr>
+        <tr><td><code>JevModelRouter</code></td><td>Asks Jev one choice question and selects <code>local</code>, <code>standard</code>, or <code>careful</code> for the rest of the run. Unavailable Jev fails open to the current model.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/agents/decisions.py">decisions.py</a></td></tr>
+        <tr><td><code>ToolRiskGate</code></td><td>Asks Jev whether a configured tool call is unsafe. A probability at or above the threshold returns a refusal and does not call the tool.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/agents/decisions.py">decisions.py</a></td></tr>
+        <tr><td><code>create_oot_enhanced_agent(...)</code></td><td>Construct an agent with Ontology-of-Thought observation.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/agents/observers/oot.py">oot.py</a></td></tr>
+        <tr><td><code>ThoughtGraph</code></td><td>Structured thought representation and query-node optimization.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/agents/ontology_of_thought/graph.py">graph.py</a></td></tr>
+        <tr><td><code>QueryOptimizer</code></td><td>HumanGS-style candidate selection over thought graphs.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/agents/ontology_of_thought/optimizer.py">optimizer.py</a></td></tr>
+        <tr><td><code>Trace</code>, <code>TraceStep</code></td><td>Typed execution trace records.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/agents/runtime/trace.py">trace.py</a></td></tr>
       </table>
-      <pre><code>from agentoi.agents import Agent, JevModelRouter, ToolRiskGate
+      <pre><code>from moira.agents import Agent, JevModelRouter, ToolRiskGate
 
 agent = Agent(
     llm,
@@ -229,70 +229,70 @@ response = agent.invoke("Find the closest ontology concept.")
 run = agent.invoke("Explain the match.", return_trace=True)</code></pre>
 
       <h3>Model routing</h3>
-      <p><code>create_model_router()</code> returns a router when <code>AGENTOI_MODEL_ROUTING=jev</code>. It asks one choice question, then <code>Agent.invoke</code> uses the selected model for that run.</p>
+      <p><code>create_model_router()</code> returns a router when <code>MOIRA_MODEL_ROUTING=jev</code>. It asks one choice question, then <code>Agent.invoke</code> uses the selected model for that run.</p>
       <table>
         <tr><th>Route</th><th>Criterion</th><th>Model</th></tr>
-        <tr><td><code>local</code></td><td>Short lookups, extraction, and questions answerable from retrieved ontology context.</td><td><code>AGENTOI_ROUTE_LOCAL</code>, default <code>ollama:phi3</code></td></tr>
-        <tr><td><code>standard</code></td><td>Normal ontology question answering and relation lookup.</td><td><code>AGENTOI_ROUTE_STANDARD</code>, default <code>LLM_MODEL</code></td></tr>
-        <tr><td><code>careful</code></td><td>Alignment disputes, conflicts, refinement, or multi-ontology reasoning.</td><td><code>AGENTOI_ROUTE_CAREFUL</code>, default <code>LLM_MODEL</code></td></tr>
+        <tr><td><code>local</code></td><td>Short lookups, extraction, and questions answerable from retrieved ontology context.</td><td><code>MOIRA_ROUTE_LOCAL</code>, default <code>ollama:phi3</code></td></tr>
+        <tr><td><code>standard</code></td><td>Normal ontology question answering and relation lookup.</td><td><code>MOIRA_ROUTE_STANDARD</code>, default <code>LLM_MODEL</code></td></tr>
+        <tr><td><code>careful</code></td><td>Alignment disputes, conflicts, refinement, or multi-ontology reasoning.</td><td><code>MOIRA_ROUTE_CAREFUL</code>, default <code>LLM_MODEL</code></td></tr>
       </table>
       <p>The <code>model_route</code> step and the <code>llm_invoke</code> step store <code>name</code>, <code>model_name</code>, <code>probabilities</code>, <code>confidence</code>, <code>fail_open</code>, and <code>error</code>. The same payload is emitted as <code>model.routed</code> for Ontology-of-Thought. If Jev is unavailable, the run fails open to the current model.</p>
 
       <h3>Tool-risk gating</h3>
-      <p><code>create_tool_gate()</code> returns a gate when <code>AGENTOI_TOOL_GATE=jev</code>. It runs after <code>tool.parsed</code> and before tool execution. The default gated tools are <code>search_term_context</code> and <code>search_knowledge_graph</code>. Override them with <code>AGENTOI_GATED_TOOLS</code>. <code>ontology_term_info</code> is not gated.</p>
-      <p>Jev returns the probability that the call is unsafe. A value at or above <code>AGENTOI_TOOL_RISK_THRESHOLD</code> (default <code>0.5</code>) becomes the tool result:</p>
+      <p><code>create_tool_gate()</code> returns a gate when <code>MOIRA_TOOL_GATE=jev</code>. It runs after <code>tool.parsed</code> and before tool execution. The default gated tools are <code>search_term_context</code> and <code>search_knowledge_graph</code>. Override them with <code>MOIRA_GATED_TOOLS</code>. <code>ontology_term_info</code> is not gated.</p>
+      <p>Jev returns the probability that the call is unsafe. A value at or above <code>MOIRA_TOOL_RISK_THRESHOLD</code> (default <code>0.5</code>) becomes the tool result:</p>
       <pre><code>{"blocked": true, "tool_name": "search_term_context", "reason": "...", "risk": 0.92}</code></pre>
       <p>The tool function is not called. The <code>tool_execute</code> step status is <code>blocked</code>, and Ontology-of-Thought receives <code>tool.blocked</code>. Arguments are passed through <code>redact</code> before the request. Query text and those redacted arguments are still sent to TypeSafe. When the gate is enabled and Jev cannot decide, that gated call fails closed. A disabled gate leaves every tool call unchanged.</p>
     </section>
 
     <section id="validation" class="api-section">
-      <p class="eyebrow">agentoi.validation</p>
+      <p class="eyebrow">moira.validation</p>
       <h2>Validation</h2>
       <table>
         <tr><th>API</th><th>Input → output</th><th>Source</th></tr>
-        <tr><td><code>evaluate_alignment(expected, predicted)</code></td><td>Alignment pairs → <code>AlignmentMetrics</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/metrics.py">metrics.py</a></td></tr>
-        <tr><td><code>ValidationPipeline</code></td><td>Tuples → normalization, evaluation, and optional ontology translation.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/pipeline.py">pipeline.py</a></td></tr>
-        <tr><td><code>TupleEvaluator</code></td><td><code>Sequence[str]</code> → <code>TupleEvaluation</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/tuples.py">tuples.py</a></td></tr>
-        <tr><td><code>validate_matches(...)</code></td><td>Candidate matches → <code>ValidationReport</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/rules.py">rules.py</a></td></tr>
-        <tr><td><code>agentoi-lint</code></td><td>Ontology file → terminal diagnostics and process status.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/ontology_lint.py">ontology_lint.py</a></td></tr>
+        <tr><td><code>evaluate_alignment(expected, predicted)</code></td><td>Alignment pairs → <code>AlignmentMetrics</code>.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/validation/metrics.py">metrics.py</a></td></tr>
+        <tr><td><code>ValidationPipeline</code></td><td>Tuples → normalization, evaluation, and optional ontology translation.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/validation/pipeline.py">pipeline.py</a></td></tr>
+        <tr><td><code>TupleEvaluator</code></td><td><code>Sequence[str]</code> → <code>TupleEvaluation</code>.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/validation/tuples.py">tuples.py</a></td></tr>
+        <tr><td><code>validate_matches(...)</code></td><td>Candidate matches → <code>ValidationReport</code>.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/validation/rules.py">rules.py</a></td></tr>
+        <tr><td><code>moira-lint</code></td><td>Ontology file → terminal diagnostics and process status.</td><td><a href="https://github.com/lamng3/moira/blob/master/src/moira/validation/ontology_lint.py">ontology_lint.py</a></td></tr>
       </table>
     </section>
 
     <section id="prompting" class="api-section">
-      <p class="eyebrow">agentoi.prompting</p>
+      <p class="eyebrow">moira.prompting</p>
       <h2>Prompt construction</h2>
       <pre class="signature"><code>OntologyEquivalencePromptBuilder(
     config: PromptConfig | None = None,
 ).build(source: object, target: object) -&gt; str</code></pre>
-      <pre><code>from agentoi.prompting import (
+      <pre><code>from moira.prompting import (
     OntologyEquivalencePromptBuilder,
     parse_equivalence_answer,
 )
 
 prompt = OntologyEquivalencePromptBuilder().build(source, target)
 decision = parse_equivalence_answer(model.invoke(prompt).content)</code></pre>
-      <p><a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/prompting/ontology.py">View source →</a></p>
+      <p><a class="source-link" href="https://github.com/lamng3/moira/blob/master/src/moira/prompting/ontology.py">View source →</a></p>
     </section>
 
     <section id="uq" class="api-section">
-      <p class="eyebrow">agentoi.uq</p>
+      <p class="eyebrow">moira.uq</p>
       <h2>Uncertainty quantification</h2>
       <table>
         <tr><th>Scorer</th><th>Dependency</th><th>Use</th></tr>
         <tr><td><code>AgreementConfidenceScorer</code></td><td>Core</td><td>Dependency-free agreement over repeated responses.</td></tr>
-        <tr><td><code>UQLMConfidenceScorer</code></td><td><code>agentoi[uq]</code></td><td>Black-box UQLM confidence.</td></tr>
-        <tr><td><code>GraphConfidenceScorer</code></td><td><code>agentoi[uq]</code></td><td>Graph-based UQLM scoring.</td></tr>
-        <tr><td><code>EnsembleConfidenceScorer</code></td><td><code>agentoi[uq]</code></td><td>Weighted multi-scorer confidence.</td></tr>
+        <tr><td><code>UQLMConfidenceScorer</code></td><td><code>moira[uq]</code></td><td>Black-box UQLM confidence.</td></tr>
+        <tr><td><code>GraphConfidenceScorer</code></td><td><code>moira[uq]</code></td><td>Graph-based UQLM scoring.</td></tr>
+        <tr><td><code>EnsembleConfidenceScorer</code></td><td><code>moira[uq]</code></td><td>Weighted multi-scorer confidence.</td></tr>
       </table>
-      <pre><code>from agentoi.uq import AgreementConfidenceScorer
+      <pre><code>from moira.uq import AgreementConfidenceScorer
 
 scorer = AgreementConfidenceScorer(llm=llm, num_responses=5)
 answer, confidence, scores = scorer.score_prompt(prompt)</code></pre>
-      <p><a class="source-link" href="https://github.com/lamng3/agentoi/tree/master/src/agentoi/uq">View source →</a></p>
+      <p><a class="source-link" href="https://github.com/lamng3/moira/tree/master/src/moira/uq">View source →</a></p>
     </section>
 
     <h2>Public import surfaces</h2>
-    <p>Prefer package-level imports such as <code>agentoi.parser</code>, <code>agentoi.algorithms.graph</code>, <code>agentoi.algorithms.refinement</code>, <code>agentoi.embeddings</code>, <code>agentoi.retrieval</code>, <code>agentoi.validation</code>, <code>agentoi.prompting</code>, <code>agentoi.uq</code>, and <code>agentoi.agents</code>. Their <code>__all__</code> declarations define supported public APIs.</p>
+    <p>Prefer package-level imports such as <code>moira.parser</code>, <code>moira.algorithms.graph</code>, <code>moira.algorithms.refinement</code>, <code>moira.embeddings</code>, <code>moira.retrieval</code>, <code>moira.validation</code>, <code>moira.prompting</code>, <code>moira.uq</code>, and <code>moira.agents</code>. Their <code>__all__</code> declarations define supported public APIs.</p>
       </div>
     </div>
   </main>

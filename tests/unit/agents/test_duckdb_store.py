@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 
-from agentoi.agents.runtime.duckdb_store import list_runs, load_run, save_run
+from moira.agents.runtime.duckdb_store import list_runs, load_run, save_run
 
 
 def test_duckdb_round_trip_lists_the_newer_run_first(tmp_path) -> None:
-    path = tmp_path / "traces" / "agentoi.duckdb"
+    path = tmp_path / "traces" / "moira.duckdb"
     older = {
         "thoughts": [{"id": "t1", "question": "once"}],
         "edges": [],

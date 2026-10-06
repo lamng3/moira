@@ -2,13 +2,13 @@ import pytest
 import torch
 import numpy as np
 import networkx as nx
-from agentoi.algorithms.graph import (
+from moira.algorithms.graph import (
     Concept,
     ConceptGraph,
     EquivalentClass,
     EquivalentClassRelation,
 )
-from agentoi.embeddings import GraphEmbedding
+from moira.embeddings import GraphEmbedding
 
 
 @pytest.fixture

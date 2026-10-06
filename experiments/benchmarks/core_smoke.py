@@ -7,8 +7,8 @@ import json
 import os
 from pathlib import Path
 
-from agentoi.algorithms.refinement import RelationRefiner, default_rules
-from agentoi.validation import evaluate_alignment, validate_matches
+from moira.algorithms.refinement import RelationRefiner, default_rules
+from moira.validation import evaluate_alignment, validate_matches
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -52,9 +52,9 @@ def main(argv: list[str] | None = None) -> int:
             "passed": validation.passed,
         },
     }
-    destination = os.environ.get("AGENTOI_METRICS_PATH")
+    destination = os.environ.get("MOIRA_METRICS_PATH")
     if not destination:
-        raise RuntimeError("AGENTOI_METRICS_PATH is required")
+        raise RuntimeError("MOIRA_METRICS_PATH is required")
     path = Path(destination)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(

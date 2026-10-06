@@ -10,7 +10,7 @@ def main() -> None:
     parser.add_argument("--public-only", action="store_true")
     args = parser.parse_args()
 
-    from agentoi.agents.tools.knowledge_graph.knowledge_graph_lookup import (
+    from moira.agents.tools.knowledge_graph.knowledge_graph_lookup import (
         KnowledgeGraphLookup,
         SearchOpts,
     )

@@ -1,13 +1,13 @@
 import pytest
 import torch
 
-from agentoi.algorithms.graph import (
+from moira.algorithms.graph import (
     Concept,
     ConceptGraph,
     ConceptHypergraph,
     EquivalentClass,
 )
-from agentoi.embeddings import (
+from moira.embeddings import (
     MultiQuerySearchService,
     TorchExactVectorIndex,
     register_vector_index,

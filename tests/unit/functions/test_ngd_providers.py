@@ -5,10 +5,10 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from agentoi.functions.similarity import (
+from moira.functions.similarity import (
     NormalizedGoogleDistance,
 )
-from agentoi.retrieval.web import (
+from moira.retrieval.web import (
     DatasetSearchProvider,
     GoogleCSEProvider,
     MediaWikiSearchProvider,

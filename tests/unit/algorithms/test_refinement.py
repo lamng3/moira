@@ -1,13 +1,13 @@
 import json
 
-from agentoi.algorithms.graph import (
+from moira.algorithms.graph import (
     Concept,
     ConceptGraph,
     EquivalentClass,
     EquivalentClassRelation,
     Ontology,
 )
-from agentoi.algorithms.refinement import (
+from moira.algorithms.refinement import (
     DeferredReason,
     GraphUpdate,
     OfflineGraphRefiner,

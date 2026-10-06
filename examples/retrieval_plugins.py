@@ -1,6 +1,6 @@
-"""Select or extend AgentOI retrieval backends."""
+"""Select or extend MOIRA retrieval backends."""
 
-from agentoi.retrieval import (
+from moira.retrieval import (
     StaticSearchProvider,
     WebSearchPlugin,
     available_vector_indexes,

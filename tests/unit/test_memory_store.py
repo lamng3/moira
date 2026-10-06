@@ -1,10 +1,10 @@
 import torch
 
-from agentoi.algorithms.graph import ConceptGraph
-from agentoi.cli import main
-from agentoi.embeddings.encoders.text import TextEmbedding
-from agentoi.memory_store import DEFAULT_TEXT_MODEL, EmbeddingMemory, clear_ontology_memory
-from agentoi.workspace import OntologyWorkspace
+from moira.algorithms.graph import ConceptGraph
+from moira.cli import main
+from moira.embeddings.encoders.text import TextEmbedding
+from moira.memory_store import DEFAULT_TEXT_MODEL, EmbeddingMemory, clear_ontology_memory
+from moira.workspace import OntologyWorkspace
 
 
 ONTOLOGY = """

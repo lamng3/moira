@@ -1,4 +1,4 @@
-"""Run an AgentOI agent with a local fake model and tool."""
+"""Run an MOIRA agent with a local fake model and tool."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import tempfile
 import types
 from pathlib import Path
 
-from agentoi.agents import Agent, OOTAgentObserver
+from moira.agents import Agent, OOTAgentObserver
 
 
 def echo(text: str, uppercase: bool = False) -> dict:

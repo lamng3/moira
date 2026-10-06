@@ -6,11 +6,11 @@ Research notes. These are not product decisions, and they are not part of the do
 
 A stored answer begins “An anatomic region is a part of the body that has a specific location and function, but does not have well-defined compartmental boundaries.” The next question turns that definition around: “What is a part of the body that has a specific location and function, but does not have well-defined compartmental boundaries?”
 
-That question missed the hot hash. It went through concept retrieval and `ollama:llama3.1`, the long path in the chat (Thought 33.1s, then another working card). A definition asked back should name the concept without another full model call. The per-answer checksum in `src/agentoi/memory/signature.py` now does that for this literal case: three-word shingles of the question overlap the stored answer, the last concept on that path is named, and retrieval is skipped.
+That question missed the hot hash. It went through concept retrieval and `ollama:llama3.1`, the long path in the chat (Thought 33.1s, then another working card). A definition asked back should name the concept without another full model call. The per-answer checksum in `src/moira/memory/signature.py` now does that for this literal case: three-word shingles of the question overlap the stored answer, the last concept on that path is named, and retrieval is skipped.
 
-Lookup today is question-keyed. `normalize_question` in `src/agentoi/memory/path.py` folds the question, and `HotCache` matches that string. The Harness compares the new question with cached questions, not with stored answers. The concept trie in `src/agentoi/memory/trie.py` is a prefix of concept ids. The answer sits on the terminal node and is not a search key.
+Lookup today is question-keyed. `normalize_question` in `src/moira/memory/path.py` folds the question, and `HotCache` matches that string. The Harness compares the new question with cached questions, not with stored answers. The concept trie in `src/moira/memory/trie.py` is a prefix of concept ids. The answer sits on the terminal node and is not a search key.
 
-The same answer also repeats the prompt heading “RELEVANT CONCEPT CLUSTERS” from `make_prompt_for_query` in `src/agentoi/algorithms/graph/concept_graph.py`. The stored value is a restatement plus prompt text, not the concept name, so it is a poor key.
+The same answer also repeats the prompt heading “RELEVANT CONCEPT CLUSTERS” from `make_prompt_for_query` in `src/moira/algorithms/graph/concept_graph.py`. The stored value is a restatement plus prompt text, not the concept name, so it is a poor key.
 
 An answer trie is only a partial fit. A prefix trie helps when the question is a literal span of a stored answer. It does not help when the definition is paraphrased, and a polluted answer poisons the trie.
 

@@ -2,11 +2,11 @@
 
 from importlib.metadata import version
 
-import agentoi
-from agentoi import OntologySummary, OntologyWorkspace
+import moira
+from moira import OntologySummary, OntologyWorkspace
 
 
 def test_public_import_matches_the_installed_version() -> None:
-    assert version("agentoi") == agentoi.__version__
-    assert OntologyWorkspace is agentoi.OntologyWorkspace
-    assert OntologySummary is agentoi.OntologySummary
+    assert version("moira") == moira.__version__
+    assert OntologyWorkspace is moira.OntologyWorkspace
+    assert OntologySummary is moira.OntologySummary

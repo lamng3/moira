@@ -1,7 +1,7 @@
 import torch
 import pytest
-from agentoi.embeddings import TextEmbedding
-from agentoi.algorithms.graph import Concept, EquivalentClass
+from moira.embeddings import TextEmbedding
+from moira.algorithms.graph import Concept, EquivalentClass
 
 
 @pytest.fixture

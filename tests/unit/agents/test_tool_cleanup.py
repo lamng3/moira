@@ -8,11 +8,11 @@ from pathlib import Path
 
 import pytest
 
-from agentoi.agents.core.tool_executor import FALLBACK_MODULES, load_tools_json
-from agentoi.agents.tools.common import coerce_terms
-from agentoi.agents.tools.common.http import SessionHttp
-from agentoi.agents.tools.common.resources import read_json_resource
-from agentoi.agents.tools.registry import (
+from moira.agents.core.tool_executor import FALLBACK_MODULES, load_tools_json
+from moira.agents.tools.common import coerce_terms
+from moira.agents.tools.common.http import SessionHttp
+from moira.agents.tools.common.resources import read_json_resource
+from moira.agents.tools.registry import (
     default_registry_resource,
     load_registry,
 )
@@ -51,7 +51,7 @@ def test_shared_http_uses_session_defaults_and_closes(
 
     session = Session()
     monkeypatch.setattr(
-        "agentoi.agents.tools.common.http.requests.Session",
+        "moira.agents.tools.common.http.requests.Session",
         lambda: session,
     )
 
@@ -69,7 +69,7 @@ def test_packaged_registry_loads_preserved_module_paths() -> None:
 
     assert resource.is_file()
     assert registry["search_term_context"]["module_path"] == (
-        "agentoi.agents.tools.website.website_lookup"
+        "moira.agents.tools.website.website_lookup"
     )
     assert "search_term_context" not in FALLBACK_MODULES
     assert load_tools_json(resource) == registry
@@ -103,7 +103,7 @@ def test_cypher_catalog_is_package_safe(
 ) -> None:
     monkeypatch.chdir(tmp_path)
     catalog = read_json_resource(
-        "agentoi.agents.tools.knowledge_graph",
+        "moira.agents.tools.knowledge_graph",
         "cyphers.json",
     )
     assert catalog["default"]["random_nodes"].startswith("MATCH (n)")
@@ -121,9 +121,9 @@ def test_tool_imports_do_not_load_dotenv(
         lambda *args, **kwargs: calls.append((args, kwargs)),
     )
     modules = (
-        "agentoi.agents.tools.website.config",
-        "agentoi.agents.tools.ontology.config",
-        "agentoi.agents.tools.knowledge_graph.config",
+        "moira.agents.tools.website.config",
+        "moira.agents.tools.ontology.config",
+        "moira.agents.tools.knowledge_graph.config",
     )
     for module_name in modules:
         sys.modules.pop(module_name, None)
@@ -134,7 +134,7 @@ def test_tool_imports_do_not_load_dotenv(
 
 def test_ontology_testbed_annotation_resolves() -> None:
     module = importlib.import_module(
-        "agentoi.agents.tools.ontology.ontology_lookup"
+        "moira.agents.tools.ontology.ontology_lookup"
     )
     assert module.TestbedName is str
 
@@ -151,7 +151,7 @@ def test_knowledge_graph_provider_failures_remain_fail_soft(
         )
         monkeypatch.setitem(sys.modules, "neo4j", neo4j)
     module = importlib.import_module(
-        "agentoi.agents.tools.knowledge_graph.knowledge_graph_lookup"
+        "moira.agents.tools.knowledge_graph.knowledge_graph_lookup"
     )
     monkeypatch.setattr(module, "DEBUG", True)
 
@@ -182,5 +182,5 @@ def test_knowledge_graph_provider_failures_remain_fail_soft(
     assert result["heart"]["count"] == 0
 
     for module_name in set(sys.modules) - modules_before:
-        if module_name.startswith("agentoi.agents.tools.knowledge_graph"):
+        if module_name.startswith("moira.agents.tools.knowledge_graph"):
             sys.modules.pop(module_name, None)

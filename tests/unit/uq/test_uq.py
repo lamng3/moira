@@ -2,11 +2,11 @@ from types import SimpleNamespace
 
 import pytest
 
-import agentoi.uq as uq
-from agentoi.uq import AgreementConfidenceScorer
-from agentoi.uq.ensemble_scorer import EnsembleConfidenceScorer
-from agentoi.uq.graph_scorer import GraphConfidenceScorer
-from agentoi.uq.scorer import UQLMConfidenceScorer
+import moira.uq as uq
+from moira.uq import AgreementConfidenceScorer
+from moira.uq.ensemble_scorer import EnsembleConfidenceScorer
+from moira.uq.graph_scorer import GraphConfidenceScorer
+from moira.uq.scorer import UQLMConfidenceScorer
 
 
 class FakeLLM:

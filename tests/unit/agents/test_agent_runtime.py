@@ -2,8 +2,8 @@ import json
 import sys
 import types
 
-from agentoi.agents import Agent, OOTAgentObserver
-from agentoi.agents.runtime import persistence
+from moira.agents import Agent, OOTAgentObserver
+from moira.agents.runtime import persistence
 
 
 class FakeLLM:
@@ -13,14 +13,14 @@ class FakeLLM:
         call = {
             "tool_name": "echo",
             "tool_type": "module",
-            "module_path": "agentoi_test_tools",
+            "module_path": "moira_test_tools",
             "arguments": {"text": "ontology"},
         }
         return types.SimpleNamespace(content=json.dumps(call))
 
 
 def _agent(tmp_path, **kwargs):
-    module = types.ModuleType("agentoi_test_tools")
+    module = types.ModuleType("moira_test_tools")
     module.echo = lambda text: {"text": text, "length": len(text)}
     sys.modules[module.__name__] = module
     registry = tmp_path / "tools.json"
@@ -83,40 +83,40 @@ def test_agent_invokes_registered_tool_and_returns_oot_trace(tmp_path):
 def test_agent_persists_derived_graph_once(monkeypatch, tmp_path):
     saved = []
     monkeypatch.setattr(
-        "agentoi.agents.core.agent.save_run_graph",
+        "moira.agents.core.agent.save_run_graph",
         lambda **payload: saved.append(payload),
     )
     agent = _agent(
         tmp_path,
         save_traces=True,
-        dynamo_table="agentoi-runs",
+        dynamo_table="moira-runs",
         save_local=False,
     )
 
     agent.invoke("Persist ontology trace.")
 
     assert len(saved) == 1
-    assert saved[0]["table_name"] == "agentoi-runs"
+    assert saved[0]["table_name"] == "moira-runs"
     assert saved[0]["memory_trace"]["id"] == saved[0]["run_id"]
     assert saved[0]["graph"]["thoughts"]
 
 
 def test_duckdb_store_is_written_before_dynamodb(monkeypatch, tmp_path):
     saved = []
-    monkeypatch.setenv("AGENTOI_TRACE_STORE", "duckdb")
-    monkeypatch.setenv("AGENTOI_TRACE_DB", str(tmp_path / "agentoi.duckdb"))
+    monkeypatch.setenv("MOIRA_TRACE_STORE", "duckdb")
+    monkeypatch.setenv("MOIRA_TRACE_DB", str(tmp_path / "moira.duckdb"))
     monkeypatch.setattr(
-        "agentoi.agents.core.agent.save_run_graph",
+        "moira.agents.core.agent.save_run_graph",
         lambda **payload: saved.append(payload),
     )
-    agent = _agent(tmp_path, save_traces=True, dynamo_table="agentoi-runs", save_local=True)
+    agent = _agent(tmp_path, save_traces=True, dynamo_table="moira-runs", save_local=True)
 
     agent.invoke("Persist ontology trace.")
 
     assert saved == []
-    from agentoi.agents.runtime.duckdb_store import list_runs
+    from moira.agents.runtime.duckdb_store import list_runs
 
-    assert len(list_runs(tmp_path / "agentoi.duckdb")) == 1
+    assert len(list_runs(tmp_path / "moira.duckdb")) == 1
 
 
 def test_load_run_graph_accepts_legacy_flattened_rows(monkeypatch):

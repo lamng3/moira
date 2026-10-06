@@ -180,7 +180,7 @@ class ExperimentRunner:
         environment.update(spec.environment)
         environment.setdefault("PYTHONPATH", str(self.project_root / "src"))
         environment.setdefault("PYTHONUNBUFFERED", "1")
-        environment["AGENTOI_METRICS_PATH"] = str(metrics_path)
+        environment["MOIRA_METRICS_PATH"] = str(metrics_path)
 
         error = None
         exit_code = None

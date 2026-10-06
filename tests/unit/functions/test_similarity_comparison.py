@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 import torch
 
-from agentoi.functions.similarity import (
+from moira.functions.similarity import (
     ComparisonResult,
     CosineSimilarityPlugin,
     NodePairSimilarityEngine,

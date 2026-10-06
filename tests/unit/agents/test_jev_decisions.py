@@ -2,8 +2,8 @@ import json
 import sys
 import types
 
-from agentoi.agents import Agent, JevModelRouter, OOTAgentObserver, ToolRiskGate
-from agentoi.agents.decisions import create_model_router, create_tool_gate
+from moira.agents import Agent, JevModelRouter, OOTAgentObserver, ToolRiskGate
+from moira.agents.decisions import create_model_router, create_tool_gate
 
 
 class FakeLLM:
@@ -21,7 +21,7 @@ class FakeLLM:
 
 
 def _agent(tmp_path, llm, **kwargs):
-    module = types.ModuleType("agentoi_test_tools")
+    module = types.ModuleType("moira_test_tools")
     called = []
 
     def echo(text):
@@ -221,8 +221,8 @@ def test_enabled_gate_fails_closed_for_gated_tools(tmp_path):
 
 
 def test_disabled_gate_preserves_tool_execution(tmp_path, monkeypatch):
-    monkeypatch.delenv("AGENTOI_TOOL_GATE", raising=False)
-    monkeypatch.delenv("AGENTOI_MODEL_ROUTING", raising=False)
+    monkeypatch.delenv("MOIRA_TOOL_GATE", raising=False)
+    monkeypatch.delenv("MOIRA_MODEL_ROUTING", raising=False)
     payload = {
         "tool_name": "search_term_context",
         "arguments": {"term": "freshwater"},

@@ -12,6 +12,6 @@ uv pip install --upgrade pip
 uv pip install ".[all,dev]"
 pre-commit install
 
-echo "AgentOI is ready."
+echo "MOIRA is ready."
 echo "Activate it with: source .venv/bin/activate"
-echo "Run it with: agentoi --help"
+echo "Run it with: moira --help"

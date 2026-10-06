@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from agentoi.functions.similarity import (
+from moira.functions.similarity import (
     SimilarityMethod,
     analyze_alignment_similarity,
 )

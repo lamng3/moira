@@ -1,5 +1,5 @@
-from agentoi.algorithms.graph import ConceptGraph, Ontology
-from agentoi.validation import OntologyTranslator, ValidationPipeline
+from moira.algorithms.graph import ConceptGraph, Ontology
+from moira.validation import OntologyTranslator, ValidationPipeline
 
 
 TRIPLES = (
@@ -9,7 +9,7 @@ TRIPLES = (
 )
 
 
-def test_translation_uses_agentoi_graph_models_and_preserves_edges() -> None:
+def test_translation_uses_moira_graph_models_and_preserves_edges() -> None:
     translator = OntologyTranslator()
 
     ontology = translator.triples_to_ontology(

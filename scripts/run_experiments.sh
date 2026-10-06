@@ -5,7 +5,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 python="$root/.venv/bin/python"
 
 if [[ ! -x "$python" ]]; then
-  echo "AgentOI is not installed. Run ./setup.sh first." >&2
+  echo "MOIRA is not installed. Run ./setup.sh first." >&2
   exit 1
 fi
 

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec agentoi run "$@"
+exec moira run "$@"

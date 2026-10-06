@@ -1,5 +1,5 @@
 version = 3
-title = "AgentOI Secrets Policy"
+title = "MOIRA Secrets Policy"
 enable-default-rules = false
 
 [allowlist]

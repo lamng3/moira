@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from agentoi.application import _write_experiment_metrics
+from moira.application import _write_experiment_metrics
 from experiments.cli import main
 from experiments.models import ConfigurationError, ExperimentSpec, ExperimentSuite
 from experiments.repository import JsonResultRepository
@@ -38,7 +38,7 @@ def test_standard_strategy_builds_deterministic_command(tmp_path):
     assert command == [
         sys.executable,
         "-m",
-        "agentoi.cli",
+        "moira.cli",
         "run",
         "--ontology",
         "envo",
@@ -101,7 +101,7 @@ def test_metrics_are_fingerprinted_and_compared(tmp_path):
     metrics_code = (
         "import json, os; "
         "json.dump({'alignment': {'precision': 0.8, 'recall': 0.5, "
-        "'f1': 0.6154}}, open(os.environ['AGENTOI_METRICS_PATH'], 'w'))"
+        "'f1': 0.6154}}, open(os.environ['MOIRA_METRICS_PATH'], 'w'))"
     )
     suite = ExperimentSuite.from_dict(
         {
@@ -135,7 +135,7 @@ def test_suite_chart_compares_multiple_experiments(tmp_path):
     metrics_code = (
         "import json, os; "
         "json.dump({'alignment': {'precision': 0.8, 'recall': 0.5, "
-        "'f1': 0.6154}}, open(os.environ['AGENTOI_METRICS_PATH'], 'w'))"
+        "'f1': 0.6154}}, open(os.environ['MOIRA_METRICS_PATH'], 'w'))"
     )
     suite = ExperimentSuite.from_dict(
         {
@@ -173,7 +173,7 @@ def test_standard_experiment_gets_isolated_output_path(tmp_path):
 
 def test_pipeline_metrics_are_exported_for_experiment_runner(tmp_path, monkeypatch):
     destination = tmp_path / "metrics.json"
-    monkeypatch.setenv("AGENTOI_METRICS_PATH", str(destination))
+    monkeypatch.setenv("MOIRA_METRICS_PATH", str(destination))
 
     _write_experiment_metrics(
         {

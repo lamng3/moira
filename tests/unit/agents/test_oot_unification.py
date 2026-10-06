@@ -1,7 +1,7 @@
-from agentoi.agents import OOTAgentObserver
-from agentoi.agents.core.events import emit_event
-from agentoi.agents.ontology_of_thought.memory import ThoughtType as MemoryThoughtType
-from agentoi.agents.ontology_of_thought.models import ThoughtType
+from moira.agents import OOTAgentObserver
+from moira.agents.core.events import emit_event
+from moira.agents.ontology_of_thought.memory import ThoughtType as MemoryThoughtType
+from moira.agents.ontology_of_thought.models import ThoughtType
 
 
 def test_thought_type_is_shared_by_memory_and_graph_models():

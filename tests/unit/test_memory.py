@@ -1,12 +1,12 @@
 from dataclasses import replace
 from pathlib import Path
 
-from agentoi.memory.cache.hot import HotCache
-from agentoi.memory.config import MemoryConfig
-from agentoi.memory.path import SUBCLASS_OF, QueryPath
-from agentoi.memory.service import AgentMemory
-from agentoi.workspace import _converged_hot
-from agentoi.memory.trie import PrefixTrie
+from moira.memory.cache.hot import HotCache
+from moira.memory.config import MemoryConfig
+from moira.memory.path import SUBCLASS_OF, QueryPath
+from moira.memory.service import AgentMemory
+from moira.workspace import _converged_hot
+from moira.memory.trie import PrefixTrie
 
 
 def _memory(directory: Path, **overrides: object) -> AgentMemory:

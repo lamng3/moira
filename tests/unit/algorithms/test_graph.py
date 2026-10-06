@@ -1,6 +1,6 @@
 import pytest
 
-from agentoi.algorithms.graph import (
+from moira.algorithms.graph import (
     DSU,
     Concept,
     ConceptGraph,

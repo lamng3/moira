@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from agentoi.cli import main
+from moira.cli import main
 
 
 ONTOLOGY = """

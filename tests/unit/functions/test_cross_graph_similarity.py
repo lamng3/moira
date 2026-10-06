@@ -8,7 +8,7 @@ import pytest
 from typing import List, Dict
 from unittest.mock import Mock, patch
 
-from agentoi.functions.similarity import (
+from moira.functions.similarity import (
     CrossGraphSimilarity,
     CrossGraphPair,
     SimilarityMethod,
@@ -16,7 +16,7 @@ from agentoi.functions.similarity import (
     compare_cross_graph_methods,
     analyze_cross_graph_similarity
 )
-from agentoi.algorithms.graph import ConceptGraph, EquivalentClass, Concept
+from moira.algorithms.graph import ConceptGraph, EquivalentClass, Concept
 
 
 class TestCrossGraphSimilarity:

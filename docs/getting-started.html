@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Getting Started · AgentOI</title>
+  <title>Getting Started · MOIRA</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header><a href="index.html"><strong>AgentOI</strong></a><nav><a class="active" href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a href="api.html">API</a><a href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
+  <header><a href="index.html"><strong>MOIRA</strong></a><nav><a class="active" href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a href="api.html">API</a><a href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
   <main>
     <p class="eyebrow">Guide 01 · Setup</p>
     <h1>Getting started</h1>
-    <p class="lede">Install AgentOI, inspect an ontology, and query it directly from the terminal.</p>
+    <p class="lede">Install MOIRA, inspect an ontology, and query it directly from the terminal.</p>
 
     <h2>Install</h2>
-    <pre><code>git clone https://github.com/lamng3/agentoi.git
-cd agentoi
+    <pre><code>git clone https://github.com/lamng3/moira.git
+cd moira
 ./setup.sh
 source .venv/bin/activate</code></pre>
     <p>For a smaller installation, select only the provider integrations you need:</p>
@@ -33,56 +33,56 @@ uv pip install -e ".[openai,knowledge-graph,dev]"</code></pre>
       <tr><td>Web lookup</td><td><code>TAVILY_API_KEY</code></td></tr>
       <tr><td>Google CSE counts</td><td><code>GOOGLE_API_KEY</code>, <code>GOOGLE_CSE_CX</code></td></tr>
       <tr><td>Knowledge graph</td><td><code>NEO4J_URI</code>, <code>NEO4J_USER</code>, <code>NEO4J_PASSWORD</code></td></tr>
-      <tr><td>Thought storage</td><td><code>DYNAMO_TABLE</code>, AWS credentials, or <code>AGENTOI_DYNAMO_DISABLED=1</code></td></tr>
-      <tr><td>Jev decisions</td><td><code>JEV_API_KEY</code>, then any of <code>AGENTOI_CONTEXT_HARNESS</code>, <code>AGENTOI_MODEL_ROUTING</code>, <code>AGENTOI_TOOL_GATE</code></td></tr>
+      <tr><td>Thought storage</td><td><code>DYNAMO_TABLE</code>, AWS credentials, or <code>MOIRA_DYNAMO_DISABLED=1</code></td></tr>
+      <tr><td>Jev decisions</td><td><code>JEV_API_KEY</code>, then any of <code>MOIRA_CONTEXT_HARNESS</code>, <code>MOIRA_MODEL_ROUTING</code>, <code>MOIRA_TOOL_GATE</code></td></tr>
     </table>
 
     <h2>Inspect an ontology</h2>
-    <pre><code>agentoi inspect data/my-ontology.owl
-agentoi inspect data/my-ontology.ttl --json</code></pre>
+    <pre><code>moira inspect data/my-ontology.owl
+moira inspect data/my-ontology.ttl --json</code></pre>
     <p><code>inspect</code> parses local OWL, RDF/XML, Turtle, N-Triples, TriG, TriX, or JSON-LD without loading an embedding or language model.</p>
 
     <h2>Search locally</h2>
-    <pre><code>agentoi search data/my-ontology.owl \
+    <pre><code>moira search data/my-ontology.owl \
   "water quality measurement" --top-k 8</code></pre>
     <p>This builds the concept graph and returns the most relevant ontology concepts. The first run may download the configured text embedding model.</p>
 
     <h2>Ask questions</h2>
     <pre><code># One question
-agentoi query data/my-ontology.owl \
+moira query data/my-ontology.owl \
   "Which concepts describe freshwater temperature?"
 
 # Interactive terminal session
-agentoi chat data/my-ontology.owl</code></pre>
+moira chat data/my-ontology.owl</code></pre>
     <p>The ontology is parsed and embedded once per command, before the first question. Interactive mode reuses that graph for every question in the session. Add <code>--refine</code> to apply relation refinement first. Answers are plain sentences. Add <code>--log</code> to print the detailed run, or type <code>log</code> after an answer.</p>
-    <p>For a local model, set <code>LLM_MODEL=ollama:llama3.1</code>. Hosted models require the corresponding API key. The Ollama client is installed with AgentOI.</p>
-    <p><code>search</code>, <code>query</code>, and <code>chat</code> save concept embeddings under <code>results/memory</code> and load them on the next run. Delete that store with <code>agentoi memory clear data/my-ontology.owl</code>. Pass <code>--no-save-memory</code> to skip writing it. Answers are cached separately under <code>results/cache</code>. The <a href="architecture.html">architecture page</a> describes the hot, short-term, and long-term tiers and how eviction keeps each one inside its cap.</p>
+    <p>For a local model, set <code>LLM_MODEL=ollama:llama3.1</code>. Hosted models require the corresponding API key. The Ollama client is installed with MOIRA.</p>
+    <p><code>search</code>, <code>query</code>, and <code>chat</code> save concept embeddings under <code>results/memory</code> and load them on the next run. Delete that store with <code>moira memory clear data/my-ontology.owl</code>. Pass <code>--no-save-memory</code> to skip writing it. Answers are cached separately under <code>results/cache</code>. The <a href="architecture.html">architecture page</a> describes the hot, short-term, and long-term tiers and how eviction keeps each one inside its cap.</p>
 
     <h2>Run the evaluation pipeline</h2>
-    <pre><code>agentoi run --ontology envo sweet --top_k 10 --eval_alignment
-agentoi run --ontology envo sweet --eval_alignment --refine</code></pre>
+    <pre><code>moira run --ontology envo sweet --top_k 10 --eval_alignment
+moira run --ontology envo sweet --eval_alignment --refine</code></pre>
     <p>Catalog-based evaluation output is written under <code>results/runs/</code>.</p>
 
     <h2>Select retrieval backends</h2>
-    <pre><code>from agentoi.retrieval import create_vector_index, create_web_search
+    <pre><code>from moira.retrieval import create_vector_index, create_web_search
 
 web = create_web_search("mediawiki")
 index = create_vector_index("torch-exact", dimension=768)</code></pre>
     <p>Use <code>static</code> or <code>dataset</code> for deterministic offline work. Register project-specific web, ANN, DiskANN, or vector-database adapters through the same public retrieval API.</p>
-    <p>Optional Jev context selection is separate from retrieval. Install it with <code>uv sync --extra jev</code>, set <code>JEV_API_KEY</code>, and enable <code>AGENTOI_CONTEXT_HARNESS=jev</code>. It starts in shadow mode and fails open to the original shortlist.</p>
+    <p>Optional Jev context selection is separate from retrieval. Install it with <code>uv sync --extra jev</code>, set <code>JEV_API_KEY</code>, and enable <code>MOIRA_CONTEXT_HARNESS=jev</code>. It starts in shadow mode and fails open to the original shortlist.</p>
 
     <h2>Route models and gate tools</h2>
     <p>Model routing and tool-risk gating use the same Jev key. They stay off until enabled, and they do not change which evidence the context harness selects.</p>
     <pre><code>uv sync --extra jev
 export JEV_API_KEY=your_typesafe_api_key
-export AGENTOI_MODEL_ROUTING=jev
-export AGENTOI_ROUTE_LOCAL=ollama:phi3
-export AGENTOI_ROUTE_CAREFUL=deepseek-ai/DeepSeek-R1-Distill-Llama-70B
-export AGENTOI_TOOL_GATE=jev</code></pre>
+export MOIRA_MODEL_ROUTING=jev
+export MOIRA_ROUTE_LOCAL=ollama:phi3
+export MOIRA_ROUTE_CAREFUL=deepseek-ai/DeepSeek-R1-Distill-Llama-70B
+export MOIRA_TOOL_GATE=jev</code></pre>
     <table>
       <tr><th>Decision</th><th>What Jev chooses</th><th>If Jev cannot decide</th></tr>
       <tr><td>Model routing</td><td><code>local</code> for short lookups, <code>standard</code> for normal ontology questions, <code>careful</code> for alignment, conflicts, and multi-ontology reasoning. The chosen model is used for the whole run.</td><td>Fail open to <code>LLM_MODEL</code>.</td></tr>
-      <tr><td>Tool-risk gating</td><td>Whether <code>search_term_context</code> or <code>search_knowledge_graph</code> is unsafe to run. A probability at or above <code>AGENTOI_TOOL_RISK_THRESHOLD</code> (default <code>0.5</code>) returns a refusal and does not call the tool. <code>ontology_term_info</code> is not gated.</td><td>Fail closed for gated tools only.</td></tr>
+      <tr><td>Tool-risk gating</td><td>Whether <code>search_term_context</code> or <code>search_knowledge_graph</code> is unsafe to run. A probability at or above <code>MOIRA_TOOL_RISK_THRESHOLD</code> (default <code>0.5</code>) returns a refusal and does not call the tool. <code>ontology_term_info</code> is not gated.</td><td>Fail closed for gated tools only.</td></tr>
     </table>
     <p>The query and redacted tool arguments are sent to TypeSafe. Routing stores <code>name</code>, <code>model_name</code>, <code>probabilities</code>, <code>confidence</code>, and <code>fail_open</code> on the trace and emits <code>model.routed</code>. A blocked call sets the <code>tool_execute</code> step to <code>blocked</code> and emits <code>tool.blocked</code>.</p>
 

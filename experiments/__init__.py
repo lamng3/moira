@@ -1,4 +1,4 @@
-"""Reproducible experiment orchestration for AgentOI."""
+"""Reproducible experiment orchestration for MOIRA."""
 
 from .models import (
     ConfigurationError,

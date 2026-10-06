@@ -10,7 +10,7 @@ def main() -> None:
     parser.add_argument("--domain", action="append", dest="domains")
     args = parser.parse_args()
 
-    from agentoi.agents.tools.website.website_lookup import WebsiteLookup
+    from moira.agents.tools.website.website_lookup import WebsiteLookup
 
     with WebsiteLookup() as lookup:
         result = lookup.term_context(

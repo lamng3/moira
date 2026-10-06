@@ -1,9 +1,9 @@
 """A definition asked back names the concept without the answer model."""
 
-from agentoi.memory.config import MemoryConfig
-from agentoi.memory.path import QueryPath
-from agentoi.memory.service import AgentMemory
-from agentoi.workspace import OntologyWorkspace
+from moira.memory.config import MemoryConfig
+from moira.memory.path import QueryPath
+from moira.memory.service import AgentMemory
+from moira.workspace import OntologyWorkspace
 
 
 DEFINITION = (
@@ -67,7 +67,7 @@ def test_two_typos_do_not_match(tmp_path) -> None:
 def test_a_cached_tool_plan_does_not_replay(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
-    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("MOIRA_CACHE_DIR", str(tmp_path / "cache"))
     workspace = OntologyWorkspace(ontology)
     memory = workspace._query_memory()
     memory.remember(QueryPath.from_steps(ORIGINAL, [CONCEPT]), SHORT_DEFINITION)
@@ -76,7 +76,7 @@ def test_a_cached_tool_plan_does_not_replay(tmp_path, monkeypatch) -> None:
     def unused(*_args, **_kwargs):
         raise AssertionError("the answer model should stay unused")
 
-    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    monkeypatch.setattr("moira.workspace.create_application_agent", unused)
     answer = workspace.ask(SHORT_TYPO)
 
     assert answer == "Anatomic region"
@@ -84,7 +84,7 @@ def test_a_cached_tool_plan_does_not_replay(tmp_path, monkeypatch) -> None:
 
 
 def test_a_tool_plan_is_not_shown_or_remembered(tmp_path, monkeypatch) -> None:
-    from agentoi.algorithms.graph import ConceptGraph
+    from moira.algorithms.graph import ConceptGraph
 
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text(
@@ -95,27 +95,27 @@ def test_a_tool_plan_is_not_shown_or_remembered(tmp_path, monkeypatch) -> None:
         'ex:Heart a owl:Class ; rdfs:label "Heart" .\n',
         encoding="utf-8",
     )
-    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
-    monkeypatch.setenv("AGENTOI_HARNESS_URL", "")
+    monkeypatch.setenv("MOIRA_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("MOIRA_HARNESS_URL", "")
     monkeypatch.setattr(
         ConceptGraph,
         "compute_all_embeddings",
         lambda self, alpha=0.5, progress=None, control=None: self,
     )
-    monkeypatch.setattr("agentoi.workspace.build_context_candidates", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr("moira.workspace.build_context_candidates", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(
         ConceptGraph,
         "make_prompt_for_query",
         lambda self, *_args, **_kwargs: "QUERY: Where is the spleen?",
     )
-    monkeypatch.setattr("agentoi.workspace.create_model_runtime", lambda **_kwargs: object())
+    monkeypatch.setattr("moira.workspace.create_model_runtime", lambda **_kwargs: object())
 
     class Agent:
         def invoke(self, _prompt: str) -> str:
             return TOOL_PLAN
 
     monkeypatch.setattr(
-        "agentoi.workspace.create_application_agent",
+        "moira.workspace.create_application_agent",
         lambda *_args, **_kwargs: Agent(),
     )
     workspace = OntologyWorkspace(ontology)
@@ -129,7 +129,7 @@ def test_a_tool_plan_is_not_shown_or_remembered(tmp_path, monkeypatch) -> None:
 def test_a_reverse_match_names_the_ontology_label(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
-    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("MOIRA_CACHE_DIR", str(tmp_path / "cache"))
     workspace = OntologyWorkspace(ontology)
     concept_id = "eq_Nf956502f12724437e22bc380e0cfd99e"
     workspace._query_memory().remember(
@@ -152,7 +152,7 @@ def test_a_reverse_match_names_the_ontology_label(tmp_path, monkeypatch) -> None
     def unused(*_args, **_kwargs):
         raise AssertionError("the answer model should stay unused")
 
-    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    monkeypatch.setattr("moira.workspace.create_application_agent", unused)
     answer = workspace.ask(SHORT_TYPO)
 
     assert answer == "visceral organ system"
@@ -163,7 +163,7 @@ def test_a_reverse_match_names_the_ontology_label(tmp_path, monkeypatch) -> None
 def test_a_reverse_match_names_the_concept_in_the_answer(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
-    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("MOIRA_CACHE_DIR", str(tmp_path / "cache"))
     workspace = OntologyWorkspace(ontology)
     region = "eq_region"
     system = "eq_system"
@@ -201,7 +201,7 @@ def test_a_reverse_match_names_the_concept_in_the_answer(tmp_path, monkeypatch) 
     def unused(*_args, **_kwargs):
         raise AssertionError("the answer model should stay unused")
 
-    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    monkeypatch.setattr("moira.workspace.create_application_agent", unused)
     answer = workspace.ask(question)
 
     assert answer == "visceral organ system"
@@ -211,7 +211,7 @@ def test_a_reverse_match_names_the_concept_in_the_answer(tmp_path, monkeypatch) 
 def test_a_cached_prompt_echo_keeps_the_concept_names(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
-    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("MOIRA_CACHE_DIR", str(tmp_path / "cache"))
     workspace = OntologyWorkspace(ontology)
     question = "List the organ systems in the mouse"
     workspace._query_memory().hot.put(
@@ -225,7 +225,7 @@ def test_a_cached_prompt_echo_keeps_the_concept_names(tmp_path, monkeypatch) -> 
     def unused(*_args, **_kwargs):
         raise AssertionError("the answer model should stay unused")
 
-    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    monkeypatch.setattr("moira.workspace.create_application_agent", unused)
     answer = workspace.ask(question)
 
     assert "Visceral organ system" in answer
@@ -245,14 +245,14 @@ def test_a_weak_overlap_does_not_match(tmp_path) -> None:
 def test_reverse_question_skips_the_answer_model(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
-    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("MOIRA_CACHE_DIR", str(tmp_path / "cache"))
     workspace = OntologyWorkspace(ontology)
     workspace._query_memory().remember(QueryPath.from_steps(ORIGINAL, [CONCEPT]), DEFINITION)
 
     def unused(*_args, **_kwargs):
         raise AssertionError("the answer model should stay unused")
 
-    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    monkeypatch.setattr("moira.workspace.create_application_agent", unused)
     answer = workspace.ask(REVERSE)
 
     assert answer == "Anatomic region"
@@ -263,14 +263,14 @@ def test_reverse_question_skips_the_answer_model(tmp_path, monkeypatch) -> None:
 def test_exact_question_still_hits_the_hot_cache(tmp_path, monkeypatch) -> None:
     ontology = tmp_path / "anatomy.ttl"
     ontology.write_text("@prefix ex: <https://example.test/> .\n", encoding="utf-8")
-    monkeypatch.setenv("AGENTOI_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("MOIRA_CACHE_DIR", str(tmp_path / "cache"))
     workspace = OntologyWorkspace(ontology)
     workspace._query_memory().remember(QueryPath.from_steps(ORIGINAL, [CONCEPT]), DEFINITION)
 
     def unused(*_args, **_kwargs):
         raise AssertionError("the answer model should stay unused")
 
-    monkeypatch.setattr("agentoi.workspace.create_application_agent", unused)
+    monkeypatch.setattr("moira.workspace.create_application_agent", unused)
     answer = workspace.ask(ORIGINAL)
 
     assert answer.startswith("An anatomic region is a part of the body")

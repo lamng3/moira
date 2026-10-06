@@ -7,8 +7,8 @@ import json
 import os
 from pathlib import Path
 
-from agentoi.retrieval import ContextCandidate, JevContextHarness, PassthroughHarness
-from agentoi.validation import evaluate_alignment
+from moira.retrieval import ContextCandidate, JevContextHarness, PassthroughHarness
+from moira.validation import evaluate_alignment
 
 CANDIDATES = (
     ContextCandidate("water", "Fresh water has low dissolved salts.", "concept", 0.91),
@@ -71,9 +71,9 @@ def main(argv: list[str] | None = None) -> int:
         "context": selection.metrics(),
         "selection": _quality(predicted),
     }
-    destination = os.environ.get("AGENTOI_METRICS_PATH")
+    destination = os.environ.get("MOIRA_METRICS_PATH")
     if not destination:
-        raise RuntimeError("AGENTOI_METRICS_PATH is required")
+        raise RuntimeError("MOIRA_METRICS_PATH is required")
     path = Path(destination)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(

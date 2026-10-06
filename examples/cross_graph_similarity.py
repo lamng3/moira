@@ -2,8 +2,8 @@
 
 import torch
 
-from agentoi.algorithms.graph import Concept, ConceptGraph, EquivalentClass
-from agentoi.functions.similarity import (
+from moira.algorithms.graph import Concept, ConceptGraph, EquivalentClass
+from moira.functions.similarity import (
     SimilarityMethod,
     find_top_k_cross_graph_pairs,
 )

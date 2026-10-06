@@ -1,6 +1,6 @@
-# AgentOI
+# MOIRA
 
-AgentOI is a Python toolkit for ontology integration, matching, refinement, and
+MOIRA is a Python toolkit for ontology integration, matching, refinement, and
 ontology-grounded language-model reasoning. It combines RDF/OWL parsing,
 graph and text embeddings, pluggable retrieval, validation, uncertainty
 quantification, and Ontology-of-Thought traces.
@@ -12,14 +12,14 @@ quantification, and Ontology-of-Thought traces.
 
 ## Quick start
 
-AgentOI requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
+MOIRA requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/lamng3/agentoi.git
-cd agentoi
+git clone https://github.com/lamng3/moira.git
+cd moira
 ./setup.sh
 source .venv/bin/activate
-agentoi --help
+moira --help
 ```
 
 ## Use it from another program
@@ -27,50 +27,50 @@ agentoi --help
 Install the package from this repository. Python 3.12 is required.
 
 ```bash
-pip install "agentoi @ git+https://github.com/lamng3/agentoi.git"
+pip install "moira @ git+https://github.com/lamng3/moira.git"
 ```
 
 ```python
-from agentoi import OntologyWorkspace
+from moira import OntologyWorkspace
 
 workspace = OntologyWorkspace("ontology.owl")
 print(workspace.summary.concepts)
 print(workspace.ask("Which concepts describe the heart?", model="ollama:llama3.1"))
 ```
 
-Install that same command again to pick up a later update. The version is `agentoi.__version__`.
+Install that same command again to pick up a later update. The version is `moira.__version__`.
 
 Inspect an OWL, RDF/XML, Turtle, N-Triples, TriG, TriX, or JSON-LD file without
 an LLM:
 
 ```bash
-agentoi inspect data/my-ontology.owl
+moira inspect data/my-ontology.owl
 ```
 
 Search it locally with graph and text retrieval:
 
 ```bash
-agentoi search data/my-ontology.owl "water quality measurement" --top-k 8
+moira search data/my-ontology.owl "water quality measurement" --top-k 8
 ```
 
 Ask one natural-language question:
 
 ```bash
-agentoi query data/my-ontology.owl \
+moira query data/my-ontology.owl \
   "Which concepts describe freshwater temperature?"
 ```
 
 Or load the ontology once and keep asking questions:
 
 ```bash
-agentoi chat data/my-ontology.owl
+moira chat data/my-ontology.owl
 ```
 
 `query` and `chat` require an LLM provider. Set `LLM_MODEL` and its API key in
 `.env`, or use a local Ollama model:
 
 ```bash
-LLM_MODEL=ollama:llama3.1 agentoi chat data/my-ontology.owl
+LLM_MODEL=ollama:llama3.1 moira chat data/my-ontology.owl
 ```
 
 The first `search`, `query`, or `chat` run may download the configured text
@@ -79,7 +79,7 @@ embedding model and embed every concept. That result is saved under
 `inspect` is lightweight and does not load a model.
 
 ```bash
-agentoi memory clear data/my-ontology.owl
+moira memory clear data/my-ontology.owl
 ```
 
 Pass `--no-save-memory` to keep the embeddings in the current process only.
@@ -103,7 +103,7 @@ flowchart LR
     ShortTerm -->|seen 3 times| LongTerm
 ```
 
-The same question hits `hot.json` before retrieval. After a miss, the Harness asks typed questions about the question the user typed and can replay a cached one before retrieval starts. It runs only when the hot cache already has questions. `same_intent` is a yes-or-no, `match` chooses a cached question or retrieve, and `closeness` scores Different, Related, or Same question. A failed call, or a choice that is not in the cache, continues into retrieval. The default call is SGLang `/v1/systemone` at `http://127.0.0.1:30000` (`AGENTOI_HARNESS_URL`). An empty `AGENTOI_HARNESS_URL` keeps the Ollama router, `ollama:phi3` (`AGENTOI_ROUTER_MODEL`). The answer model stays the one selected in chat. Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concept ids, in any order. Replay reads the stored answer and its SPARQL pattern. It does not execute that pattern. A different concept set still calls the model, then the capture is written into the short-term trie. After the same set has been answered 3 times it is copied into `long_term.json`.
+The same question hits `hot.json` before retrieval. After a miss, the Harness asks typed questions about the question the user typed and can replay a cached one before retrieval starts. It runs only when the hot cache already has questions. `same_intent` is a yes-or-no, `match` chooses a cached question or retrieve, and `closeness` scores Different, Related, or Same question. A failed call, or a choice that is not in the cache, continues into retrieval. The default call is SGLang `/v1/systemone` at `http://127.0.0.1:30000` (`MOIRA_HARNESS_URL`). An empty `MOIRA_HARNESS_URL` keeps the Ollama router, `ollama:phi3` (`MOIRA_ROUTER_MODEL`). The answer model stays the one selected in chat. Optional Jev routing still chooses among answer models inside the agent and stays separate from this step. A wording that is not replayed hits graph replay when retrieval returns the same concept ids, in any order. Replay reads the stored answer and its SPARQL pattern. It does not execute that pattern. A different concept set still calls the model, then the capture is written into the short-term trie. After the same set has been answered 3 times it is copied into `long_term.json`.
 
 | Tier | File | Default cap | Eviction |
 | --- | --- | --- | --- |
@@ -111,14 +111,14 @@ The same question hits `hot.json` before retrieval. After a miss, the Harness as
 | Short-term | `short_term.json` | 512 trie nodes | Least frequently used |
 | Long-term | `long_term.json` | 1024 patterns | Least frequently used |
 
-`lfu` drops the least frequently read record, then the one touched longest ago. `lru` drops the record touched longest ago. `2q` drops a one-time record before a repeated one. Hot, short-term, and long-term follow `AGENTOI_CACHE_EVICTION`, which defaults to `lfu`. A new policy is a class with `choose(entries)` registered under a name.
+`lfu` drops the least frequently read record, then the one touched longest ago. `lru` drops the record touched longest ago. `2q` drops a one-time record before a repeated one. Hot, short-term, and long-term follow `MOIRA_CACHE_EVICTION`, which defaults to `lfu`. A new policy is a class with `choose(entries)` registered under a name.
 
 ```bash
-export AGENTOI_CACHE_DIR=results/cache
-export AGENTOI_HOT_ENTRIES=32
-export AGENTOI_SHORT_TERM_NODES=512
-export AGENTOI_LONG_TERM_ENTRIES=1024
-export AGENTOI_CACHE_EVICTION=lfu
+export MOIRA_CACHE_DIR=results/cache
+export MOIRA_HOT_ENTRIES=32
+export MOIRA_SHORT_TERM_NODES=512
+export MOIRA_LONG_TERM_ENTRIES=1024
+export MOIRA_CACHE_EVICTION=lfu
 ```
 
 ## Demo
@@ -126,7 +126,7 @@ export AGENTOI_CACHE_EVICTION=lfu
 Ask the adult mouse anatomy ontology what the heart belongs to:
 
 ```bash
-LLM_MODEL=ollama:llama3.1 agentoi chat data/MouseHuman/mouse.owl
+LLM_MODEL=ollama:llama3.1 moira chat data/MouseHuman/mouse.owl
 ```
 
 The ontology loads before the first question, and the answer comes back as plain sentences. Add `--log` to print the detailed run while it works, or type `log` after an answer.
@@ -151,23 +151,23 @@ Jev leaves the process for TypeSafe. Tool arguments are redacted first.
 ### Context selection
 
 ```bash
-export AGENTOI_CONTEXT_HARNESS=jev
-agentoi query data/my-ontology.owl "Which concepts describe freshwater?"
+export MOIRA_CONTEXT_HARNESS=jev
+moira query data/my-ontology.owl "Which concepts describe freshwater?"
 ```
 
 The default mode is shadow: Jev records its proposed selection, and the
 answering model still receives the retrieved shortlist. Set
-`AGENTOI_CONTEXT_MODE=live` after calibrating `min_relevance`. A missing key or
+`MOIRA_CONTEXT_MODE=live` after calibrating `min_relevance`. A missing key or
 provider error fails open to the original shortlist. Concept labels and any web
 snippets included in the shortlist are sent to TypeSafe.
 
 ### Model routing
 
 ```bash
-export AGENTOI_MODEL_ROUTING=jev
-export AGENTOI_ROUTE_LOCAL=ollama:phi3
-export AGENTOI_ROUTE_CAREFUL=deepseek-ai/DeepSeek-R1-Distill-Llama-70B
-agentoi query data/my-ontology.owl "Resolve the alignment conflict."
+export MOIRA_MODEL_ROUTING=jev
+export MOIRA_ROUTE_LOCAL=ollama:phi3
+export MOIRA_ROUTE_CAREFUL=deepseek-ai/DeepSeek-R1-Distill-Llama-70B
+moira query data/my-ontology.owl "Resolve the alignment conflict."
 ```
 
 Routing asks Jev one choice question before the first model call, then uses
@@ -175,9 +175,9 @@ that model for the rest of the run.
 
 | Route | Used for | Model variable |
 | --- | --- | --- |
-| `local` | Short lookups, extraction, and questions answerable from retrieved context | `AGENTOI_ROUTE_LOCAL` (default `ollama:phi3`) |
-| `standard` | Normal ontology question answering and relation lookup | `AGENTOI_ROUTE_STANDARD` (default `LLM_MODEL`) |
-| `careful` | Alignment disputes, conflicts, refinement, or multi-ontology reasoning | `AGENTOI_ROUTE_CAREFUL` (default `LLM_MODEL`) |
+| `local` | Short lookups, extraction, and questions answerable from retrieved context | `MOIRA_ROUTE_LOCAL` (default `ollama:phi3`) |
+| `standard` | Normal ontology question answering and relation lookup | `MOIRA_ROUTE_STANDARD` (default `LLM_MODEL`) |
+| `careful` | Alignment disputes, conflicts, refinement, or multi-ontology reasoning | `MOIRA_ROUTE_CAREFUL` (default `LLM_MODEL`) |
 
 If Jev is unavailable, routing fails open and the run keeps `LLM_MODEL`. The
 choice, probabilities, confidence, and `fail_open` flag are stored on the
@@ -187,13 +187,13 @@ receives the same decision as `model.routed`.
 ### Tool-risk gating
 
 ```bash
-export AGENTOI_TOOL_GATE=jev
-export AGENTOI_TOOL_RISK_THRESHOLD=0.5
-export AGENTOI_GATED_TOOLS=search_term_context,search_knowledge_graph
+export MOIRA_TOOL_GATE=jev
+export MOIRA_TOOL_RISK_THRESHOLD=0.5
+export MOIRA_GATED_TOOLS=search_term_context,search_knowledge_graph
 ```
 
 After a tool call is parsed, Jev estimates whether that call is unsafe to run.
-Only tools named in `AGENTOI_GATED_TOOLS` are checked. The built-in policy
+Only tools named in `MOIRA_GATED_TOOLS` are checked. The built-in policy
 gates `search_term_context` and `search_knowledge_graph` because they send
 ontology terms to external services. `ontology_term_info` is a lookup and is
 left ungated.
@@ -201,13 +201,13 @@ left ungated.
 A probability at or above the threshold returns a structured refusal and does
 not call the tool. The `tool_execute` trace step is marked `blocked`, and
 Ontology-of-Thought records `tool.blocked`. When the gate is enabled and Jev
-cannot decide, gated tools fail closed. Leaving `AGENTOI_TOOL_GATE` unset
+cannot decide, gated tools fail closed. Leaving `MOIRA_TOOL_GATE` unset
 preserves normal tool execution. Arguments sent to Jev pass through redaction;
 the query and those redacted arguments still leave the process for TypeSafe.
 
 ## Agent runtime
 
-`AGENTOI_TRACE_STORE=duckdb` writes each thought graph to `results/traces/agentoi.duckdb`. Install that store with `agentoi[traces]`. DynamoDB is used when `DYNAMO_TABLE` is set.
+`MOIRA_TRACE_STORE=duckdb` writes each thought graph to `results/traces/moira.duckdb`. Install that store with `moira[traces]`. DynamoDB is used when `DYNAMO_TABLE` is set.
 
 ## Experiments
 
@@ -281,13 +281,13 @@ With the default local tracker, generated logs, metrics, manifests, and reports
 stay under ignored `results/`.
 The manifest records the exact command, source revision, configuration hash,
 and result hash. Catalog-based evaluations are available through
-`agentoi run --help`.
+`moira run --help`.
 
 ## Python API
 
 ```python
-from agentoi.parser import Parser
-from agentoi.retrieval import create_vector_index, create_web_search
+from moira.parser import Parser
+from moira.retrieval import create_vector_index, create_web_search
 
 ontology = Parser("data/my-ontology.owl").to_ontology()
 web = create_web_search("mediawiki")
@@ -305,7 +305,7 @@ For graph maintenance, use `OfflineGraphRefiner` for complete graphs and
 ## Repository layout
 
 ```text
-src/agentoi/   Installable library and CLI
+src/moira/   Installable library and CLI
 examples/      Small integration examples
 experiments/   Reproducible suites and runner
 scripts/       Maintained shell entry points
@@ -322,4 +322,4 @@ pytest -q
 pre-commit run --all-files
 ```
 
-AgentOI is authored by Lam Nguyen and Ethan Frakes and licensed under MIT.
+MOIRA is authored by Lam Nguyen and Ethan Frakes and licensed under MIT.

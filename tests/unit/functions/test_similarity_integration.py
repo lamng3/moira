@@ -3,11 +3,11 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from agentoi.functions.similarity import (
+from moira.functions.similarity import (
     EmbeddingAwareSimilaritySystem,
     create_embedding_aware_system,
 )
-from agentoi.retrieval.web import DatasetSearchProvider, StaticSearchProvider
+from moira.retrieval.web import DatasetSearchProvider, StaticSearchProvider
 
 
 def _node(node_id: str, values: list[float]):

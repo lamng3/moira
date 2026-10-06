@@ -1,6 +1,6 @@
 import pytest
 
-from agentoi.prompting import (
+from moira.prompting import (
     OntologyEquivalencePromptBuilder,
     PromptConfig,
     PromptExample,

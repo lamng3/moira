@@ -32,7 +32,7 @@ def load_suite(path: Path) -> ExperimentSuite:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run reproducible AgentOI experiment suites."
+        description="Run reproducible MOIRA experiment suites."
     )
     parser.add_argument("config", type=Path, help="Path to a JSON suite config.")
     parser.add_argument(
@@ -55,12 +55,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--tracker",
         choices=("local", "wandb"),
-        default=os.environ.get("AGENTOI_TRACKER", "local"),
-        help="Result destination (default: AGENTOI_TRACKER or local).",
+        default=os.environ.get("MOIRA_TRACKER", "local"),
+        help="Result destination (default: MOIRA_TRACKER or local).",
     )
     parser.add_argument(
         "--tracking-project",
-        default=os.environ.get("WANDB_PROJECT", "agentoi"),
+        default=os.environ.get("WANDB_PROJECT", "moira"),
         help="W&B project name.",
     )
     parser.add_argument(
@@ -88,7 +88,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     try:
         suite = load_suite(args.config)
         if tracker.is_remote and not args.keep_local:
-            temporary = tempfile.TemporaryDirectory(prefix="agentoi-results-")
+            temporary = tempfile.TemporaryDirectory(prefix="moira-results-")
             results_dir = Path(temporary.name) / "artifacts"
         else:
             results_dir = (

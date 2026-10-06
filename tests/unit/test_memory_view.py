@@ -2,7 +2,7 @@
 
 import json
 
-from agentoi.memory.view import memory_snapshot
+from moira.memory.view import memory_snapshot
 
 
 def test_snapshot_shows_hits_and_skips_answer_text() -> None:

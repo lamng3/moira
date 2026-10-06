@@ -1,7 +1,7 @@
 """Select high-value questions from a thought graph."""
 
-from agentoi.agents.ontology_of_thought import Thought, ThoughtGraph
-from agentoi.agents.ontology_of_thought.optimizer import QueryOptimizer
+from moira.agents.ontology_of_thought import Thought, ThoughtGraph
+from moira.agents.ontology_of_thought.optimizer import QueryOptimizer
 
 
 def main() -> None:

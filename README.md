@@ -1,9 +1,10 @@
 # MOIRA
 
-MOIRA is a Python toolkit for ontology integration, matching, refinement, and
-ontology-grounded language-model reasoning. It combines RDF/OWL parsing,
-graph and text embeddings, pluggable retrieval, validation, uncertainty
-quantification, and Ontology-of-Thought traces.
+MOIRA (Memory-augmented Ontology Integration with Reasoning Agents) is a Python
+toolkit for ontology integration, matching, refinement, and ontology-grounded
+language-model reasoning. It combines RDF/OWL parsing, graph and text
+embeddings, pluggable retrieval, validation, uncertainty quantification, and
+Ontology-of-Thought traces.
 
 [Documentation](https://lamng3.github.io/moira-docs/) ·
 [Architecture](https://lamng3.github.io/moira-docs/architecture.html) ·
@@ -322,4 +323,15 @@ pytest -q
 pre-commit run --all-files
 ```
 
-MOIRA is authored by Lam Nguyen and Ethan Frakes and licensed under MIT.
+## Citation
+
+If you use MOIRA, please cite:
+
+```bibtex
+@misc{nguyen_2026_moira,
+    title={MOIRA: Cost-Bounded Ontology Integration with Memory-Augmented Agent Workflows},
+    author={Lam Nguyen and Ethan Frakes and Hanchao Ma and Ozan Dernek and Roger H. French and Yinghui Wu},
+    year={2026},
+    url={https://github.com/lamng3/moira},
+}
+```

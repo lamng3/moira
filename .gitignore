@@ -15,3 +15,6 @@ build/
 dist/
 results/
 data/.cache/
+
+# Local agent run traces
+src/moira/agents/shared_memory/.cache/

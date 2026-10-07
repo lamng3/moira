@@ -15,7 +15,6 @@ from typing import Any
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
 
-from moira import legacy_pickle
 from .concept import Concept, ConceptRelation
 from .identifiers import name_from_uuid
 from .noise import BARTNoiser, bart_default_config
@@ -635,7 +634,7 @@ class Ontology:
     def load_pickle(key: str, dirpath: str = "data/.cache/cross_domain/") -> Ontology:
         """fast load from .cache directory"""
         with open(os.path.join(dirpath, f"ontology-{key}.pkl"), "rb") as f:
-            return legacy_pickle.load(f)
+            return pickle.load(f)
 
     @staticmethod
     def union_ontologies(onts: list[Ontology]) -> Ontology:

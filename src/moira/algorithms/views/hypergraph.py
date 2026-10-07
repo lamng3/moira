@@ -12,7 +12,6 @@ import networkx as nx
 import numpy as np
 from scipy import sparse
 
-from moira import legacy_pickle
 from moira.algorithms.graph import Concept, ConceptGraph
 
 
@@ -452,7 +451,7 @@ class HypergraphView:
     ) -> HypergraphView:
         """fast load from .cache directory"""
         with open(os.path.join(dirpath, filename), "rb") as f:
-            return legacy_pickle.load(f)
+            return pickle.load(f)
 
     def to_pickle(
         self, dirpath: str = "data/.cache/hypergraph", filename: str = "hypergraph.pkl"

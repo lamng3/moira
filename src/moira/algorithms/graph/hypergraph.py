@@ -8,7 +8,6 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from moira import legacy_pickle
 from .builder import OntologyStructureBuilder
 from .concept_graph import ConceptGraph
 from .equivalence import DSU, EquivalentClass, EquivalentClassRelation
@@ -328,7 +327,7 @@ class ConceptHypergraph:
         filename: str = "concept_hypergraph.pkl",
     ) -> ConceptHypergraph:
         with open(os.path.join(dirpath, filename), "rb") as f:
-            return legacy_pickle.load(f)
+            return pickle.load(f)
 
     def to_pickle(
         self,

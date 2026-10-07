@@ -6,7 +6,6 @@ from collections import defaultdict
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
-from moira import legacy_pickle
 from .builder import OntologyStructureBuilder
 from .concept import Concept
 from .equivalence import DSU, EquivalentClass, EquivalentClassRelation
@@ -297,7 +296,7 @@ class ConceptGraph:
     ) -> ConceptGraph:
         """fast load from .cache directory"""
         with open(os.path.join(dirpath, filename), "rb") as f:
-            return legacy_pickle.load(f)
+            return pickle.load(f)
 
     def to_pickle(
         self,

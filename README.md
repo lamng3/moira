@@ -5,10 +5,10 @@ ontology-grounded language-model reasoning. It combines RDF/OWL parsing,
 graph and text embeddings, pluggable retrieval, validation, uncertainty
 quantification, and Ontology-of-Thought traces.
 
-[Documentation](https://lamng3.github.io/agentoi-docs/) ·
-[Architecture](https://lamng3.github.io/agentoi-docs/architecture.html) ·
-[API reference](https://lamng3.github.io/agentoi-docs/api.html) ·
-[Experiments](https://lamng3.github.io/agentoi-docs/experiments.html)
+[Documentation](https://lamng3.github.io/moira-docs/) ·
+[Architecture](https://lamng3.github.io/moira-docs/architecture.html) ·
+[API reference](https://lamng3.github.io/moira-docs/api.html) ·
+[Experiments](https://lamng3.github.io/moira-docs/experiments.html)
 
 ## Quick start
 

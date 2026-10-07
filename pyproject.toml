@@ -62,7 +62,7 @@ moira-hypergraph = "moira.hypergraph:main"
 moira-lint = "moira.validation.ontology_lint:main"
 
 [project.urls]
-Documentation = "https://lamng3.github.io/agentoi-docs/"
+Documentation = "https://lamng3.github.io/moira-docs/"
 Repository = "https://github.com/lamng3/moira"
 
 [tool.setuptools.dynamic]

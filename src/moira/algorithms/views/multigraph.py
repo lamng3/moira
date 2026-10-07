@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-from moira import legacy_pickle
 from moira.algorithms.graph import ConceptGraph
 
 
@@ -290,7 +289,7 @@ class MultigraphView:
     ) -> MultigraphView:
         """fast load from .cache directory"""
         with open(os.path.join(dirpath, filename), "rb") as f:
-            return legacy_pickle.load(f)
+            return pickle.load(f)
 
     def to_pickle(
         self, dirpath: str = "data/.cache/multigraph", filename: str = "multigraph.pkl"

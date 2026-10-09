@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "MOIRA: Memory-Augmented Ontology Integration with Cost-Bounded Reasoning Agents"
+authors:
+  - family-names: Nguyen
+    given-names: Lam
+  - family-names: Frakes
+    given-names: Ethan
+  - family-names: Ma
+    given-names: Hanchao
+  - family-names: Dernek
+    given-names: Ozan
+  - family-names: French
+    given-names: Roger H.
+  - family-names: Wu
+    given-names: Yinghui
+year: 2026
+url: "https://github.com/lamng3/moira"

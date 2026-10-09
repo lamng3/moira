@@ -11,6 +11,8 @@ quantification, and Ontology-of-Thought traces.
 [API reference](https://lamng3.github.io/moira-docs/api.html) ·
 [Experiments](https://lamng3.github.io/moira-docs/experiments.html)
 
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
 ## Quick start
 
 MOIRA requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
@@ -323,9 +325,9 @@ pytest -q
 pre-commit run --all-files
 ```
 
-## Citation
+## How to Cite
 
-If you use MOIRA, please cite:
+If you use MOIRA in your work, please cite:
 
 ```bibtex
 @misc{nguyen_2026_moira,
@@ -335,3 +337,7 @@ If you use MOIRA, please cite:
     url={https://github.com/lamng3/moira},
 }
 ```
+
+## License
+
+MOIRA is released under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).

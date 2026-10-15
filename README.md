@@ -20,7 +20,7 @@
 </p>
 
 > [!NOTE]
-> **Paper in submission.** Results will be added here once it is published. The
+> **Preprint.** Results will be added here once the paper is published. The
 > [documentation](https://lamng3.github.io/moira-docs/) covers the
 > [architecture](https://lamng3.github.io/moira-docs/architecture.html),
 > [API](https://lamng3.github.io/moira-docs/api.html), and

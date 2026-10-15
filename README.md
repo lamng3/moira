@@ -1,19 +1,32 @@
-# MOIRA
+<div align="center">
 
-MOIRA (Memory-Augmented Ontology Integration with Cost-Bounded Reasoning Agents)
-is a Python toolkit for ontology integration, matching, refinement, and
-ontology-grounded language-model reasoning. It combines RDF/OWL parsing, graph
-and text embeddings, pluggable retrieval, validation, uncertainty
-quantification, and Ontology-of-Thought traces.
+# 🧵 MOIRA
 
-[Documentation](https://lamng3.github.io/moira-docs/) ·
-[Architecture](https://lamng3.github.io/moira-docs/architecture.html) ·
-[API reference](https://lamng3.github.io/moira-docs/api.html) ·
-[Experiments](https://lamng3.github.io/moira-docs/experiments.html)
+**Memory-Augmented Ontology Integration with Cost-Bounded Reasoning Agents**
 
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![Tests](https://github.com/lamng3/moira/actions/workflows/tests.yml/badge.svg)](https://github.com/lamng3/moira/actions/workflows/tests.yml)
+[![Docs](https://img.shields.io/badge/docs-moira--docs-8b5cf6)](https://lamng3.github.io/moira-docs/)
+[![Python](https://img.shields.io/badge/python-3.12-3b82f6)](pyproject.toml)
+[![License: CC BY 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-green.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-## Quick start
+[⚡ Quick start](#-quick-start) · [✨ What it is](#-what-it-is) · [🎬 Demo](#-demo) · [🔧 Usage](#-usage) · [📖 Docs](https://lamng3.github.io/moira-docs/) · [📝 Citation](#-citation)
+
+</div>
+
+<p align="center">
+  <b>Lam Nguyen</b> &nbsp;&nbsp;&nbsp; <b>Ethan Frakes</b> &nbsp;&nbsp;&nbsp; <b>Hanchao Ma</b>
+  <br>
+  <b>Ozan Dernek</b> &nbsp;&nbsp;&nbsp; <b>Roger H. French</b> &nbsp;&nbsp;&nbsp; <b>Yinghui Wu</b>
+</p>
+
+> [!NOTE]
+> **Paper in submission.** Results will be added here once it is published. The
+> [documentation](https://lamng3.github.io/moira-docs/) covers the
+> [architecture](https://lamng3.github.io/moira-docs/architecture.html),
+> [API](https://lamng3.github.io/moira-docs/api.html), and
+> [experiments](https://lamng3.github.io/moira-docs/experiments.html).
+
+## ⚡ Quick start
 
 MOIRA requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
 
@@ -25,9 +38,7 @@ source .venv/bin/activate
 moira --help
 ```
 
-## Use it from another program
-
-Install the package from this repository. Python 3.12 is required.
+Or install it into another project:
 
 ```bash
 pip install "moira @ git+https://github.com/lamng3/moira.git"
@@ -42,6 +53,37 @@ print(workspace.ask("Which concepts describe the heart?", model="ollama:llama3.1
 ```
 
 Install that same command again to pick up a later update. The version is `moira.__version__`.
+
+## ✨ What it is
+
+MOIRA is a Python toolkit for ontology integration, matching, refinement, and
+ontology-grounded language-model reasoning.
+
+- **Parse** OWL, RDF/XML, Turtle, N-Triples, TriG, TriX, and JSON-LD.
+- **Retrieve** with fused graph and text embeddings and pluggable vector indexes and web sources.
+- **Match and refine** ontologies offline or as new triples stream in.
+- **Answer** natural-language questions with an LLM grounded in the ontology, with validation and uncertainty quantification.
+- **Remember** across runs: embeddings are cached, and a tiered query cache replays repeated or reworded questions without calling the model.
+- **Trace** every step as an Ontology-of-Thought graph.
+
+## 🎬 Demo
+
+Ask the adult mouse anatomy ontology what the heart belongs to:
+
+```bash
+LLM_MODEL=ollama:llama3.1 moira chat data/MouseHuman/mouse.owl
+```
+
+The ontology loads before the first question, and the answer comes back as plain sentences. Add `--log` to print the detailed run while it works, or type `log` after an answer.
+
+[What is the heart part of?](examples/mouse-anatomy-chat.md)
+
+[![llama3.1 chooses an ontology lookup for the heart question](docs/images/chat-demo.jpg)](examples/mouse-anatomy-chat.md)
+
+## 🔧 Usage
+
+<details>
+<summary><b>Command line</b></summary>
 
 Inspect an OWL, RDF/XML, Turtle, N-Triples, TriG, TriX, or JSON-LD file without
 an LLM:
@@ -88,7 +130,10 @@ moira memory clear data/my-ontology.owl
 Pass `--no-save-memory` to keep the embeddings in the current process only.
 Local Ollama models use the `langchain-ollama` package included in the install.
 
-## Query cache
+</details>
+
+<details>
+<summary><b>Query cache</b></summary>
 
 Embedding memory and the query cache are separate. Embeddings under `results/memory` let the next run skip encoding concepts. The query cache under `results/cache/<sha>/` lets a repeated question skip the model.
 
@@ -124,21 +169,10 @@ export MOIRA_LONG_TERM_ENTRIES=1024
 export MOIRA_CACHE_EVICTION=lfu
 ```
 
-## Demo
+</details>
 
-Ask the adult mouse anatomy ontology what the heart belongs to:
-
-```bash
-LLM_MODEL=ollama:llama3.1 moira chat data/MouseHuman/mouse.owl
-```
-
-The ontology loads before the first question, and the answer comes back as plain sentences. Add `--log` to print the detailed run while it works, or type `log` after an answer.
-
-[What is the heart part of?](examples/mouse-anatomy-chat.md)
-
-[![llama3.1 chooses an ontology lookup for the heart question](docs/images/chat-demo.jpg)](examples/mouse-anatomy-chat.md)
-
-## Jev decisions
+<details>
+<summary><b>Jev decisions</b></summary>
 
 Jev is optional. Install it once, then enable only the decisions you want:
 
@@ -208,11 +242,17 @@ cannot decide, gated tools fail closed. Leaving `MOIRA_TOOL_GATE` unset
 preserves normal tool execution. Arguments sent to Jev pass through redaction;
 the query and those redacted arguments still leave the process for TypeSafe.
 
-## Agent runtime
+</details>
+
+<details>
+<summary><b>Agent runtime</b></summary>
 
 `MOIRA_TRACE_STORE=duckdb` writes each thought graph to `results/traces/moira.duckdb`. Install that store with `moira[traces]`. DynamoDB is used when `DYNAMO_TABLE` is set.
 
-## Experiments
+</details>
+
+<details>
+<summary><b>Experiments</b></summary>
 
 Run the dependency-light smoke benchmark first:
 
@@ -286,7 +326,10 @@ The manifest records the exact command, source revision, configuration hash,
 and result hash. Catalog-based evaluations are available through
 `moira run --help`.
 
-## Python API
+</details>
+
+<details>
+<summary><b>Python API</b></summary>
 
 ```python
 from moira.parser import Parser
@@ -305,7 +348,10 @@ For graph maintenance, use `OfflineGraphRefiner` for complete graphs and
 `OnlineOntologyRefiner` for streamed updates. Both accept configuration W's
 `concept_similar` predicate.
 
-## Repository layout
+</details>
+
+<details>
+<summary><b>Repository layout and development</b></summary>
 
 ```text
 src/moira/   Installable library and CLI
@@ -318,16 +364,14 @@ docs/          Documentation website source
 results/       Generated artifacts; ignored
 ```
 
-## Development
-
 ```bash
 pytest -q
 pre-commit run --all-files
 ```
 
-## How to Cite
+</details>
 
-If you use MOIRA in your work, please cite:
+## 📝 Citation
 
 ```bibtex
 @misc{nguyen_2026_moira,
@@ -340,4 +384,4 @@ If you use MOIRA in your work, please cite:
 
 ## License
 
-MOIRA is released under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
+MOIRA is released under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/). Copyright (c) 2026 Lam Nguyen, Ethan Frakes, Hanchao Ma, Ozan Dernek, Roger H. French, and Yinghui Wu.

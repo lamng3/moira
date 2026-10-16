@@ -186,6 +186,7 @@ def main() -> None:
 
     say("3. An honest edit through Aegis: add Ceramic under Material, and align it")
     v.apply_chain([inject_concept("Ceramic"), inject_relation("Ceramic", SUB, "Material")])
+    detector.accept(v)  # reviewed and honest: the detector measures harm from this version on
     honest_lsn = v.lsn
     print(f"   version now {versions.current().key}; the old answer went stale with the old version")
     request(("Ceramic", "Ceramics"))

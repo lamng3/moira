@@ -1,0 +1,712 @@
+<title>Shared Memory Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a lab console. One recorded run, stepped through on the left; the memory log and the ontology it governs on the right. */
+:root {
+  --bg: #f3f5f8; --panel: #ffffff; --sunk: #eaeef3; --ink: #151a22; --muted: #5a6474; --line: #dbe1e9;
+  --accent: #2f4fd8;
+  --c-user: #6b7280; --c-kroma: #7a4cc2; --c-moira: #0d857a; --c-aegis: #b9640a; --c-mneme: #2f4fd8;
+  --c-ontodb: #4d6a35; --c-attacker: #c8323c; --c-hermes: #a24f7c;
+  --ok: #1d7f47; --ok-bg: #e2f3e9; --bad: #c8323c; --bad-bg: #fbe6e7; --warn: #a86a12; --warn-bg: #fbf0dc;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1116; --panel: #161a21; --sunk: #1d222b; --ink: #e7eaf0; --muted: #98a2b3; --line: #2a313c;
+  --accent: #7d93ff;
+  --c-user: #9aa3b2; --c-kroma: #b18cf0; --c-moira: #3fc7b8; --c-aegis: #f0a24a; --c-mneme: #7d93ff;
+  --c-ontodb: #95bd72; --c-attacker: #ff6b74; --c-hermes: #e48cbc;
+  --ok: #5fd08f; --ok-bg: #16301f; --bad: #ff6b74; --bad-bg: #3a1a1d; --warn: #f0b45a; --warn-bg: #352712;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e1116; --panel: #161a21; --sunk: #1d222b; --ink: #e7eaf0; --muted: #98a2b3; --line: #2a313c;
+  --accent: #7d93ff;
+  --c-user: #9aa3b2; --c-kroma: #b18cf0; --c-moira: #3fc7b8; --c-aegis: #f0a24a; --c-mneme: #7d93ff;
+  --c-ontodb: #95bd72; --c-attacker: #ff6b74; --c-hermes: #e48cbc;
+  --ok: #5fd08f; --ok-bg: #16301f; --bad: #ff6b74; --bad-bg: #3a1a1d; --warn: #f0b45a; --warn-bg: #352712;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
+.wrap { max-width: 1280px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; }
+h2 { font-size: 22px; }
+h3 { font-size: 15px; font-family: var(--f-body); font-weight: 600; letter-spacing: 0; }
+p { margin: 0; }
+.mono { font-family: var(--f-mono); font-size: 12.5px; }
+.muted { color: var(--muted); }
+.label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: grid; gap: 14px; margin-bottom: 22px; }
+.lede { max-width: 72ch; color: var(--muted); font-size: 16px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+.cast { display: flex; flex-wrap: wrap; gap: 8px; }
+.who { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 3px 9px 3px 7px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); }
+.who i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); display: inline-block; }
+
+nav.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 20px; overflow-x: auto; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+nav.tabs button { background: none; border: 0; padding: 10px 14px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.panel > .label { display: block; margin-bottom: 10px; }
+.grid { display: grid; gap: 16px; }
+.walk { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+@media (max-width: 900px) { .walk, .lab, .two { grid-template-columns: minmax(0, 1fr) !important; } }
+
+/* steps */
+.steps { display: flex; gap: 6px; flex-wrap: wrap; }
+.steps button { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); font-family: var(--f-mono); font-size: 13px; }
+.steps button[aria-current="step"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.steps button.attack { border-color: var(--c-attacker); }
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 6px 12px; font-size: 13.5px; font-weight: 500; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.stepcard { display: grid; gap: 8px; }
+.stepcard h2 { font-size: 21px; }
+.feed { display: grid; gap: 6px; margin-top: 4px; }
+.say { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px; font-size: 13.5px; align-items: baseline; }
+.say .who2 { font-family: var(--f-mono); font-size: 11.5px; color: var(--c); font-weight: 500; text-align: right; }
+.say .txt { min-width: 0; overflow-wrap: anywhere; }
+
+svg text { fill: var(--ink); font-family: var(--f-body); }
+.diagram { width: 100%; height: auto; display: block; }
+.node rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: stroke .3s, fill .3s; }
+.node.on rect { stroke: var(--c); stroke-width: 2.5; fill: var(--sunk); }
+.node .nm { font-weight: 600; font-size: 13px; }
+.node .rl { font-size: 10.5px; fill: var(--muted); }
+.node.off { opacity: .55; }
+.link { stroke: var(--line); stroke-width: 1.5; fill: none; }
+.link.on { stroke: var(--c); stroke-width: 2.2; stroke-dasharray: 6 5; animation: flow 1s linear infinite; }
+.link.planned { stroke-dasharray: 3 4; }
+@keyframes flow { to { stroke-dashoffset: -11; } }
+@media (prefers-reduced-motion: reduce) { .link.on { animation: none; } }
+
+.gauges { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.gauge { background: var(--sunk); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; }
+.gauge .v { font-family: var(--f-mono); font-size: 18px; font-variant-numeric: tabular-nums; }
+.bar { height: 6px; border-radius: 3px; background: var(--line); position: relative; overflow: hidden; }
+.bar > span { position: absolute; inset: 0 auto 0 0; background: var(--c, var(--accent)); border-radius: 3px; }
+.bar > em { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
+
+.answer { font-size: 14.5px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.item { padding: 2px 8px; border-radius: 6px; background: var(--sunk); font-size: 13.5px; }
+.item.added { background: var(--bad-bg); color: var(--bad); font-weight: 600; }
+.item.gone { background: transparent; color: var(--bad); text-decoration: line-through; border: 1px dashed var(--bad); }
+.item small { color: var(--muted); font-size: 11.5px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--sunk); color: var(--muted); white-space: nowrap; }
+.chip.ok { background: var(--ok-bg); color: var(--ok); }
+.chip.bad { background: var(--bad-bg); color: var(--bad); }
+.chip.warn { background: var(--warn-bg); color: var(--warn); }
+.chip.cache { background: var(--sunk); color: var(--c-moira); }
+
+.onto { width: 100%; height: auto; max-height: 300px; display: block; }
+.cn rect { fill: var(--panel); stroke: var(--muted); stroke-width: 1.2; }
+.cn.new rect { stroke: var(--c-attacker); stroke-width: 2; fill: var(--bad-bg); }
+.cn.honest-new rect { stroke: var(--ok); stroke-width: 2; fill: var(--ok-bg); }
+.cn.root rect { stroke: var(--ink); stroke-width: 1.8; }
+.cn text { font-size: 12px; font-weight: 500; }
+.edge { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+.edge.added { stroke: var(--c-attacker); stroke-width: 2.2; }
+.edge.honest-added { stroke: var(--ok); stroke-width: 2.2; }
+.edge.removed { stroke: var(--c-attacker); stroke-dasharray: 4 4; opacity: .8; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.legend span::before { content: ""; display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--c); margin-right: 6px; vertical-align: middle; }
+.legend span.dash::before { border-top-style: dashed; }
+
+/* memory */
+.tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 560px) { .tiers { grid-template-columns: minmax(0, 1fr); } }
+.tier { background: var(--sunk); border-radius: 8px; padding: 10px; display: grid; align-content: start; gap: 6px; min-width: 0; }
+.tier header { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.mem { text-align: left; border: 1px solid var(--line); background: var(--panel); border-left: 4px solid var(--c); border-radius: 6px; padding: 5px 8px; display: grid; gap: 1px; min-width: 0; }
+.mem .k { font-family: var(--f-mono); font-size: 10.5px; color: var(--c); }
+.mem .key { font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mem.stale { opacity: .55; background: repeating-linear-gradient(135deg, var(--panel) 0 6px, var(--sunk) 6px 12px); }
+.mem.retracted { opacity: .55; }
+.mem.retracted .key { text-decoration: line-through; }
+.mem.fresh { box-shadow: 0 0 0 2px var(--accent); }
+.mem.sel { box-shadow: 0 0 0 2px var(--ink); }
+.mem.lin { box-shadow: 0 0 0 2px var(--c-aegis); }
+.detail { margin-top: 12px; background: var(--sunk); border-radius: 8px; padding: 12px; display: grid; gap: 8px; min-width: 0; }
+.detail pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--f-mono); font-size: 12px; }
+.refs { display: flex; flex-wrap: wrap; gap: 6px; }
+.refs button { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 2px 7px; font-family: var(--f-mono); font-size: 11.5px; }
+.toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; white-space: nowrap; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-size: 12.5px; }
+tr.best td { font-weight: 600; }
+.op-put { color: var(--ok); } .op-stale { color: var(--warn); } .op-retract, .op-quarantine { color: var(--bad); }
+.op-restore { color: var(--accent); } .op-move { color: var(--muted); }
+
+/* attack lab */
+.lab { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+.picker { display: grid; gap: 14px; }
+.choices { display: flex; flex-wrap: wrap; gap: 6px; }
+.choices button { border: 1px solid var(--line); background: var(--panel); border-radius: 7px; padding: 4px 9px; font-size: 12.5px; }
+.choices button.hit { border-color: var(--c-attacker); color: var(--c-attacker); }
+.choices button[aria-pressed="true"], .mx button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 1px; }
+.mx { border-collapse: separate; border-spacing: 3px; width: auto; }
+.mx th, .mx td { border: 0; padding: 0; }
+.mx th { font-size: 10.5px; text-transform: none; letter-spacing: 0; padding: 0 4px; }
+.mx thead th { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; height: 92px; vertical-align: bottom; }
+.mx tbody th { text-align: right; white-space: nowrap; }
+.mx button { width: 30px; height: 26px; border-radius: 5px; border: 1px solid var(--line); background: var(--sunk); font-family: var(--f-mono); font-size: 10.5px; }
+.mx button.hit { background: var(--bad-bg); border-color: var(--c-attacker); color: var(--c-attacker); font-weight: 600; }
+.mx td.na { width: 30px; height: 26px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--panel); padding: 6px 12px; font-size: 13px; font-weight: 500; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.verdict { display: grid; gap: 12px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stat .v { font-family: var(--f-display); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+@media (max-width: 420px) { .cards { grid-template-columns: minmax(0, 1fr); } }
+.card { display: grid; gap: 10px; align-content: start; }
+.card .prim { font-family: var(--f-mono); font-size: 12px; background: var(--sunk); padding: 6px 8px; border-radius: 6px; overflow-wrap: anywhere; }
+.caught { display: grid; gap: 4px; font-size: 12.5px; }
+.caught div { padding-left: 10px; border-left: 3px solid var(--ok); overflow-wrap: anywhere; }
+.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.note { font-size: 13px; color: var(--muted); max-width: 80ch; }
+footer { margin-top: 36px; font-size: 13px; color: var(--muted); display: grid; gap: 6px; }
+code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); padding: 1px 5px; border-radius: 4px; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="label">KROMA · MOIRA · Aegis · Mneme · OntoDB · Hermes</span>
+    <h1>Shared Memory Lab</h1>
+    <p class="lede">Five agents and systems answer questions over a materials ontology through one shared memory. Step through a recorded run, open any memory to see what it was built from, then attack the ontology or the memory yourself and see what each defence does.</p>
+    <div class="meta" id="meta"></div>
+    <div class="cast" id="cast"></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="walk" aria-selected="true">Walkthrough</button>
+    <button role="tab" data-tab="lab" aria-selected="false">Attack the ontology</button>
+    <button role="tab" data-tab="mem" aria-selected="false">Attack the memory</button>
+    <button role="tab" data-tab="results" aria-selected="false">Results and cost</button>
+  </nav>
+
+  <section id="tab-walk" role="tabpanel">
+    <div class="grid walk">
+      <div class="grid" style="align-content:start">
+        <div class="panel stepcard">
+          <div class="controls">
+            <button class="btn" id="prev" aria-label="Previous step">←</button>
+            <button class="btn primary" id="play">Play</button>
+            <button class="btn" id="next" aria-label="Next step">→</button>
+            <div class="steps" id="steps"></div>
+          </div>
+          <span class="label" id="steplabel"></span>
+          <h2 id="steptitle"></h2>
+          <p id="steptext" class="muted"></p>
+          <div class="feed" id="feed"></div>
+        </div>
+        <div class="panel">
+          <span class="label">Who is working</span>
+          <svg class="diagram" id="diagram" viewBox="0 0 640 380" role="img" aria-label="System diagram"></svg>
+        </div>
+        <div class="panel">
+          <span class="label">Gauges</span>
+          <div class="gauges" id="gauges"></div>
+        </div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="panel">
+          <span class="label">What MOIRA answers: “What kinds of material are there?”</span>
+          <div id="answer"></div>
+        </div>
+        <div class="panel">
+          <span class="label">The ontology, as Aegis versions it</span>
+          <svg class="onto" id="onto"></svg>
+          <div class="legend"><span style="--c:var(--ok)">added by an honest edit</span><span style="--c:var(--c-attacker)">added by the attack</span><span class="dash" style="--c:var(--c-attacker)">removed by the attack</span></div>
+        </div>
+        <div class="panel">
+          <div class="row" style="justify-content:space-between;margin-bottom:10px">
+            <span class="label">Mneme: every memory, by tier</span>
+            <label class="toggle"><input type="checkbox" id="receipts"> show receipts</label>
+          </div>
+          <div class="tiers" id="tiers"></div>
+          <div id="memdetail"></div>
+        </div>
+        <div class="panel">
+          <span class="label">Memory log: records written in this step</span>
+          <div class="scroll"><table id="log"></table></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-lab" role="tabpanel" hidden>
+    <div class="stats" id="labstats"></div>
+    <div class="grid lab">
+      <div class="panel picker">
+        <div>
+          <h3>Pick an attack on the honest ontology</h3>
+          <p class="note">Each one is a full run of the workflow: steps 1 to 3, then this attack, then MOIRA is asked again. Red marks attacks that changed MOIRA's answer.</p>
+        </div>
+        <div><span class="label">The scripted attack</span><div class="choices" id="c-scripted"></div></div>
+        <div><span class="label">Remove an edge</span><div class="choices" id="c-remove"></div></div>
+        <div><span class="label">Add a concept under Material</span><div class="choices" id="c-inject"></div></div>
+        <div>
+          <span class="label">Move a concept (row) under another parent (column)</span>
+          <div class="scroll"><table class="mx" id="c-rewire"></table></div>
+        </div>
+      </div>
+      <div class="panel verdict" id="verdict"></div>
+    </div>
+  </section>
+
+  <section id="tab-mem" role="tabpanel" hidden>
+    <div class="row" style="justify-content:space-between;margin-bottom:14px">
+      <p class="note">Attacks on the agents' shared memory itself, from the honest state after step 3. Each is run twice: with no defences, and with Aegis's memory defences on: a writer policy learned from the honest run, required provenance for matches and answers, a sealed log, a laundering check, and a probe monitor that repairs by attribution.</p>
+      <div class="seg" role="group" aria-label="Defences">
+        <button id="def-off" aria-pressed="false">Defences off</button>
+        <button id="def-on" aria-pressed="true">Defences on</button>
+      </div>
+    </div>
+    <div class="cards" id="memcards"></div>
+  </section>
+
+  <section id="tab-results" role="tabpanel" hidden>
+    <div class="grid" id="results"></div>
+  </section>
+
+  <footer>
+    <div id="foot"></div>
+    <div>Reproduce: <code>uv run python showcase/record.py</code> then <code>python showcase/build.py</code> in the moira repository, with the other projects cloned beside it.</div>
+  </footer>
+</div>
+
+<script id="trace" type="application/json">__TRACE__</script>
+<script>
+(() => {
+const T = JSON.parse(document.getElementById('trace').textContent);
+const $ = (s) => document.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') n.className = v; else if (k === 'style') n.setAttribute('style', v);
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== undefined && v !== null && v !== false) n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return n;
+};
+const SVG = 'http://www.w3.org/2000/svg';
+const sv = (tag, attrs = {}, ...kids) => {
+  const n = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v !== undefined && v !== null) n.setAttribute(k, v);
+  for (const k of kids.flat()) if (k !== null && k !== undefined) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return n;
+};
+const fmt = (x, d = 3) => (x === null || x === undefined) ? '—' : Number(x).toFixed(d);
+
+const CAST = {
+  user: ['User', 'asks and requests', 'var(--c-user)'],
+  kroma: ['KROMA', 'aligns ontologies', 'var(--c-kroma)'],
+  moira: ['MOIRA', 'answers questions', 'var(--c-moira)'],
+  aegis: ['Aegis', 'versions and defends', 'var(--c-aegis)'],
+  mneme: ['Mneme', 'shared agent memory', 'var(--c-mneme)'],
+  ontodb: ['OntoDB', 'stores ontology and memory', 'var(--c-ontodb)'],
+  hermes: ['Hermes', 'SPARQL query planning', 'var(--c-hermes)'],
+  attacker: ['Attacker', 'mallory', 'var(--c-attacker)'],
+};
+const AGENT_COMPONENT = (a) => a.startsWith('kroma') ? 'kroma' : a.startsWith('moira') ? 'moira' : a === 'aegis' || a.startsWith('aegis.') ? 'aegis'
+  : a === 'mneme' ? 'mneme' : a === 'user' ? 'user' : a === 'mallory' ? 'attacker' : 'mneme';
+const KIND_COMPONENT = { ontology_version: 'aegis', match: 'kroma', match_request: 'user', question: 'user', answer: 'moira', receipt: 'mneme', review: 'kroma', seal: 'mneme' };
+
+// header
+const steps = T.steps;
+const honestOnto = steps[3].ontology;
+const tags = Object.entries(T.projects).map(([p, h]) => `${p} ${h.tag || ''}${h.tag ? ' · ' : ''}${h.commit}`);
+$('#meta').append(
+  el('span', {}, 'Recorded ', el('b', {}, T.generated)),
+  el('span', {}, 'Storage ', el('b', {}, T.storage)),
+  el('span', {}, el('b', {}, String(1 + T.counterfactual.ontology.length + T.counterfactual.memory.length)), ' full runs in ', el('b', {}, `${T.seconds} s`)),
+  el('span', {}, el('b', {}, String(T.model_calls)), ' model calls, so ', el('b', {}, '$0.00')),
+);
+for (const k of ['user', 'kroma', 'moira', 'aegis', 'mneme', 'ontodb', 'hermes']) {
+  $('#cast').append(el('span', { class: 'who', style: `--c:${CAST[k][2]}` }, el('i'), el('b', {}, CAST[k][0]), ' ', el('span', { class: 'muted' }, CAST[k][1])));
+}
+$('#foot').textContent = 'Commits: ' + tags.join(' · ') + '. KROMA\'s language-model debate stands as fixed verdicts in this run, and MOIRA\'s answerer reads the hierarchy, so the run makes no model calls. The Results tab shows the projects\' real model runs and what they cost.';
+
+// tabs
+const tabs = [...document.querySelectorAll('nav.tabs button')];
+function showTab(name) {
+  for (const b of tabs) b.setAttribute('aria-selected', String(b.dataset.tab === name));
+  for (const s of document.querySelectorAll('section[role=tabpanel]')) s.hidden = s.id !== 'tab-' + name;
+  try { localStorage.setItem('sml-tab', name); } catch (e) {}
+}
+tabs.forEach((b) => b.addEventListener('click', () => { showTab(b.dataset.tab); history.replaceState(null, '', '#' + b.dataset.tab); }));
+let first = (location.hash || '').slice(1);
+if (!tabs.some((b) => b.dataset.tab === first)) { try { first = localStorage.getItem('sml-tab') || 'walk'; } catch (e) { first = 'walk'; } }
+showTab(tabs.some((b) => b.dataset.tab === first) ? first : 'walk');
+
+// ---------- ontology drawing ----------
+function drawOntology(svg, onto, base, mode) {
+  // mode 'attack': diff vs base in attacker colour; 'honest': additions vs base in green
+  svg.replaceChildren();
+  const edges = onto.edges.map(([s, o]) => s + '>' + o);
+  const baseEdges = base ? base.edges.map(([s, o]) => s + '>' + o) : edges;
+  const concepts = [...new Set([...onto.concepts, ...(base ? base.concepts : [])])];
+  const parent = {};
+  for (const [s, o] of onto.edges) if (!parent[s]) parent[s] = o;
+  const kids = {};
+  for (const c of concepts) kids[c] = [];
+  for (const c of concepts) if (parent[c] && kids[parent[c]]) kids[parent[c]].push(c);
+  for (const c in kids) kids[c].sort();
+  const order = ['Material', 'Temperature'];
+  const roots = concepts.filter((c) => !parent[c] || !concepts.includes(parent[c])).sort((a, b) => {
+    const ia = order.indexOf(a), ib = order.indexOf(b);
+    return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib) || a.localeCompare(b);
+  });
+  const pos = {}; let slot = 0; let maxDepth = 0;
+  const place = (c, d, seen) => {
+    if (seen.has(c)) return; seen.add(c);
+    maxDepth = Math.max(maxDepth, d);
+    if (!kids[c].length) { pos[c] = { x: slot++, y: d }; return; }
+    kids[c].forEach((k) => place(k, d + 1, seen));
+    const xs = kids[c].map((k) => pos[k] && pos[k].x).filter((x) => x !== undefined);
+    pos[c] = { x: xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : slot++, y: d };
+  };
+  const seen = new Set();
+  roots.forEach((r) => { place(r, 0, seen); slot += 0.4; });
+  const W = 96, H = 64, padX = 54, padY = 22;
+  const width = Math.max(slot, 1) * W + padX * 2 - W * 0.4, height = (maxDepth + 1) * H + padY * 2;
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  const xy = (c) => [padX + pos[c].x * W, padY + 14 + pos[c].y * H];
+  const line = (s, o, cls) => { if (!pos[s] || !pos[o]) return; const [x1, y1] = xy(s), [x2, y2] = xy(o);
+    svg.append(sv('path', { d: `M${x1},${y1 - 12} C${x1},${(y1 + y2) / 2} ${x2},${(y1 + y2) / 2} ${x2},${y2 + 12}`, class: 'edge ' + cls })); };
+  for (const [s, o] of onto.edges) {
+    const isNew = base && !baseEdges.includes(s + '>' + o);
+    line(s, o, isNew ? (mode === 'honest' ? 'honest-added' : 'added') : '');
+  }
+  if (base) for (const [s, o] of base.edges) if (!edges.includes(s + '>' + o)) line(s, o, 'removed');
+  for (const c of concepts) {
+    if (!pos[c]) continue;
+    const [x, y] = xy(c); const w = Math.max(54, c.length * 7.4 + 16);
+    const isNew = base && !base.concepts.includes(c);
+    const cls = 'cn' + (isNew ? (mode === 'honest' ? ' honest-new' : ' new') : '') + (roots.includes(c) && (c === 'Material' || c === 'Temperature') ? ' root' : '');
+    svg.append(sv('g', { class: cls }, sv('rect', { x: x - w / 2, y: y - 12, width: w, height: 24, rx: 6 }), sv('text', { x, y: y + 4, 'text-anchor': 'middle' }, c)));
+  }
+}
+
+// ---------- answers ----------
+const items = (a) => (a || '').split('; ').filter(Boolean);
+function answerView(answer, base, origin) {
+  const box = el('div', { class: 'answer' });
+  if (origin) box.append(el('span', { class: 'chip ' + (origin === 'cache' ? 'cache' : '') }, origin === 'cache' ? 'from MOIRA\'s cache' : 'agents did the work'));
+  const now = items(answer), was = base ? items(base) : now;
+  const show = (t, cls) => { const m = t.match(/^(.*?) \(MatOnto: (.*)\)$/);
+    return el('span', { class: 'item ' + cls }, m ? m[1] : t, m ? el('small', {}, ' ≈ ' + m[2]) : null); };
+  for (const t of now) box.append(show(t, base && !was.includes(t) ? 'added' : ''));
+  if (base) for (const t of was) if (!now.includes(t)) box.append(show(t, 'gone'));
+  if (!now.length) box.append(el('span', { class: 'muted' }, 'no answer'));
+  return box;
+}
+
+// ---------- walkthrough ----------
+const NODES = {
+  user: [70, 52], kroma: [70, 160], moira: [70, 268], cache: [200, 340],
+  mneme: [330, 170], aegis: [560, 170], attacker: [560, 52], ontodb: [400, 336], hermes: [560, 300],
+};
+const LINKS = [['user', 'mneme'], ['kroma', 'mneme'], ['moira', 'mneme'], ['moira', 'cache'], ['aegis', 'mneme'],
+  ['aegis', 'ontodb'], ['mneme', 'ontodb'], ['attacker', 'aegis'], ['hermes', 'ontodb', 'planned']];
+function drawDiagram(step) {
+  const svg = $('#diagram'); svg.replaceChildren();
+  const actors = new Set(step.actors);
+  if (step.n === 4) actors.add('attacker');
+  if (step.events.some((e) => e.ask && e.ask.origin === 'cache')) actors.add('cache');
+  if (step.n === 1 || step.n === 3) actors.add('user');
+  for (const [a, b, kind] of LINKS) {
+    const [x1, y1] = NODES[a], [x2, y2] = NODES[b];
+    const on = actors.has(a) && actors.has(b);
+    const c = CAST[a] ? CAST[a][2] : 'var(--c-moira)';
+    svg.append(sv('line', { x1, y1, x2, y2, class: 'link' + (on ? ' on' : '') + (kind ? ' planned' : ''), style: `--c:${c}` }));
+  }
+  const box = (k, label, role, c, w = 118) => {
+    const [x, y] = NODES[k]; const on = actors.has(k);
+    svg.append(sv('g', { class: 'node' + (on ? ' on' : '') + (k === 'hermes' ? ' off' : ''), style: `--c:${c}` },
+      sv('rect', { x: x - w / 2, y: y - 24, width: w, height: 48, rx: 9 }),
+      sv('text', { x, y: y - 3, 'text-anchor': 'middle', class: 'nm', style: `fill:${c}` }, label),
+      sv('text', { x, y: y + 13, 'text-anchor': 'middle', class: 'rl' }, role)));
+  };
+  for (const k of ['user', 'kroma', 'moira', 'aegis', 'attacker', 'ontodb', 'hermes']) box(k, CAST[k][0], k === 'hermes' ? 'planned' : CAST[k][1], CAST[k][2]);
+  box('cache', 'MOIRA cache', 'hot · short · long', 'var(--c-moira)', 130);
+  // mneme as the big centre
+  const [mx, my] = NODES.mneme; const on = true;
+  svg.append(sv('g', { class: 'node on', style: '--c:var(--c-mneme)' },
+    sv('rect', { x: mx - 86, y: my - 52, width: 172, height: 104, rx: 12 }),
+    sv('text', { x: mx, y: my - 22, 'text-anchor': 'middle', class: 'nm', style: 'fill:var(--c-mneme);font-size:15px' }, 'Mneme'),
+    sv('text', { x: mx, y: my - 4, 'text-anchor': 'middle', class: 'rl' }, 'one append-only log'),
+    sv('text', { x: mx, y: my + 18, 'text-anchor': 'middle', class: 'nm', style: 'font-family:var(--f-mono);font-size:12px' }, `lsn ${step.lsn}`),
+    sv('text', { x: mx, y: my + 36, 'text-anchor': 'middle', class: 'rl' }, Object.entries(step.tiers).map(([t, n]) => `${t} ${n}`).join(' · '))));
+}
+
+let cur = 0, timer = null, selected = null;
+const stepBtns = steps.map((s, i) => {
+  const b = el('button', { 'aria-label': `Step ${s.n}: ${s.title}`, class: s.n === 4 ? 'attack' : '', onclick: () => go(i) }, String(s.n));
+  $('#steps').append(b); return b;
+});
+$('#prev').onclick = () => go(Math.max(0, cur - 1));
+$('#next').onclick = () => go(Math.min(steps.length - 1, cur + 1));
+$('#play').onclick = () => {
+  if (timer) { clearInterval(timer); timer = null; $('#play').textContent = 'Play'; return; }
+  if (cur === steps.length - 1) go(0);
+  $('#play').textContent = 'Pause';
+  timer = setInterval(() => { if (cur >= steps.length - 1) { clearInterval(timer); timer = null; $('#play').textContent = 'Play'; return; } go(cur + 1); }, 3200);
+};
+$('#receipts').onchange = () => renderMemory(steps[cur]);
+
+function go(i) {
+  cur = i; const s = steps[i];
+  stepBtns.forEach((b, j) => b.toggleAttribute('aria-current', j === i) || (j === i && b.setAttribute('aria-current', 'step')));
+  stepBtns.forEach((b, j) => { if (j === i) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#steplabel').textContent = `Step ${s.n} of ${steps.length - 1}`;
+  $('#steptitle').textContent = s.title;
+  $('#steptext').textContent = s.text;
+  $('#feed').replaceChildren(...s.events.map((e) => {
+    const c = CAST[e.c] ? CAST[e.c][2] : 'var(--muted)';
+    return el('div', { class: 'say', style: `--c:${c}` }, el('span', { class: 'who2' }, CAST[e.c] ? CAST[e.c][0] : e.c), el('span', { class: 'txt' }, e.say));
+  }));
+  drawDiagram(s);
+  // answer: latest ask up to this step
+  let ask = null;
+  for (let j = i; j >= 0 && !ask; j--) { const a = steps[j].events.filter((e) => e.ask); if (a.length) ask = a[a.length - 1].ask; }
+  const ab = $('#answer'); ab.replaceChildren();
+  if (ask) {
+    const poisoned = ask.answer !== T.honest_answer && i >= 3;
+    ab.append(answerView(ask.answer, i >= 3 ? T.honest_answer : null, ask.origin));
+    ab.append(el('p', { class: 'muted', style: 'margin-top:8px;font-size:13px' }, poisoned ? 'Red marks differ from the honest answer: concepts the attack added, and struck-through ones it took away.' :
+      (i >= 3 ? 'The honest answer. Each concept shows the MatOnto concept KROMA aligned it to.' : 'Each concept shows the MatOnto concept KROMA aligned it to.')));
+  } else ab.append(el('p', { class: 'muted' }, 'Nobody has asked yet.'));
+  // ontology
+  const base = i === 3 ? steps[2].ontology : i >= 4 ? honestOnto : null;
+  drawOntology($('#onto'), s.ontology, base, i === 3 ? 'honest' : 'attack');
+  // gauges
+  const g = $('#gauges'); g.replaceChildren();
+  const harmPct = Math.min(1, Math.max(0, s.harm)) * 100;
+  g.append(el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Aegis harm'), el('span', { class: 'v', style: s.harm > 0.05 ? 'color:var(--bad)' : '' }, fmt(s.harm)),
+    el('div', { class: 'bar', style: `--c:${s.harm > 0.05 ? 'var(--bad)' : 'var(--ok)'}` }, el('span', { style: `width:${harmPct}%` }), el('em', { style: 'left:5%' })),
+    el('span', { class: 'muted', style: 'font-size:11.5px' }, 'alarm above 0.05')));
+  g.append(el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Ontology'), el('span', { class: 'v' }, s.ontology.version), el('span', { class: 'muted', style: 'font-size:11.5px' }, `${s.ontology.concepts.length} concepts · ${s.ontology.edges.length} edges`)));
+  g.append(el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'MOIRA cache'), el('span', { class: 'v' }, `${s.cache.hits} / ${s.cache.misses}`), el('span', { class: 'muted', style: 'font-size:11.5px' }, `hits / misses · ${s.cache.rebuilds} rebuilds`)));
+  g.append(el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Short-term memory'), el('span', { class: 'v' }, `${s.tier_stats.hits + s.tier_stats.warm}`), el('span', { class: 'muted', style: 'font-size:11.5px' }, `uses · ${s.tier_stats.evictions} evicted · ${s.tier_stats.page_ins} paged in`)));
+  renderMemory(s);
+  // log
+  const log = $('#log'); log.replaceChildren();
+  log.append(el('thead', {}, el('tr', {}, ['lsn', 'op', 'by', 'kind', 'key', 'why'].map((h, k) => el('th', { class: k === 0 ? 'n' : '' }, h)))));
+  const tb = el('tbody');
+  for (const r of s.records) {
+    tb.append(el('tr', {}, el('td', { class: 'n' }, r.lsn), el('td', { class: 'mono op-' + r.op }, r.op + (r.op === 'move' ? ' → ' + r.tier : '')),
+      el('td', { class: 'mono', style: `color:${CAST[AGENT_COMPONENT(r.agent)][2]}` }, r.agent), el('td', { class: 'mono' }, r.kind), el('td', {}, r.key), el('td', { class: 'muted' }, r.reason)));
+  }
+  if (!s.records.length) tb.append(el('tr', {}, el('td', { colspan: 6, class: 'muted' }, 'Nothing new: a read-only step.')));
+  log.append(tb);
+}
+
+function renderMemory(s) {
+  const showReceipts = $('#receipts').checked;
+  const fresh = new Set(s.records.filter((r) => r.op === 'put' || r.op === 'restore').map((r) => r.memory));
+  const byId = Object.fromEntries(s.memories.map((m) => [m.id, m]));
+  const sel = selected && byId[selected] ? byId[selected] : null;
+  const lineage = new Set(sel ? sel.derived_from : []);
+  const usedBy = new Set(sel ? s.memories.filter((m) => m.derived_from.includes(sel.id)).map((m) => m.id) : []);
+  const box = $('#tiers'); box.replaceChildren();
+  const names = { short: 'Short-term', long: 'Long-term', archive: 'Archive' };
+  for (const t of ['short', 'long', 'archive']) {
+    const ms = s.memories.filter((m) => (m.tier || 'short') === t && (showReceipts || m.kind !== 'receipt'));
+    const col = el('div', { class: 'tier' }, el('header', {}, el('span', { class: 'label' }, names[t]), el('span', { class: 'mono muted' }, String(ms.length))));
+    for (const m of ms) {
+      const comp = KIND_COMPONENT[m.kind] || 'mneme';
+      const cls = ['mem', m.status, fresh.has(m.id) ? 'fresh' : '', sel && sel.id === m.id ? 'sel' : '', lineage.has(m.id) || usedBy.has(m.id) ? 'lin' : ''].join(' ');
+      col.append(el('button', { class: cls, style: `--c:${CAST[comp][2]}`, title: `${m.kind} ${m.key} (${m.status})`, onclick: () => { selected = selected === m.id ? null : m.id; renderMemory(s); } },
+        el('span', { class: 'k' }, `${m.kind} · ${m.status}`), el('span', { class: 'key' }, m.key)));
+    }
+    if (!ms.length) col.append(el('span', { class: 'muted', style: 'font-size:12px' }, 'empty'));
+    box.append(col);
+  }
+  const d = $('#memdetail'); d.replaceChildren();
+  if (!sel) { d.append(el('p', { class: 'muted', style: 'font-size:12.5px;margin-top:10px' }, 'Click a memory to see its body, who wrote it, what it was built from, and what was built on it. Ringed memories are new in this step; striped ones are stale.')); return; }
+  const refBtn = (r) => byId[r] ? el('button', { onclick: () => { selected = r; renderMemory(s); } }, `${byId[r].kind} · ${byId[r].key}`)
+    : el('span', { class: 'chip' }, r.startsWith('find:') ? 'read: ' + r.slice(5) : r);
+  d.append(el('div', { class: 'detail' },
+    el('div', { class: 'row' }, el('b', {}, `${sel.kind} · ${sel.key}`), el('span', { class: 'chip ' + (sel.status === 'live' ? 'ok' : 'warn') }, sel.status), el('span', { class: 'chip' }, sel.tier), el('span', { class: 'mono muted' }, sel.id)),
+    el('div', {}, el('span', { class: 'label' }, 'Written by '), el('span', { class: 'mono' }, sel.source)),
+    el('pre', {}, typeof sel.body === 'string' ? sel.body : JSON.stringify(sel.body, null, 1)),
+    el('div', {}, el('span', { class: 'label' }, 'Built from'), el('div', { class: 'refs' }, sel.derived_from.length ? sel.derived_from.map(refBtn) : el('span', { class: 'muted' }, 'nothing: a premise'))),
+    el('div', {}, el('span', { class: 'label' }, 'Built on it'), el('div', { class: 'refs' }, usedBy.size ? [...usedBy].map(refBtn) : el('span', { class: 'muted' }, 'nothing yet')))));
+}
+go(0);
+
+// ---------- ontology attack lab ----------
+const OA = T.counterfactual.ontology;
+const changed = OA.filter((r) => r.answer_changed);
+$('#labstats').append(
+  el('div', { class: 'stat' }, el('span', { class: 'label' }, 'Attacks run'), el('div', { class: 'v' }, OA.length), el('span', { class: 'muted', style: 'font-size:12.5px' }, 'each a full workflow run')),
+  el('div', { class: 'stat' }, el('span', { class: 'label' }, 'Changed the answer'), el('div', { class: 'v', style: 'color:var(--bad)' }, changed.length), el('span', { class: 'muted', style: 'font-size:12.5px' }, 'served to users without Aegis')),
+  el('div', { class: 'stat' }, el('span', { class: 'label' }, 'Caught and rolled back'), el('div', { class: 'v', style: 'color:var(--ok)' }, `${changed.filter((r) => r.alarmed && r.restored).length} / ${changed.length}`), el('span', { class: 'muted', style: 'font-size:12.5px' }, 'honest answer restored')),
+  el('div', { class: 'stat' }, el('span', { class: 'label' }, 'False alarms'), el('div', { class: 'v' }, OA.filter((r) => !r.answer_changed && r.alarmed).length), el('span', { class: 'muted', style: 'font-size:12.5px' }, `of ${OA.length - changed.length} harmless edits`)),
+);
+let pick = 'scripted', aegisOn = true;
+const pickBtns = [];
+const choice = (r, text, host) => { const b = el('button', { class: r.answer_changed ? 'hit' : '', 'aria-pressed': String(r.id === pick), title: r.label, onclick: () => choose(r.id) }, text); pickBtns.push([r.id, b]); host.append(b); };
+for (const r of OA) {
+  if (r.family === 'scripted') choice(r, 'Metal under Temperature + look-alike Metall', $('#c-scripted'));
+  if (r.family === 'remove') choice(r, r.label.replace('Remove ', ''), $('#c-remove'));
+  if (r.family === 'inject') choice(r, r.label.replace('Add ', '').replace(' under Material', '').replace(' under Alloy', ' (under Alloy)'), $('#c-inject'));
+}
+const rew = OA.filter((r) => r.family === 'rewire');
+const rows = [...new Set(rew.map((r) => r.id.split(':')[1]))], cols = [...new Set(rew.map((r) => r.id.split(':')[2]))].sort();
+const mx = $('#c-rewire');
+mx.append(el('thead', {}, el('tr', {}, el('th'), cols.map((c) => el('th', { scope: 'col' }, c)))));
+const mtb = el('tbody');
+for (const rname of rows) {
+  const tr = el('tr', {}, el('th', { scope: 'row' }, rname));
+  for (const c of cols) {
+    const r = rew.find((x) => x.id === `rewire:${rname}:${c}`);
+    if (!r) { tr.append(el('td', { class: 'na' })); continue; }
+    const b = el('button', { class: r.answer_changed ? 'hit' : '', 'aria-pressed': 'false', 'aria-label': r.label, title: `${r.label}: harm ${fmt(r.harm)}`, onclick: () => choose(r.id) }, r.answer_changed ? fmt(r.harm, 2).replace('0.', '.') : '·');
+    pickBtns.push([r.id, b]); tr.append(el('td', {}, b));
+  }
+  mtb.append(tr);
+}
+mx.append(mtb);
+
+function choose(id) { pick = id; for (const [k, b] of pickBtns) b.setAttribute('aria-pressed', String(k === id)); renderVerdict(); }
+function renderVerdict() {
+  const r = OA.find((x) => x.id === pick); const v = $('#verdict'); v.replaceChildren();
+  const seg = el('div', { class: 'seg', role: 'group', 'aria-label': 'Aegis' },
+    el('button', { 'aria-pressed': String(!aegisOn), onclick: () => { aegisOn = false; renderVerdict(); } }, 'Without Aegis'),
+    el('button', { 'aria-pressed': String(aegisOn), onclick: () => { aegisOn = true; renderVerdict(); } }, 'With Aegis'));
+  v.append(el('div', { class: 'row', style: 'justify-content:space-between' }, el('div', {}, el('span', { class: 'label' }, 'Counterfactual'), el('h2', {}, r.label)), seg));
+  v.append(el('div', { class: 'refs' }, r.edits.map((e) => el('span', { class: 'chip bad' }, e))));
+  const svg = sv('svg', { class: 'onto' }); drawOntology(svg, r.ontology, honestOnto, 'attack');
+  v.append(svg);
+  v.append(el('div', {}, el('span', { class: 'label' }, 'MOIRA answers, right after the attack'), answerView(r.answer_attacked, T.honest_answer, null)));
+  if (!r.answer_changed) {
+    v.append(el('div', { class: 'row' }, el('span', { class: 'chip ok' }, 'answer unchanged'), el('span', { class: 'muted', style: 'font-size:13px' },
+      `This edit doesn't touch what the question reads. Aegis's harm is ${fmt(r.harm)}, under the 0.05 threshold, so it raises no alarm.`)));
+    return;
+  }
+  if (!aegisOn) {
+    v.append(el('div', { class: 'row' }, el('span', { class: 'chip bad' }, 'poisoned answer stays'),
+      r.cache_served_poison ? el('span', { class: 'chip bad' }, 'cached: the reworded question gets it too') : null));
+    v.append(el('p', { class: 'note' }, 'Nothing measures harm, so nothing rolls back. MOIRA keeps serving this answer from its cache to anyone who asks, in any wording, until someone notices.'));
+    return;
+  }
+  v.append(el('div', { class: 'gauges' },
+    el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Harm'), el('span', { class: 'v', style: 'color:var(--bad)' }, fmt(r.harm)),
+      el('div', { class: 'bar', style: '--c:var(--bad)' }, el('span', { style: `width:${Math.min(100, r.harm * 100)}%` }), el('em', { style: 'left:5%' }))),
+    el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Rolled back to'), el('span', { class: 'v' }, `lsn ${r.rolled_back_to}`), el('span', { class: 'muted', style: 'font-size:11.5px' }, 'the accepted honest edit')),
+    el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Answers made stale'), el('span', { class: 'v' }, r.stale_answers), el('span', { class: 'muted', style: 'font-size:11.5px' }, 'derived from the poisoned version'))));
+  v.append(el('div', {}, el('span', { class: 'label' }, 'MOIRA answers after the rollback'), answerView(r.answer_after, T.honest_answer, null)));
+  v.append(el('div', { class: 'row' }, el('span', { class: 'chip ' + (r.restored ? 'ok' : 'bad') }, r.restored ? 'honest answer restored' : 'not restored'), el('span', { class: 'mono muted' }, `${r.seconds} s for the whole run`)));
+}
+renderVerdict();
+
+// ---------- memory attacks ----------
+const MA = T.counterfactual.memory;
+let defended = true;
+$('#def-off').onclick = () => { defended = false; renderCards(); };
+$('#def-on').onclick = () => { defended = true; renderCards(); };
+function renderCards() {
+  $('#def-off').setAttribute('aria-pressed', String(!defended)); $('#def-on').setAttribute('aria-pressed', String(defended));
+  const host = $('#memcards'); host.replaceChildren();
+  for (const r of MA.filter((x) => x.defended === defended)) {
+    const ops = Object.entries(r.ops_after_attack);
+    const healed = !r.answer_changed && (r.ops_after_attack.restore || 0) > 0 && !r.blocked;
+    let status;
+    if (r.blocked) status = el('span', { class: 'chip ok' }, 'blocked before it was written');
+    else if (r.answer_changed && !r.correct_after) status = el('span', { class: 'chip bad' }, 'MOIRA serves the forged answer');
+    else if (r.answer_changed && r.correct_after) status = el('span', { class: 'chip warn' }, 'poisoned, then repaired');
+    else status = el('span', { class: 'chip ' + (r.caught.length || healed ? 'ok' : 'warn') }, healed ? 'agents redid the work' : r.caught.length ? 'answer intact, attack caught' : 'answer intact, attack unseen');
+    host.append(el('div', { class: 'panel card' },
+      el('div', { class: 'row', style: 'justify-content:space-between' }, el('h3', {}, r.label), status),
+      el('p', { class: 'muted', style: 'font-size:13px' }, r.detail),
+      el('div', { class: 'prim' }, r.primitive),
+      el('div', {}, el('span', { class: 'label' }, 'MOIRA answers after the attack'), answerView(r.answer_attacked, T.honest_answer, r.origin_attacked)),
+      r.caught.length ? el('div', {}, el('span', { class: 'label' }, 'Caught by'), el('div', { class: 'caught' }, r.caught.map((c) => el('div', {}, c)))) :
+        el('p', { class: 'note' }, defended ? 'No defence fired.' : 'No defences are running.'),
+      r.repair ? el('div', { class: 'row' }, el('span', { class: 'chip ok' }, `repair: ${r.repair.restored} restored, ${r.repair.quarantined} quarantined`), el('span', { class: 'mono muted' }, `probe score ${fmt(r.repair.score_after, 2)}`)) : null,
+      healed ? el('p', { class: 'note' }, `The retracted match's request was still open, so KROMA redid it and Mneme restored the identical memory: ${r.ops_after_attack.restore} memories came back.`) : null,
+      r.id === 'tamper' && !defended ? el('p', { class: 'note' }, 'MOIRA still answers correctly, from its own cached copy. The log on disk is corrupt, and nothing notices until something reads it.') : null,
+      el('div', { class: 'row' }, el('span', { class: 'label' }, 'log after the attack'), ops.length ? ops.map(([k, n]) => el('span', { class: 'chip' }, `${k} ${n}`)) : el('span', { class: 'chip' }, 'nothing written'),
+        el('span', { class: 'chip ' + (r.correct_after ? 'ok' : 'bad') }, r.correct_after ? 'correct at the end' : 'wrong at the end'))));
+  }
+}
+renderCards();
+
+// ---------- results ----------
+const R = T.results; const host = $('#results');
+const table = (head, rows, opts = {}) => el('div', { class: 'scroll' }, el('table', {},
+  el('thead', {}, el('tr', {}, head.map(([h, n]) => el('th', { class: n ? 'n' : '' }, h)))),
+  el('tbody', {}, rows.map((r, i) => el('tr', { class: opts.best === i ? 'best' : '' }, r.map((c, j) => el('td', { class: head[j][1] ? 'n' : '' }, c)))))));
+const section = (who, title, note, body, src) => el('div', { class: 'panel', style: `--c:${CAST[who][2]}` },
+  el('div', { class: 'row', style: 'margin-bottom:6px' }, el('span', { class: 'who', style: `--c:${CAST[who][2]}` }, el('i'), el('b', {}, CAST[who][0])), el('h2', {}, title)),
+  el('p', { class: 'note', style: 'margin-bottom:10px' }, note), body, el('p', { class: 'mono muted', style: 'margin-top:8px;font-size:11.5px' }, src));
+const money = (x) => x === null || x === undefined ? 'local' : '$' + Number(x).toFixed(4);
+
+host.append(section('moira', 'Which local model answers "what kinds of X" best?',
+  'Eight mouse-anatomy questions through MOIRA\'s agent on local Ollama models. Each model has a fresh workspace and cache. Local models have no per-token price, so cost is tokens and model seconds.',
+  R.moira_agent_qa ? table([['Model'], ['Recall', 1], ['Input tokens / q', 1], ['Output tokens / q', 1], ['Model s / q', 1], ['Wall s', 1]],
+    R.moira_agent_qa.map((r) => [r.model.replace('ollama:', ''), fmt(r.recall), r.input_tokens, r.output_tokens, fmt(r.model_seconds, 2), fmt(r.wall_seconds, 1)]), { best: 0 })
+    : el('p', { class: 'muted' }, 'Not on this machine.'), 'moira/results/agent_qa/2026-10-16.json'));
+
+host.append(section('aegis', 'Attacks on real ontologies',
+  'The worst two-edit chain Aegis finds on each ontology, whether the detector caught it, and what the search cost in scoring calls (exact against grouped).',
+  table([['Ontology'], ['Concepts', 1], ['Worst harm', 1], ['Detected'], ['Restored'], ['Inference amplification', 1], ['Exact calls', 1], ['Grouped calls', 1], ['Seconds', 1]],
+    R.aegis_ontologies.map((r) => [r.ontology, r.concepts, fmt(r.best_harm), r.detected ? 'yes' : 'no', r.restored ? 'yes' : 'no', fmt(r.amplification, 2) + '×', r.exact_calls.toLocaleString(), r.group_calls.toLocaleString(), fmt(r.seconds, 1)])),
+  'aegis/results/real_ontologies/2026-10-16.json'));
+
+const md = R.aegis_memory_defense;
+host.append(section('aegis', 'Repairing an attacked memory',
+  '20 random attacks on a shared memory. Repair by attribution reverts only what hurt; rollback reverts everything after the last healthy commit.',
+  table([['Repair'], ['Probe score after', 1], ['Honest work kept', 1], ['Probe runs', 1]],
+    Object.entries(md).map(([k, v]) => [k, fmt(v.score_after), fmt(v.honest_after_kept), fmt(v.probe_runs, 1)]), { best: 0 }),
+  'aegis/results/memory_defense/2026-10-16.json'));
+
+const runs = Object.entries(R.aegis_costs.by_run);
+host.append(section('aegis', 'Every Claude call Aegis has made',
+  `${R.aegis_costs.calls} calls through the Claude Code CLI, priced at list rates with cache reads and writes. Superseded runs stay in the ledger, labelled.`,
+  table([['Experiment / run'], ['Calls', 1], ['Cost', 1]], [...runs.map(([k, v]) => [k, v.calls, money(v.cost_usd)]), [el('b', {}, 'Total'), el('b', {}, R.aegis_costs.calls), el('b', {}, money(R.aegis_costs.cost_usd))]]),
+  'aegis/results/costs/ledger.jsonl'));
+
+const pol = R.mneme_policies; const bestCap = Math.max(...pol.filter((r) => !r.policy.includes('promote')).map((r) => r.hit_rate));
+host.append(section('mneme', 'Which eviction policy keeps what agents need?',
+  'A synthetic agent-shaped workload replayed through the real store at a short-term capacity of 32. No model calls: cost is log records written and replay time.',
+  table([['Policy'], ['Hit rate', 1], ['Page-ins', 1], ['Evictions', 1], ['Peak working', 1], ['Log records', 1], ['Replay ms', 1]],
+    pol.map((r) => [r.policy, r.hit_rate === bestCap ? el('b', {}, fmt(r.hit_rate)) : fmt(r.hit_rate), r.paged_in, r.evicted, r.peak_working, r.records.toLocaleString(), fmt(r.seconds * 1000, 0)])),
+  'mneme/results/policies/2026-10-16.json · promotion policies hold more than the cap, so the bold best is among capped policies'));
+
+const hb = R.hermes_best_official;
+host.append(section('hermes', 'Verified SPARQL planning on CK26',
+  `Hermes is not wired into the live run yet. Its systems on the CK26 benchmark, F1 against cost per item; the best official entry, ${hb.system.replace(' (official)', '')}, reaches F1 ${hb.F1}.`,
+  table([['System'], ['Model'], ['F1', 1], ['LLM calls / item', 1], ['Input tokens / item', 1], ['Cost']],
+    R.hermes_ck26.slice().sort((a, b) => Number(b.F1 || 0) - Number(a.F1 || 0)).map((r) => [r.system, r.model, r.F1 || '—', r.calls, r.input_tokens, r.cost])),
+  'hermes/results/LEADERBOARD.md'));
+
+const kp = R.kroma_paper;
+host.append(section('kroma', 'What alignment costs',
+  'From the KROMA paper. In the live run above, KROMA\'s language-model debate stands as fixed verdicts, so it costs nothing there.',
+  table([['Stage'], ['Seconds', 1]], [['Inference, all benchmarks', kp.inference_seconds.toLocaleString()], ['Refinement, offline', kp.refinement_offline_seconds], ['Refinement, online', kp.refinement_online_seconds]]),
+  kp.source));
+})();
+</script>

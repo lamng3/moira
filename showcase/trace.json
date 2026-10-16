@@ -1,0 +1,7744 @@
+{
+ "storage": "OntoDB",
+ "honest_answer": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+ "steps": [
+  {
+   "n": 0,
+   "title": "Start",
+   "actors": [
+    "ontodb",
+    "aegis",
+    "mneme"
+   ],
+   "text": "OntoDB stores the materials ontology. Aegis versions it and writes each version into Mneme as a memory, so agents can derive their work from a version.",
+   "events": [
+    {
+     "c": "aegis",
+     "say": "watching materials@0"
+    }
+   ],
+   "records": [
+    {
+     "lsn": 1,
+     "op": "put",
+     "agent": "aegis",
+     "memory": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "reason": "",
+     "tier": "long"
+    }
+   ],
+   "ontology": {
+    "version": "materials@0",
+    "lsn": 0,
+    "concepts": [
+     "Alloy",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.0,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    }
+   ],
+   "tiers": {
+    "long": 1
+   },
+   "cache": {
+    "hits": 0,
+    "misses": 0,
+    "rebuilds": 0
+   },
+   "tier_stats": {
+    "hits": 0,
+    "warm": 0,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 0
+   },
+   "lsn": 1
+  },
+  {
+   "n": 1,
+   "title": "KROMA aligns the ontology with MatOnto",
+   "actors": [
+    "kroma",
+    "mneme"
+   ],
+   "text": "A user posts match requests to the shared memory. KROMA's matcher picks them up from the blackboard and writes a verdict for each pair.",
+   "events": [
+    {
+     "c": "kroma",
+     "say": "Metal ~ MetallicMaterial: same (0.94)",
+     "match": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true
+     }
+    },
+    {
+     "c": "kroma",
+     "say": "Polymer ~ Plastic: same (0.91)",
+     "match": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true
+     }
+    },
+    {
+     "c": "kroma",
+     "say": "Metal ~ Plastic: different (0.89)",
+     "match": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true
+     }
+    }
+   ],
+   "records": [
+    {
+     "lsn": 2,
+     "op": "put",
+     "agent": "user",
+     "memory": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 3,
+     "op": "put",
+     "agent": "user",
+     "memory": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 4,
+     "op": "put",
+     "agent": "user",
+     "memory": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 5,
+     "op": "put",
+     "agent": "kroma.matcher",
+     "memory": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 6,
+     "op": "put",
+     "agent": "kroma.matcher",
+     "memory": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "reason": "",
+     "tier": "archive"
+    },
+    {
+     "lsn": 7,
+     "op": "put",
+     "agent": "kroma.matcher",
+     "memory": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 8,
+     "op": "put",
+     "agent": "kroma.matcher",
+     "memory": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "reason": "",
+     "tier": "archive"
+    },
+    {
+     "lsn": 9,
+     "op": "put",
+     "agent": "kroma.matcher",
+     "memory": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 10,
+     "op": "put",
+     "agent": "kroma.matcher",
+     "memory": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "reason": "",
+     "tier": "archive"
+    }
+   ],
+   "ontology": {
+    "version": "materials@0",
+    "lsn": 0,
+    "concepts": [
+     "Alloy",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.0,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:d266a67c616d430d"
+     },
+     "derived_from": [
+      "m:be1ed3bc10c01bfc",
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:383543b70410e137"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:383543b70410e137"
+     },
+     "derived_from": [
+      "m:383543b70410e137",
+      "m:59b21404487c453a"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true,
+      "same_class": false
+     },
+     "derived_from": [
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:8614467959e212c5"
+     },
+     "derived_from": [
+      "m:6d810dc475dea47a",
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "archive"
+    }
+   ],
+   "tiers": {
+    "long": 1,
+    "short": 6,
+    "archive": 3
+   },
+   "cache": {
+    "hits": 0,
+    "misses": 0,
+    "rebuilds": 0
+   },
+   "tier_stats": {
+    "hits": 0,
+    "warm": 0,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 0
+   },
+   "lsn": 10
+  },
+  {
+   "n": 2,
+   "title": "Ask MOIRA, then ask again in other words",
+   "actors": [
+    "moira",
+    "mneme"
+   ],
+   "text": "MOIRA's answerer reads the hierarchy and KROMA's matches, and writes an answer derived from the current ontology version and every match it read. The reworded question is served from MOIRA's cache.",
+   "events": [
+    {
+     "c": "moira",
+     "say": "(agents) Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+     "ask": {
+      "question": "What kinds of material are there?",
+      "answer": "Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+      "origin": "agents",
+      "memory": "m:d93cb557669f09cc",
+      "used": [
+       "m:d93cb557669f09cc",
+       "m:558a827bef19a2ad",
+       "m:59b21404487c453a",
+       "m:be1ed3bc10c01bfc",
+       "m:e9a60f9003674925"
+      ],
+      "ms": 142.6
+     }
+    },
+    {
+     "c": "moira",
+     "say": "(cache) Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+     "ask": {
+      "question": "what kinds of material are there",
+      "answer": "Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+      "origin": "cache",
+      "memory": "m:d93cb557669f09cc",
+      "used": [
+       "m:d93cb557669f09cc",
+       "m:558a827bef19a2ad",
+       "m:59b21404487c453a",
+       "m:be1ed3bc10c01bfc",
+       "m:e9a60f9003674925"
+      ],
+      "ms": 0.0
+     }
+    }
+   ],
+   "records": [
+    {
+     "lsn": 11,
+     "op": "put",
+     "agent": "user",
+     "memory": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 12,
+     "op": "put",
+     "agent": "moira.answerer",
+     "memory": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 13,
+     "op": "put",
+     "agent": "moira.answerer",
+     "memory": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "",
+     "tier": "archive"
+    }
+   ],
+   "ontology": {
+    "version": "materials@0",
+    "lsn": 0,
+    "concepts": [
+     "Alloy",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.0,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:d266a67c616d430d"
+     },
+     "derived_from": [
+      "m:be1ed3bc10c01bfc",
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:383543b70410e137"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:383543b70410e137"
+     },
+     "derived_from": [
+      "m:383543b70410e137",
+      "m:59b21404487c453a"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true,
+      "same_class": false
+     },
+     "derived_from": [
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:8614467959e212c5"
+     },
+     "derived_from": [
+      "m:6d810dc475dea47a",
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "source": "user",
+     "body": {
+      "question": "What kinds of material are there?"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Metal\", \"subClassOf\", \"Material\"], [\"Pol\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:558a827bef19a2ad",
+      "m:59b21404487c453a",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:d93cb557669f09cc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "archive"
+    }
+   ],
+   "tiers": {
+    "long": 1,
+    "short": 8,
+    "archive": 4
+   },
+   "cache": {
+    "hits": 1,
+    "misses": 1,
+    "rebuilds": 0
+   },
+   "tier_stats": {
+    "hits": 8,
+    "warm": 2,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 0
+   },
+   "lsn": 13
+  },
+  {
+   "n": 3,
+   "title": "An honest edit: add Ceramic, align it",
+   "actors": [
+    "aegis",
+    "kroma",
+    "moira",
+    "mneme",
+    "ontodb"
+   ],
+   "text": "Ceramic is added under Material through Aegis, reviewed, and accepted as the detector's new baseline. The new version makes the old answer stale; KROMA aligns Ceramic; the answer is redone for the new version.",
+   "events": [
+    {
+     "c": "aegis",
+     "say": "version now materials@2; old answer stale"
+    },
+    {
+     "c": "kroma",
+     "say": "Ceramic ~ Ceramics: same (0.96)",
+     "match": {
+      "source": "Ceramic",
+      "target": "Ceramics",
+      "prediction": 1,
+      "confidence": 0.96,
+      "accepted": true
+     }
+    },
+    {
+     "c": "moira",
+     "say": "(cache) Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+     "ask": {
+      "question": "What kinds of material are there?",
+      "answer": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+      "origin": "cache",
+      "memory": "m:e1628ee14f4a4cf2",
+      "used": [
+       "m:e1628ee14f4a4cf2",
+       "m:59b21404487c453a",
+       "m:7f7fc62059510549",
+       "m:b04951653987ce47",
+       "m:be1ed3bc10c01bfc",
+       "m:e9a60f9003674925"
+      ],
+      "ms": 0.1
+     }
+    }
+   ],
+   "records": [
+    {
+     "lsn": 14,
+     "op": "put",
+     "agent": "aegis",
+     "memory": "m:216423abbfb4d675",
+     "kind": "ontology_version",
+     "key": "materials@1",
+     "reason": "",
+     "tier": "long"
+    },
+    {
+     "lsn": 15,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "reason": "superseded by materials@1",
+     "tier": ""
+    },
+    {
+     "lsn": 16,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "superseded by materials@1",
+     "tier": ""
+    },
+    {
+     "lsn": 17,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "superseded by materials@1",
+     "tier": ""
+    },
+    {
+     "lsn": 18,
+     "op": "put",
+     "agent": "aegis",
+     "memory": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "reason": "",
+     "tier": "long"
+    },
+    {
+     "lsn": 19,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:216423abbfb4d675",
+     "kind": "ontology_version",
+     "key": "materials@1",
+     "reason": "superseded by materials@2",
+     "tier": ""
+    },
+    {
+     "lsn": 20,
+     "op": "put",
+     "agent": "user",
+     "memory": "m:e227edff8ef2e409",
+     "kind": "match_request",
+     "key": "Ceramic|Ceramics",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 21,
+     "op": "move",
+     "agent": "mneme",
+     "memory": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "reason": "promoted",
+     "tier": "long"
+    },
+    {
+     "lsn": 22,
+     "op": "move",
+     "agent": "mneme",
+     "memory": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "reason": "promoted",
+     "tier": "long"
+    },
+    {
+     "lsn": 23,
+     "op": "move",
+     "agent": "mneme",
+     "memory": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "reason": "promoted",
+     "tier": "long"
+    },
+    {
+     "lsn": 24,
+     "op": "put",
+     "agent": "moira.answerer",
+     "memory": "m:4e33527c048490ae",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 25,
+     "op": "put",
+     "agent": "moira.answerer",
+     "memory": "m:1116f2fe08a30647",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "",
+     "tier": "archive"
+    },
+    {
+     "lsn": 26,
+     "op": "put",
+     "agent": "kroma.matcher",
+     "memory": "m:7f7fc62059510549",
+     "kind": "match",
+     "key": "Ceramic|Ceramics",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 27,
+     "op": "put",
+     "agent": "kroma.matcher",
+     "memory": "m:961556e00f1f2629",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:e227edff8ef2e409",
+     "reason": "",
+     "tier": "archive"
+    },
+    {
+     "lsn": 28,
+     "op": "stale",
+     "agent": "kroma.matcher",
+     "memory": "m:4e33527c048490ae",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "match 'Ceramic|Ceramics' changes a read this was built on",
+     "tier": ""
+    },
+    {
+     "lsn": 29,
+     "op": "stale",
+     "agent": "kroma.matcher",
+     "memory": "m:1116f2fe08a30647",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "match 'Ceramic|Ceramics' changes a read this was built on",
+     "tier": ""
+    },
+    {
+     "lsn": 30,
+     "op": "put",
+     "agent": "moira.answerer",
+     "memory": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 31,
+     "op": "put",
+     "agent": "moira.answerer",
+     "memory": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "",
+     "tier": "archive"
+    },
+    {
+     "lsn": 32,
+     "op": "move",
+     "agent": "mneme",
+     "memory": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "evicted from short-term memory",
+     "tier": "archive"
+    }
+   ],
+   "ontology": {
+    "version": "materials@2",
+    "lsn": 2,
+    "concepts": [
+     "Alloy",
+     "Ceramic",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "Ceramic",
+      "Material"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.0,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:d266a67c616d430d"
+     },
+     "derived_from": [
+      "m:be1ed3bc10c01bfc",
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:383543b70410e137"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:383543b70410e137"
+     },
+     "derived_from": [
+      "m:383543b70410e137",
+      "m:59b21404487c453a"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true,
+      "same_class": false
+     },
+     "derived_from": [
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:8614467959e212c5"
+     },
+     "derived_from": [
+      "m:6d810dc475dea47a",
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "source": "user",
+     "body": {
+      "question": "What kinds of material are there?"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Metal\", \"subClassOf\", \"Material\"], [\"Pol\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:558a827bef19a2ad",
+      "m:59b21404487c453a",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:d93cb557669f09cc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:216423abbfb4d675",
+     "kind": "ontology_version",
+     "key": "materials@1",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 1,
+      "digest": "0e87be001250d12b",
+      "action": "inject_concept(Ceramic)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 2,
+      "digest": "d7b851759f22e99f",
+      "action": "inject_relation(('Ceramic', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e227edff8ef2e409",
+     "kind": "match_request",
+     "key": "Ceramic|Ceramics",
+     "source": "user",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:4e33527c048490ae",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Ceramic\", \"subClassO\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:1116f2fe08a30647",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:4e33527c048490ae",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:7f7fc62059510549",
+     "kind": "match",
+     "key": "Ceramic|Ceramics",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics",
+      "prediction": 1,
+      "confidence": 0.96,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:961556e00f1f2629",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:e227edff8ef2e409",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:e227edff8ef2e409"
+     },
+     "derived_from": [
+      "m:7f7fc62059510549",
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:7f7fc62059510549",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:e1628ee14f4a4cf2",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "archive"
+    }
+   ],
+   "tiers": {
+    "short": 7,
+    "long": 4,
+    "archive": 5
+   },
+   "cache": {
+    "hits": 2,
+    "misses": 1,
+    "rebuilds": 2
+   },
+   "tier_stats": {
+    "hits": 10,
+    "warm": 6,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 1
+   },
+   "lsn": 32
+  },
+  {
+   "n": 4,
+   "title": "Attack: rewire Metal under Temperature, flood a look-alike",
+   "actors": [
+    "aegis",
+    "moira",
+    "mneme"
+   ],
+   "text": "An attacker with write access to the ontology moves Metal under Temperature and adds 'Metall' under Material. MOIRA answers from the poisoned ontology, and the poisoned answer is cached.",
+   "events": [
+    {
+     "c": "attacker",
+     "say": "remove Metal \u2291 Material \u00b7 add Metal \u2291 Temperature \u00b7 add concept Metall \u00b7 add Metall \u2291 Material"
+    },
+    {
+     "c": "moira",
+     "say": "(agents) Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)",
+     "ask": {
+      "question": "What kinds of material are there?",
+      "answer": "Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)",
+      "origin": "agents",
+      "memory": "m:588464be454f52a1",
+      "used": [
+       "m:588464be454f52a1",
+       "m:59b21404487c453a",
+       "m:61bdc5472bb6eab2",
+       "m:7f7fc62059510549",
+       "m:e9a60f9003674925"
+      ],
+      "ms": 193.8
+     }
+    },
+    {
+     "c": "moira",
+     "say": "(cache) Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)",
+     "ask": {
+      "question": "what kinds of material are there",
+      "answer": "Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)",
+      "origin": "cache",
+      "memory": "m:588464be454f52a1",
+      "used": [
+       "m:588464be454f52a1",
+       "m:59b21404487c453a",
+       "m:61bdc5472bb6eab2",
+       "m:7f7fc62059510549",
+       "m:e9a60f9003674925"
+      ],
+      "ms": 0.0
+     }
+    }
+   ],
+   "records": [
+    {
+     "lsn": 33,
+     "op": "put",
+     "agent": "aegis",
+     "memory": "m:b999fc187681eb52",
+     "kind": "ontology_version",
+     "key": "materials@3",
+     "reason": "",
+     "tier": "long"
+    },
+    {
+     "lsn": 34,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "reason": "superseded by materials@3",
+     "tier": ""
+    },
+    {
+     "lsn": 35,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "superseded by materials@3",
+     "tier": ""
+    },
+    {
+     "lsn": 36,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "superseded by materials@3",
+     "tier": ""
+    },
+    {
+     "lsn": 37,
+     "op": "put",
+     "agent": "aegis",
+     "memory": "m:5e07f1b022b158a9",
+     "kind": "ontology_version",
+     "key": "materials@4",
+     "reason": "",
+     "tier": "long"
+    },
+    {
+     "lsn": 38,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:b999fc187681eb52",
+     "kind": "ontology_version",
+     "key": "materials@3",
+     "reason": "superseded by materials@4",
+     "tier": ""
+    },
+    {
+     "lsn": 39,
+     "op": "put",
+     "agent": "aegis",
+     "memory": "m:6145fb308143a199",
+     "kind": "ontology_version",
+     "key": "materials@5",
+     "reason": "",
+     "tier": "long"
+    },
+    {
+     "lsn": 40,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:5e07f1b022b158a9",
+     "kind": "ontology_version",
+     "key": "materials@4",
+     "reason": "superseded by materials@5",
+     "tier": ""
+    },
+    {
+     "lsn": 41,
+     "op": "put",
+     "agent": "aegis",
+     "memory": "m:61bdc5472bb6eab2",
+     "kind": "ontology_version",
+     "key": "materials@6",
+     "reason": "",
+     "tier": "long"
+    },
+    {
+     "lsn": 42,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:6145fb308143a199",
+     "kind": "ontology_version",
+     "key": "materials@5",
+     "reason": "superseded by materials@6",
+     "tier": ""
+    },
+    {
+     "lsn": 43,
+     "op": "put",
+     "agent": "moira.answerer",
+     "memory": "m:588464be454f52a1",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "",
+     "tier": "short"
+    },
+    {
+     "lsn": 44,
+     "op": "put",
+     "agent": "moira.answerer",
+     "memory": "m:031f3be33d852e9b",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "",
+     "tier": "archive"
+    },
+    {
+     "lsn": 45,
+     "op": "move",
+     "agent": "mneme",
+     "memory": "m:7f7fc62059510549",
+     "kind": "match",
+     "key": "Ceramic|Ceramics",
+     "reason": "promoted",
+     "tier": "long"
+    }
+   ],
+   "ontology": {
+    "version": "materials@6",
+    "lsn": 6,
+    "concepts": [
+     "Alloy",
+     "Ceramic",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Metall",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "Ceramic",
+      "Material"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Temperature"
+     ],
+     [
+      "Metall",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.5,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:d266a67c616d430d"
+     },
+     "derived_from": [
+      "m:be1ed3bc10c01bfc",
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:383543b70410e137"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:383543b70410e137"
+     },
+     "derived_from": [
+      "m:383543b70410e137",
+      "m:59b21404487c453a"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true,
+      "same_class": false
+     },
+     "derived_from": [
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:8614467959e212c5"
+     },
+     "derived_from": [
+      "m:6d810dc475dea47a",
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "source": "user",
+     "body": {
+      "question": "What kinds of material are there?"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Metal\", \"subClassOf\", \"Material\"], [\"Pol\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:558a827bef19a2ad",
+      "m:59b21404487c453a",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:d93cb557669f09cc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:216423abbfb4d675",
+     "kind": "ontology_version",
+     "key": "materials@1",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 1,
+      "digest": "0e87be001250d12b",
+      "action": "inject_concept(Ceramic)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 2,
+      "digest": "d7b851759f22e99f",
+      "action": "inject_relation(('Ceramic', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:e227edff8ef2e409",
+     "kind": "match_request",
+     "key": "Ceramic|Ceramics",
+     "source": "user",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:4e33527c048490ae",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Ceramic\", \"subClassO\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:1116f2fe08a30647",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:4e33527c048490ae",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:7f7fc62059510549",
+     "kind": "match",
+     "key": "Ceramic|Ceramics",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics",
+      "prediction": 1,
+      "confidence": 0.96,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:961556e00f1f2629",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:e227edff8ef2e409",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:e227edff8ef2e409"
+     },
+     "derived_from": [
+      "m:7f7fc62059510549",
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:7f7fc62059510549",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:e1628ee14f4a4cf2",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:b999fc187681eb52",
+     "kind": "ontology_version",
+     "key": "materials@3",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 3,
+      "digest": "4c489eefe92f0f61",
+      "action": "remove_relation(('Metal', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:5e07f1b022b158a9",
+     "kind": "ontology_version",
+     "key": "materials@4",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 4,
+      "digest": "865867eaef7bad73",
+      "action": "inject_relation(('Metal', 'subClassOf', 'Temperature'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:6145fb308143a199",
+     "kind": "ontology_version",
+     "key": "materials@5",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 5,
+      "digest": "80df5c7f8a46c628",
+      "action": "inject_concept(Metall)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:61bdc5472bb6eab2",
+     "kind": "ontology_version",
+     "key": "materials@6",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 6,
+      "digest": "90d2c896df6826f5",
+      "action": "inject_relation(('Metall', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:588464be454f52a1",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)\", \"concepts\": [\"Material\", \"Ceramic\", \"Metall\", \"Polymer\"], \"edges\": [[\"Ceramic\", \"subClassOf\", \"Material\"], [\"Metall\", \"subClassOf\", \"Material\"], [\"Polymer\", \"subC\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metall\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "m:59b21404487c453a",
+      "m:61bdc5472bb6eab2",
+      "m:7f7fc62059510549",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:031f3be33d852e9b",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:588464be454f52a1",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "archive"
+    }
+   ],
+   "tiers": {
+    "short": 6,
+    "long": 5,
+    "archive": 5
+   },
+   "cache": {
+    "hits": 3,
+    "misses": 2,
+    "rebuilds": 3
+   },
+   "tier_stats": {
+    "hits": 12,
+    "warm": 14,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 1
+   },
+   "lsn": 45
+  },
+  {
+   "n": 5,
+   "title": "Aegis detects and rolls back",
+   "actors": [
+    "aegis",
+    "ontodb",
+    "mneme",
+    "moira"
+   ],
+   "text": "The detector's workload harm is 0.500, over its threshold of 0.05. Aegis rolls the ontology back to lsn 2, the honest edit. Every memory derived from the poisoned version goes stale, and MOIRA's cache drops the poisoned answer.",
+   "events": [
+    {
+     "c": "aegis",
+     "say": "harm 0.500 > 0.05: rolled back to lsn 2 (honest edit: 2)"
+    },
+    {
+     "c": "mneme",
+     "say": "1 poisoned answer(s) stale; cache rebuilds 4"
+    }
+   ],
+   "records": [
+    {
+     "lsn": 46,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:61bdc5472bb6eab2",
+     "kind": "ontology_version",
+     "key": "materials@6",
+     "reason": "aegis rolled materials back to lsn 2",
+     "tier": ""
+    },
+    {
+     "lsn": 47,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:588464be454f52a1",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "aegis rolled materials back to lsn 2",
+     "tier": ""
+    },
+    {
+     "lsn": 48,
+     "op": "stale",
+     "agent": "aegis",
+     "memory": "m:031f3be33d852e9b",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "aegis rolled materials back to lsn 2",
+     "tier": ""
+    },
+    {
+     "lsn": 49,
+     "op": "restore",
+     "agent": "aegis",
+     "memory": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "reason": "aegis rolled materials back to lsn 2",
+     "tier": ""
+    }
+   ],
+   "ontology": {
+    "version": "materials@2",
+    "lsn": 2,
+    "concepts": [
+     "Alloy",
+     "Ceramic",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "Ceramic",
+      "Material"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.0,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:d266a67c616d430d"
+     },
+     "derived_from": [
+      "m:be1ed3bc10c01bfc",
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:383543b70410e137"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:383543b70410e137"
+     },
+     "derived_from": [
+      "m:383543b70410e137",
+      "m:59b21404487c453a"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true,
+      "same_class": false
+     },
+     "derived_from": [
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:8614467959e212c5"
+     },
+     "derived_from": [
+      "m:6d810dc475dea47a",
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "source": "user",
+     "body": {
+      "question": "What kinds of material are there?"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Metal\", \"subClassOf\", \"Material\"], [\"Pol\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:558a827bef19a2ad",
+      "m:59b21404487c453a",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:d93cb557669f09cc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:216423abbfb4d675",
+     "kind": "ontology_version",
+     "key": "materials@1",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 1,
+      "digest": "0e87be001250d12b",
+      "action": "inject_concept(Ceramic)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 2,
+      "digest": "d7b851759f22e99f",
+      "action": "inject_relation(('Ceramic', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e227edff8ef2e409",
+     "kind": "match_request",
+     "key": "Ceramic|Ceramics",
+     "source": "user",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:4e33527c048490ae",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Ceramic\", \"subClassO\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:1116f2fe08a30647",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:4e33527c048490ae",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:7f7fc62059510549",
+     "kind": "match",
+     "key": "Ceramic|Ceramics",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics",
+      "prediction": 1,
+      "confidence": 0.96,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:961556e00f1f2629",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:e227edff8ef2e409",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:e227edff8ef2e409"
+     },
+     "derived_from": [
+      "m:7f7fc62059510549",
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:7f7fc62059510549",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:e1628ee14f4a4cf2",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:b999fc187681eb52",
+     "kind": "ontology_version",
+     "key": "materials@3",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 3,
+      "digest": "4c489eefe92f0f61",
+      "action": "remove_relation(('Metal', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:5e07f1b022b158a9",
+     "kind": "ontology_version",
+     "key": "materials@4",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 4,
+      "digest": "865867eaef7bad73",
+      "action": "inject_relation(('Metal', 'subClassOf', 'Temperature'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:6145fb308143a199",
+     "kind": "ontology_version",
+     "key": "materials@5",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 5,
+      "digest": "80df5c7f8a46c628",
+      "action": "inject_concept(Metall)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:61bdc5472bb6eab2",
+     "kind": "ontology_version",
+     "key": "materials@6",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 6,
+      "digest": "90d2c896df6826f5",
+      "action": "inject_relation(('Metall', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:588464be454f52a1",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)\", \"concepts\": [\"Material\", \"Ceramic\", \"Metall\", \"Polymer\"], \"edges\": [[\"Ceramic\", \"subClassOf\", \"Material\"], [\"Metall\", \"subClassOf\", \"Material\"], [\"Polymer\", \"subC\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metall\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "m:59b21404487c453a",
+      "m:61bdc5472bb6eab2",
+      "m:7f7fc62059510549",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:031f3be33d852e9b",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:588464be454f52a1",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    }
+   ],
+   "tiers": {
+    "short": 5,
+    "long": 5,
+    "archive": 4
+   },
+   "cache": {
+    "hits": 3,
+    "misses": 2,
+    "rebuilds": 4
+   },
+   "tier_stats": {
+    "hits": 12,
+    "warm": 14,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 1
+   },
+   "lsn": 49
+  },
+  {
+   "n": 6,
+   "title": "Ask again: the honest memory is restored",
+   "actors": [
+    "moira",
+    "mneme"
+   ],
+   "text": "The agents redo the work. Mneme recognises the result as the memory written before the attack and restores it, same id and all.",
+   "events": [
+    {
+     "c": "moira",
+     "say": "(agents) Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+     "ask": {
+      "question": "What kinds of material are there?",
+      "answer": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+      "origin": "agents",
+      "memory": "m:e1628ee14f4a4cf2",
+      "used": [
+       "m:e1628ee14f4a4cf2",
+       "m:59b21404487c453a",
+       "m:7f7fc62059510549",
+       "m:b04951653987ce47",
+       "m:be1ed3bc10c01bfc",
+       "m:e9a60f9003674925"
+      ],
+      "ms": 96.8
+     }
+    },
+    {
+     "c": "mneme",
+     "say": "same answer: True; same memory id: True"
+    }
+   ],
+   "records": [
+    {
+     "lsn": 50,
+     "op": "restore",
+     "agent": "moira.answerer",
+     "memory": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "reason": "",
+     "tier": ""
+    },
+    {
+     "lsn": 51,
+     "op": "restore",
+     "agent": "moira.answerer",
+     "memory": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "reason": "",
+     "tier": ""
+    }
+   ],
+   "ontology": {
+    "version": "materials@2",
+    "lsn": 2,
+    "concepts": [
+     "Alloy",
+     "Ceramic",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "Ceramic",
+      "Material"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.0,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:d266a67c616d430d"
+     },
+     "derived_from": [
+      "m:be1ed3bc10c01bfc",
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:383543b70410e137"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:383543b70410e137"
+     },
+     "derived_from": [
+      "m:383543b70410e137",
+      "m:59b21404487c453a"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true,
+      "same_class": false
+     },
+     "derived_from": [
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:8614467959e212c5"
+     },
+     "derived_from": [
+      "m:6d810dc475dea47a",
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "source": "user",
+     "body": {
+      "question": "What kinds of material are there?"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Metal\", \"subClassOf\", \"Material\"], [\"Pol\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:558a827bef19a2ad",
+      "m:59b21404487c453a",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:d93cb557669f09cc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:216423abbfb4d675",
+     "kind": "ontology_version",
+     "key": "materials@1",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 1,
+      "digest": "0e87be001250d12b",
+      "action": "inject_concept(Ceramic)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 2,
+      "digest": "d7b851759f22e99f",
+      "action": "inject_relation(('Ceramic', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e227edff8ef2e409",
+     "kind": "match_request",
+     "key": "Ceramic|Ceramics",
+     "source": "user",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:4e33527c048490ae",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Ceramic\", \"subClassO\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:1116f2fe08a30647",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:4e33527c048490ae",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:7f7fc62059510549",
+     "kind": "match",
+     "key": "Ceramic|Ceramics",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics",
+      "prediction": 1,
+      "confidence": 0.96,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:961556e00f1f2629",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:e227edff8ef2e409",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:e227edff8ef2e409"
+     },
+     "derived_from": [
+      "m:7f7fc62059510549",
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:7f7fc62059510549",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:e1628ee14f4a4cf2",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:b999fc187681eb52",
+     "kind": "ontology_version",
+     "key": "materials@3",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 3,
+      "digest": "4c489eefe92f0f61",
+      "action": "remove_relation(('Metal', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:5e07f1b022b158a9",
+     "kind": "ontology_version",
+     "key": "materials@4",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 4,
+      "digest": "865867eaef7bad73",
+      "action": "inject_relation(('Metal', 'subClassOf', 'Temperature'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:6145fb308143a199",
+     "kind": "ontology_version",
+     "key": "materials@5",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 5,
+      "digest": "80df5c7f8a46c628",
+      "action": "inject_concept(Metall)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:61bdc5472bb6eab2",
+     "kind": "ontology_version",
+     "key": "materials@6",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 6,
+      "digest": "90d2c896df6826f5",
+      "action": "inject_relation(('Metall', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:588464be454f52a1",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)\", \"concepts\": [\"Material\", \"Ceramic\", \"Metall\", \"Polymer\"], \"edges\": [[\"Ceramic\", \"subClassOf\", \"Material\"], [\"Metall\", \"subClassOf\", \"Material\"], [\"Polymer\", \"subC\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metall\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "m:59b21404487c453a",
+      "m:61bdc5472bb6eab2",
+      "m:7f7fc62059510549",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:031f3be33d852e9b",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:588464be454f52a1",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    }
+   ],
+   "tiers": {
+    "short": 6,
+    "long": 5,
+    "archive": 5
+   },
+   "cache": {
+    "hits": 3,
+    "misses": 3,
+    "rebuilds": 4
+   },
+   "tier_stats": {
+    "hits": 13,
+    "warm": 19,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 1
+   },
+   "lsn": 51
+  },
+  {
+   "n": 7,
+   "title": "A slow agent commits work built on the poisoned version",
+   "actors": [
+    "mneme",
+    "aegis"
+   ],
+   "text": "Aegis's version guard rejects any write derived from a stale ontology version.",
+   "events": [
+    {
+     "c": "mneme",
+     "say": "rejected: answer 'late' is derived from materials@6, which is stale"
+    }
+   ],
+   "records": [],
+   "ontology": {
+    "version": "materials@2",
+    "lsn": 2,
+    "concepts": [
+     "Alloy",
+     "Ceramic",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "Ceramic",
+      "Material"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.0,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:d266a67c616d430d"
+     },
+     "derived_from": [
+      "m:be1ed3bc10c01bfc",
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:383543b70410e137"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:383543b70410e137"
+     },
+     "derived_from": [
+      "m:383543b70410e137",
+      "m:59b21404487c453a"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true,
+      "same_class": false
+     },
+     "derived_from": [
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:8614467959e212c5"
+     },
+     "derived_from": [
+      "m:6d810dc475dea47a",
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "source": "user",
+     "body": {
+      "question": "What kinds of material are there?"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Metal\", \"subClassOf\", \"Material\"], [\"Pol\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:558a827bef19a2ad",
+      "m:59b21404487c453a",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:d93cb557669f09cc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:216423abbfb4d675",
+     "kind": "ontology_version",
+     "key": "materials@1",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 1,
+      "digest": "0e87be001250d12b",
+      "action": "inject_concept(Ceramic)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 2,
+      "digest": "d7b851759f22e99f",
+      "action": "inject_relation(('Ceramic', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e227edff8ef2e409",
+     "kind": "match_request",
+     "key": "Ceramic|Ceramics",
+     "source": "user",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:4e33527c048490ae",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Ceramic\", \"subClassO\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:1116f2fe08a30647",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:4e33527c048490ae",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:7f7fc62059510549",
+     "kind": "match",
+     "key": "Ceramic|Ceramics",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics",
+      "prediction": 1,
+      "confidence": 0.96,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:961556e00f1f2629",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:e227edff8ef2e409",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:e227edff8ef2e409"
+     },
+     "derived_from": [
+      "m:7f7fc62059510549",
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:7f7fc62059510549",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:e1628ee14f4a4cf2",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:b999fc187681eb52",
+     "kind": "ontology_version",
+     "key": "materials@3",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 3,
+      "digest": "4c489eefe92f0f61",
+      "action": "remove_relation(('Metal', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:5e07f1b022b158a9",
+     "kind": "ontology_version",
+     "key": "materials@4",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 4,
+      "digest": "865867eaef7bad73",
+      "action": "inject_relation(('Metal', 'subClassOf', 'Temperature'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:6145fb308143a199",
+     "kind": "ontology_version",
+     "key": "materials@5",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 5,
+      "digest": "80df5c7f8a46c628",
+      "action": "inject_concept(Metall)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:61bdc5472bb6eab2",
+     "kind": "ontology_version",
+     "key": "materials@6",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 6,
+      "digest": "90d2c896df6826f5",
+      "action": "inject_relation(('Metall', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:588464be454f52a1",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)\", \"concepts\": [\"Material\", \"Ceramic\", \"Metall\", \"Polymer\"], \"edges\": [[\"Ceramic\", \"subClassOf\", \"Material\"], [\"Metall\", \"subClassOf\", \"Material\"], [\"Polymer\", \"subC\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metall\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "m:59b21404487c453a",
+      "m:61bdc5472bb6eab2",
+      "m:7f7fc62059510549",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:031f3be33d852e9b",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:588464be454f52a1",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    }
+   ],
+   "tiers": {
+    "short": 6,
+    "long": 5,
+    "archive": 5
+   },
+   "cache": {
+    "hits": 3,
+    "misses": 3,
+    "rebuilds": 4
+   },
+   "tier_stats": {
+    "hits": 13,
+    "warm": 19,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 1
+   },
+   "lsn": 51
+  },
+  {
+   "n": 8,
+   "title": "The record",
+   "actors": [
+    "mneme",
+    "ontodb"
+   ],
+   "text": "Everything above is in one append-only log. OntoDB holds both the ontology and the memory, and answers SPARQL over the memory's provenance.",
+   "events": [
+    {
+     "c": "mneme",
+     "say": "51 records {'put': 28, 'stale': 15, 'move': 5, 'restore': 3}"
+    },
+    {
+     "c": "ontodb",
+     "say": "SPARQL: 1 memory derived from the poisoned version; memory db verify: ok; ontology db verify: ok"
+    }
+   ],
+   "records": [],
+   "ontology": {
+    "version": "materials@2",
+    "lsn": 2,
+    "concepts": [
+     "Alloy",
+     "Ceramic",
+     "Material",
+     "MeltingPoint",
+     "Metal",
+     "Polymer",
+     "Steel",
+     "Temperature"
+    ],
+    "edges": [
+     [
+      "Alloy",
+      "Metal"
+     ],
+     [
+      "Ceramic",
+      "Material"
+     ],
+     [
+      "MeltingPoint",
+      "Temperature"
+     ],
+     [
+      "Metal",
+      "Material"
+     ],
+     [
+      "Polymer",
+      "Material"
+     ],
+     [
+      "Steel",
+      "Alloy"
+     ]
+    ]
+   },
+   "harm": 0.0,
+   "memories": [
+    {
+     "id": "m:558a827bef19a2ad",
+     "kind": "ontology_version",
+     "key": "materials@0",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 0,
+      "digest": "00af842967b0146d",
+      "action": "base"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:d266a67c616d430d",
+     "kind": "match_request",
+     "key": "Metal|MetallicMaterial",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:383543b70410e137",
+     "kind": "match_request",
+     "key": "Polymer|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:8614467959e212c5",
+     "kind": "match_request",
+     "key": "Metal|Plastic",
+     "source": "user",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:be1ed3bc10c01bfc",
+     "kind": "match",
+     "key": "Metal|MetallicMaterial",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "MetallicMaterial",
+      "prediction": 1,
+      "confidence": 0.94,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e9a9c141650d02b6",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:d266a67c616d430d",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:d266a67c616d430d"
+     },
+     "derived_from": [
+      "m:be1ed3bc10c01bfc",
+      "m:d266a67c616d430d"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:59b21404487c453a",
+     "kind": "match",
+     "key": "Polymer|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Polymer",
+      "target": "Plastic",
+      "prediction": 1,
+      "confidence": 0.91,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:383543b70410e137"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:8d4498de49fc1c18",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:383543b70410e137",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:383543b70410e137"
+     },
+     "derived_from": [
+      "m:383543b70410e137",
+      "m:59b21404487c453a"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:6d810dc475dea47a",
+     "kind": "match",
+     "key": "Metal|Plastic",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Metal",
+      "target": "Plastic",
+      "prediction": 0,
+      "confidence": 0.89,
+      "accepted": true,
+      "same_class": false
+     },
+     "derived_from": [
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:d274d94d6d4dba24",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:8614467959e212c5",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:8614467959e212c5"
+     },
+     "derived_from": [
+      "m:6d810dc475dea47a",
+      "m:8614467959e212c5"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e9a60f9003674925",
+     "kind": "question",
+     "key": "What kinds of material are there?",
+     "source": "user",
+     "body": {
+      "question": "What kinds of material are there?"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:d93cb557669f09cc",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Metal\", \"subClassOf\", \"Material\"], [\"Pol\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:558a827bef19a2ad",
+      "m:59b21404487c453a",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:1a347c601c68d191",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:d93cb557669f09cc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:216423abbfb4d675",
+     "kind": "ontology_version",
+     "key": "materials@1",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 1,
+      "digest": "0e87be001250d12b",
+      "action": "inject_concept(Ceramic)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:b04951653987ce47",
+     "kind": "ontology_version",
+     "key": "materials@2",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 2,
+      "digest": "d7b851759f22e99f",
+      "action": "inject_relation(('Ceramic', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:e227edff8ef2e409",
+     "kind": "match_request",
+     "key": "Ceramic|Ceramics",
+     "source": "user",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics"
+     },
+     "derived_from": [],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:4e33527c048490ae",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"Ceramic\", \"subClassO\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:1116f2fe08a30647",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:4e33527c048490ae",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    },
+    {
+     "id": "m:7f7fc62059510549",
+     "kind": "match",
+     "key": "Ceramic|Ceramics",
+     "source": "kroma.matcher",
+     "body": {
+      "source": "Ceramic",
+      "target": "Ceramics",
+      "prediction": 1,
+      "confidence": 0.96,
+      "accepted": true,
+      "same_class": true
+     },
+     "derived_from": [
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "long"
+    },
+    {
+     "id": "m:961556e00f1f2629",
+     "kind": "receipt",
+     "key": "kroma.matcher:m:e227edff8ef2e409",
+     "source": "kroma.matcher",
+     "body": {
+      "agent": "kroma.matcher",
+      "input": "m:e227edff8ef2e409"
+     },
+     "derived_from": [
+      "m:7f7fc62059510549",
+      "m:e227edff8ef2e409"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:e1628ee14f4a4cf2",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel\", \"concepts\": [\"Material\", \"Alloy\", \"Ceramic\", \"Metal\", \"Polymer\", \"Steel\"], \"edges\": [[\"Alloy\", \"subClassOf\", \"Metal\"], [\"\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Alloy\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metal\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Steel\"}}",
+      "m:59b21404487c453a",
+      "m:7f7fc62059510549",
+      "m:b04951653987ce47",
+      "m:be1ed3bc10c01bfc",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "short"
+    },
+    {
+     "id": "m:e043356e87db30ec",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:e1628ee14f4a4cf2",
+      "m:e9a60f9003674925"
+     ],
+     "status": "live",
+     "tier": "archive"
+    },
+    {
+     "id": "m:b999fc187681eb52",
+     "kind": "ontology_version",
+     "key": "materials@3",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 3,
+      "digest": "4c489eefe92f0f61",
+      "action": "remove_relation(('Metal', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:5e07f1b022b158a9",
+     "kind": "ontology_version",
+     "key": "materials@4",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 4,
+      "digest": "865867eaef7bad73",
+      "action": "inject_relation(('Metal', 'subClassOf', 'Temperature'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:6145fb308143a199",
+     "kind": "ontology_version",
+     "key": "materials@5",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 5,
+      "digest": "80df5c7f8a46c628",
+      "action": "inject_concept(Metall)"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:61bdc5472bb6eab2",
+     "kind": "ontology_version",
+     "key": "materials@6",
+     "source": "aegis",
+     "body": {
+      "ontology": "materials",
+      "lsn": 6,
+      "digest": "90d2c896df6826f5",
+      "action": "inject_relation(('Metall', 'subClassOf', 'Material'))"
+     },
+     "derived_from": [],
+     "status": "stale",
+     "tier": "long"
+    },
+    {
+     "id": "m:588464be454f52a1",
+     "kind": "answer",
+     "key": "What kinds of material are there?",
+     "source": "moira.answerer",
+     "body": "{\"answer\": \"Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)\", \"concepts\": [\"Material\", \"Ceramic\", \"Metall\", \"Polymer\"], \"edges\": [[\"Ceramic\", \"subClassOf\", \"Material\"], [\"Metall\", \"subClassOf\", \"Material\"], [\"Polymer\", \"subC\u2026",
+     "derived_from": [
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Ceramic\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Metall\"}}",
+      "find:{\"kind\":\"match\",\"where\":{\"source\":\"Polymer\"}}",
+      "m:59b21404487c453a",
+      "m:61bdc5472bb6eab2",
+      "m:7f7fc62059510549",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "short"
+    },
+    {
+     "id": "m:031f3be33d852e9b",
+     "kind": "receipt",
+     "key": "moira.answerer:m:e9a60f9003674925",
+     "source": "moira.answerer",
+     "body": {
+      "agent": "moira.answerer",
+      "input": "m:e9a60f9003674925"
+     },
+     "derived_from": [
+      "m:588464be454f52a1",
+      "m:e9a60f9003674925"
+     ],
+     "status": "stale",
+     "tier": "archive"
+    }
+   ],
+   "tiers": {
+    "short": 6,
+    "long": 5,
+    "archive": 5
+   },
+   "cache": {
+    "hits": 3,
+    "misses": 3,
+    "rebuilds": 4
+   },
+   "tier_stats": {
+    "hits": 13,
+    "warm": 19,
+    "misses": 0,
+    "page_ins": 0,
+    "evictions": 1
+   },
+   "lsn": 51
+  }
+ ],
+ "final": {
+  "ops": {
+   "put": 28,
+   "stale": 15,
+   "move": 5,
+   "restore": 3
+  },
+  "cache_hits": 3,
+  "cache_misses": 3,
+  "ontodb_derived_from_poisoned": 1,
+  "ontodb_memory_verify": "verify: ok",
+  "ontodb_ontology_verify": "verify: ok",
+  "ontodb_equals_aegis": true
+ },
+ "generated": "2026-10-16 15:58:40",
+ "seconds": 5.3,
+ "model_calls": 0,
+ "projects": {
+  "moira": {
+   "commit": "19e7d76",
+   "tag": "v0.1.0"
+  },
+  "kroma": {
+   "commit": "02c26f9",
+   "tag": "v0.1.0"
+  },
+  "aegis": {
+   "commit": "1593293",
+   "tag": "v0.0.1"
+  },
+  "mneme": {
+   "commit": "6477fca",
+   "tag": "v0.1.0"
+  },
+  "ontodb": {
+   "commit": "80e521d",
+   "tag": "v0-scaffold"
+  },
+  "hermes": {
+   "commit": "8aae4b9",
+   "tag": "v0.2.0"
+  }
+ },
+ "gold": [
+  "Alloy",
+  "Ceramic",
+  "Metal",
+  "Polymer",
+  "Steel"
+ ],
+ "counterfactual": {
+  "ontology": [
+   {
+    "id": "scripted",
+    "family": "scripted",
+    "label": "The scripted attack (step 4)",
+    "edits": [
+     "remove Metal \u2291 Material",
+     "add Metal \u2291 Temperature",
+     "add concept Metall",
+     "add Metall \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@6",
+     "lsn": 6,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Metall",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Temperature"
+      ],
+      [
+       "Metall",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Ceramic (MatOnto: Ceramics); Metall; Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.5,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.008
+   },
+   {
+    "id": "remove:Alloy",
+    "family": "remove",
+    "label": "Remove Alloy \u2291 Metal",
+    "edits": [
+     "remove Alloy \u2291 Metal"
+    ],
+    "ontology": {
+     "version": "materials@3",
+     "lsn": 3,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.25,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "remove:Ceramic",
+    "family": "remove",
+    "label": "Remove Ceramic \u2291 Material",
+    "edits": [
+     "remove Ceramic \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@3",
+     "lsn": 3,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "remove:MeltingPoint",
+    "family": "remove",
+    "label": "Remove MeltingPoint \u2291 Temperature",
+    "edits": [
+     "remove MeltingPoint \u2291 Temperature"
+    ],
+    "ontology": {
+     "version": "materials@3",
+     "lsn": 3,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "remove:Metal",
+    "family": "remove",
+    "label": "Remove Metal \u2291 Material",
+    "edits": [
+     "remove Metal \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@3",
+     "lsn": 3,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Ceramic (MatOnto: Ceramics); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.429,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "remove:Polymer",
+    "family": "remove",
+    "label": "Remove Polymer \u2291 Material",
+    "edits": [
+     "remove Polymer \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@3",
+     "lsn": 3,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "remove:Steel",
+    "family": "remove",
+    "label": "Remove Steel \u2291 Alloy",
+    "edits": [
+     "remove Steel \u2291 Alloy"
+    ],
+    "ontology": {
+     "version": "materials@3",
+     "lsn": 3,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Alloy:Ceramic",
+    "family": "rewire",
+    "label": "Move Alloy under Ceramic",
+    "edits": [
+     "remove Alloy \u2291 Metal",
+     "add Alloy \u2291 Ceramic"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Ceramic"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Alloy:Material",
+    "family": "rewire",
+    "label": "Move Alloy under Material",
+    "edits": [
+     "remove Alloy \u2291 Metal",
+     "add Alloy \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Material"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Alloy:MeltingPoint",
+    "family": "rewire",
+    "label": "Move Alloy under MeltingPoint",
+    "edits": [
+     "remove Alloy \u2291 Metal",
+     "add Alloy \u2291 MeltingPoint"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "MeltingPoint"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.25,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Alloy:Polymer",
+    "family": "rewire",
+    "label": "Move Alloy under Polymer",
+    "edits": [
+     "remove Alloy \u2291 Metal",
+     "add Alloy \u2291 Polymer"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Polymer"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Alloy:Temperature",
+    "family": "rewire",
+    "label": "Move Alloy under Temperature",
+    "edits": [
+     "remove Alloy \u2291 Metal",
+     "add Alloy \u2291 Temperature"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Temperature"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.25,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Ceramic:Alloy",
+    "family": "rewire",
+    "label": "Move Ceramic under Alloy",
+    "edits": [
+     "remove Ceramic \u2291 Material",
+     "add Ceramic \u2291 Alloy"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Alloy"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Ceramic:MeltingPoint",
+    "family": "rewire",
+    "label": "Move Ceramic under MeltingPoint",
+    "edits": [
+     "remove Ceramic \u2291 Material",
+     "add Ceramic \u2291 MeltingPoint"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "MeltingPoint"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Ceramic:Metal",
+    "family": "rewire",
+    "label": "Move Ceramic under Metal",
+    "edits": [
+     "remove Ceramic \u2291 Material",
+     "add Ceramic \u2291 Metal"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Metal"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Ceramic:Polymer",
+    "family": "rewire",
+    "label": "Move Ceramic under Polymer",
+    "edits": [
+     "remove Ceramic \u2291 Material",
+     "add Ceramic \u2291 Polymer"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Polymer"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Ceramic:Steel",
+    "family": "rewire",
+    "label": "Move Ceramic under Steel",
+    "edits": [
+     "remove Ceramic \u2291 Material",
+     "add Ceramic \u2291 Steel"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Steel"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Ceramic:Temperature",
+    "family": "rewire",
+    "label": "Move Ceramic under Temperature",
+    "edits": [
+     "remove Ceramic \u2291 Material",
+     "add Ceramic \u2291 Temperature"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Temperature"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:MeltingPoint:Alloy",
+    "family": "rewire",
+    "label": "Move MeltingPoint under Alloy",
+    "edits": [
+     "remove MeltingPoint \u2291 Temperature",
+     "add MeltingPoint \u2291 Alloy"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Alloy"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); MeltingPoint; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:MeltingPoint:Ceramic",
+    "family": "rewire",
+    "label": "Move MeltingPoint under Ceramic",
+    "edits": [
+     "remove MeltingPoint \u2291 Temperature",
+     "add MeltingPoint \u2291 Ceramic"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Ceramic"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); MeltingPoint; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:MeltingPoint:Material",
+    "family": "rewire",
+    "label": "Move MeltingPoint under Material",
+    "edits": [
+     "remove MeltingPoint \u2291 Temperature",
+     "add MeltingPoint \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Material"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); MeltingPoint; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:MeltingPoint:Metal",
+    "family": "rewire",
+    "label": "Move MeltingPoint under Metal",
+    "edits": [
+     "remove MeltingPoint \u2291 Temperature",
+     "add MeltingPoint \u2291 Metal"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Metal"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); MeltingPoint; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:MeltingPoint:Polymer",
+    "family": "rewire",
+    "label": "Move MeltingPoint under Polymer",
+    "edits": [
+     "remove MeltingPoint \u2291 Temperature",
+     "add MeltingPoint \u2291 Polymer"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Polymer"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); MeltingPoint; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:MeltingPoint:Steel",
+    "family": "rewire",
+    "label": "Move MeltingPoint under Steel",
+    "edits": [
+     "remove MeltingPoint \u2291 Temperature",
+     "add MeltingPoint \u2291 Steel"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Steel"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); MeltingPoint; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Metal:Ceramic",
+    "family": "rewire",
+    "label": "Move Metal under Ceramic",
+    "edits": [
+     "remove Metal \u2291 Material",
+     "add Metal \u2291 Ceramic"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Ceramic"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Metal:MeltingPoint",
+    "family": "rewire",
+    "label": "Move Metal under MeltingPoint",
+    "edits": [
+     "remove Metal \u2291 Material",
+     "add Metal \u2291 MeltingPoint"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "MeltingPoint"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Ceramic (MatOnto: Ceramics); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.429,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Metal:Polymer",
+    "family": "rewire",
+    "label": "Move Metal under Polymer",
+    "edits": [
+     "remove Metal \u2291 Material",
+     "add Metal \u2291 Polymer"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Polymer"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Metal:Temperature",
+    "family": "rewire",
+    "label": "Move Metal under Temperature",
+    "edits": [
+     "remove Metal \u2291 Material",
+     "add Metal \u2291 Temperature"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Temperature"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Ceramic (MatOnto: Ceramics); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.429,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Polymer:Alloy",
+    "family": "rewire",
+    "label": "Move Polymer under Alloy",
+    "edits": [
+     "remove Polymer \u2291 Material",
+     "add Polymer \u2291 Alloy"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Alloy"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Polymer:Ceramic",
+    "family": "rewire",
+    "label": "Move Polymer under Ceramic",
+    "edits": [
+     "remove Polymer \u2291 Material",
+     "add Polymer \u2291 Ceramic"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Ceramic"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Polymer:MeltingPoint",
+    "family": "rewire",
+    "label": "Move Polymer under MeltingPoint",
+    "edits": [
+     "remove Polymer \u2291 Material",
+     "add Polymer \u2291 MeltingPoint"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "MeltingPoint"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Polymer:Metal",
+    "family": "rewire",
+    "label": "Move Polymer under Metal",
+    "edits": [
+     "remove Polymer \u2291 Material",
+     "add Polymer \u2291 Metal"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Metal"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Polymer:Steel",
+    "family": "rewire",
+    "label": "Move Polymer under Steel",
+    "edits": [
+     "remove Polymer \u2291 Material",
+     "add Polymer \u2291 Steel"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Steel"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Polymer:Temperature",
+    "family": "rewire",
+    "label": "Move Polymer under Temperature",
+    "edits": [
+     "remove Polymer \u2291 Material",
+     "add Polymer \u2291 Temperature"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Temperature"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Steel:Ceramic",
+    "family": "rewire",
+    "label": "Move Steel under Ceramic",
+    "edits": [
+     "remove Steel \u2291 Alloy",
+     "add Steel \u2291 Ceramic"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Ceramic"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Steel:Material",
+    "family": "rewire",
+    "label": "Move Steel under Material",
+    "edits": [
+     "remove Steel \u2291 Alloy",
+     "add Steel \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Material"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Steel:MeltingPoint",
+    "family": "rewire",
+    "label": "Move Steel under MeltingPoint",
+    "edits": [
+     "remove Steel \u2291 Alloy",
+     "add Steel \u2291 MeltingPoint"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "MeltingPoint"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "rewire:Steel:Metal",
+    "family": "rewire",
+    "label": "Move Steel under Metal",
+    "edits": [
+     "remove Steel \u2291 Alloy",
+     "add Steel \u2291 Metal"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Metal"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Steel:Polymer",
+    "family": "rewire",
+    "label": "Move Steel under Polymer",
+    "edits": [
+     "remove Steel \u2291 Alloy",
+     "add Steel \u2291 Polymer"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Polymer"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": false,
+    "cache_served_poison": false,
+    "harm": 0.0,
+    "alarmed": false,
+    "rolled_back_to": null,
+    "stale_answers": 0,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "rewire:Steel:Temperature",
+    "family": "rewire",
+    "label": "Move Steel under Temperature",
+    "edits": [
+     "remove Steel \u2291 Alloy",
+     "add Steel \u2291 Temperature"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Temperature"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic)",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.111,
+    "alarmed": true,
+    "rolled_back_to": 2,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.007
+   },
+   {
+    "id": "inject:Metall",
+    "family": "inject",
+    "label": "Add Metall under Material",
+    "edits": [
+     "add concept Metall",
+     "add Metall \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Metall",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Metall",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Metall; Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "inject:Polymr",
+    "family": "inject",
+    "label": "Add Polymr under Material",
+    "edits": [
+     "add concept Polymr",
+     "add Polymr \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Polymr",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Polymr",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Polymr; Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "inject:Ceramik",
+    "family": "inject",
+    "label": "Add Ceramik under Material",
+    "edits": [
+     "add concept Ceramik",
+     "add Ceramik \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Ceramik",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "Ceramik",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Ceramik; Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "inject:Banana",
+    "family": "inject",
+    "label": "Add Banana under Material",
+    "edits": [
+     "add concept Banana",
+     "add Banana \u2291 Material"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Banana",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Banana",
+       "Material"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Banana; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "inject:Steel2",
+    "family": "inject",
+    "label": "Add Steel2 under Alloy",
+    "edits": [
+     "add concept Steel2",
+     "add Steel2 \u2291 Alloy"
+    ],
+    "ontology": {
+     "version": "materials@4",
+     "lsn": 4,
+     "concepts": [
+      "Alloy",
+      "Ceramic",
+      "Material",
+      "MeltingPoint",
+      "Metal",
+      "Polymer",
+      "Steel",
+      "Steel2",
+      "Temperature"
+     ],
+     "edges": [
+      [
+       "Alloy",
+       "Metal"
+      ],
+      [
+       "Ceramic",
+       "Material"
+      ],
+      [
+       "MeltingPoint",
+       "Temperature"
+      ],
+      [
+       "Metal",
+       "Material"
+      ],
+      [
+       "Polymer",
+       "Material"
+      ],
+      [
+       "Steel",
+       "Alloy"
+      ],
+      [
+       "Steel2",
+       "Alloy"
+      ]
+     ]
+    },
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel; Steel2",
+    "answer_changed": true,
+    "cache_served_poison": true,
+    "harm": 0.091,
+    "alarmed": true,
+    "rolled_back_to": 3,
+    "stale_answers": 1,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "restored": true,
+    "seconds": 0.006
+   }
+  ],
+  "memory": [
+   {
+    "id": "forge",
+    "defended": false,
+    "ops_after_attack": {
+     "put": 3,
+     "stale": 2,
+     "move": 2
+    },
+    "label": "Forge a match under the attacker's own name",
+    "detail": "mallory writes 'Polymer ~ MetallicMaterial, accepted' into the shared memory.",
+    "primitive": "inject(match 'Polymer|MetallicMaterial' as mallory)",
+    "blocked": null,
+    "records_written": 7,
+    "blast_radius": 0,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic, MetallicMaterial); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": true,
+    "caught": [],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic, MetallicMaterial); Steel",
+    "correct_after": false,
+    "seconds": 0.005
+   },
+   {
+    "id": "forge",
+    "defended": true,
+    "ops_after_attack": {},
+    "label": "Forge a match under the attacker's own name",
+    "detail": "mallory writes 'Polymer ~ MetallicMaterial, accepted' into the shared memory.",
+    "primitive": "inject(match 'Polymer|MetallicMaterial' as mallory)",
+    "blocked": "mallory is not a known writer; match 'Polymer|MetallicMaterial' has no live premise",
+    "records_written": 0,
+    "blast_radius": 0,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": false,
+    "caught": [
+     "guard: mallory is not a known writer; match 'Polymer|MetallicMaterial' has no live premise"
+    ],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.007
+   },
+   {
+    "id": "impersonate",
+    "defended": false,
+    "ops_after_attack": {
+     "put": 3,
+     "stale": 2,
+     "move": 2
+    },
+    "label": "Impersonate KROMA's matcher",
+    "detail": "The same forged match, written under 'kroma.matcher', with no premise.",
+    "primitive": "inject(match 'Polymer|MetallicMaterial' as kroma.matcher)",
+    "blocked": null,
+    "records_written": 7,
+    "blast_radius": 0,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic, MetallicMaterial); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": true,
+    "caught": [],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic, MetallicMaterial); Steel",
+    "correct_after": false,
+    "seconds": 0.005
+   },
+   {
+    "id": "impersonate",
+    "defended": true,
+    "ops_after_attack": {},
+    "label": "Impersonate KROMA's matcher",
+    "detail": "The same forged match, written under 'kroma.matcher', with no premise.",
+    "primitive": "inject(match 'Polymer|MetallicMaterial' as kroma.matcher)",
+    "blocked": "match 'Polymer|MetallicMaterial' has no live premise",
+    "records_written": 0,
+    "blast_radius": 0,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": false,
+    "caught": [
+     "guard: match 'Polymer|MetallicMaterial' has no live premise"
+    ],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "impersonate-premise",
+    "defended": false,
+    "ops_after_attack": {
+     "put": 3,
+     "stale": 2,
+     "move": 2
+    },
+    "label": "Impersonate KROMA with a stolen premise",
+    "detail": "The forged match, under KROMA's name, derived from the real Polymer|Plastic request.",
+    "primitive": "inject(match 'Polymer|MetallicMaterial' as kroma.matcher)",
+    "blocked": null,
+    "records_written": 7,
+    "blast_radius": 0,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic, MetallicMaterial); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": true,
+    "caught": [],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic, MetallicMaterial); Steel",
+    "correct_after": false,
+    "seconds": 0.005
+   },
+   {
+    "id": "impersonate-premise",
+    "defended": true,
+    "ops_after_attack": {
+     "put": 3,
+     "stale": 2,
+     "move": 2,
+     "restore": 1
+    },
+    "label": "Impersonate KROMA with a stolen premise",
+    "detail": "The forged match, under KROMA's name, derived from the real Polymer|Plastic request.",
+    "primitive": "inject(match 'Polymer|MetallicMaterial' as kroma.matcher)",
+    "blocked": null,
+    "records_written": 8,
+    "blast_radius": 0,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic, MetallicMaterial); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": true,
+    "caught": [
+     "laundering check: 3 live copies of a dead memory",
+     "probe monitor: score fell to 0.00"
+    ],
+    "repair": {
+     "quarantined": 0,
+     "restored": 1,
+     "score_after": 1.0
+    },
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.012
+   },
+   {
+    "id": "remove",
+    "defended": false,
+    "ops_after_attack": {
+     "retract": 1,
+     "stale": 3,
+     "restore": 4
+    },
+    "label": "Retract a true match",
+    "detail": "mallory retracts KROMA's 'Metal ~ MetallicMaterial' verdict.",
+    "primitive": "remove(m:be1ed3bc10c01bfc)",
+    "blocked": null,
+    "records_written": 8,
+    "blast_radius": 7,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": false,
+    "caught": [],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "remove",
+    "defended": true,
+    "ops_after_attack": {
+     "retract": 1,
+     "stale": 3,
+     "restore": 4
+    },
+    "label": "Retract a true match",
+    "detail": "mallory retracts KROMA's 'Metal ~ MetallicMaterial' verdict.",
+    "primitive": "remove(m:be1ed3bc10c01bfc)",
+    "blocked": null,
+    "records_written": 8,
+    "blast_radius": 7,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": false,
+    "caught": [
+     "probe monitor: score fell to 0.00"
+    ],
+    "repair": {
+     "quarantined": 0,
+     "restored": 0,
+     "score_after": 1.0
+    },
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.008
+   },
+   {
+    "id": "launder",
+    "defended": false,
+    "ops_after_attack": {
+     "put": 1,
+     "move": 2
+    },
+    "label": "Launder the answer",
+    "detail": "The honest answer is rewritten under MOIRA's name with no provenance, so invalidating its premises can no longer reach it.",
+    "primitive": "rewire(m:e1628ee14f4a4cf2)",
+    "blocked": null,
+    "records_written": 3,
+    "blast_radius": 0,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": false,
+    "caught": [],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "launder",
+    "defended": true,
+    "ops_after_attack": {},
+    "label": "Launder the answer",
+    "detail": "The honest answer is rewritten under MOIRA's name with no provenance, so invalidating its premises can no longer reach it.",
+    "primitive": "rewire(m:e1628ee14f4a4cf2)",
+    "blocked": "answer 'What kinds of material are there?' has no live premise",
+    "records_written": 0,
+    "blast_radius": 0,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": false,
+    "caught": [
+     "guard: answer 'What kinds of material are there?' has no live premise"
+    ],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.006
+   },
+   {
+    "id": "tamper",
+    "defended": false,
+    "ops_after_attack": {
+     "log unreadable: tampered": 1
+    },
+    "label": "Tamper with the stored answer on disk",
+    "detail": "The answer's body is edited in the log file, below the store and every guard.",
+    "primitive": "tamper(m:e1628ee14f4a4cf2)",
+    "blocked": null,
+    "records_written": 0,
+    "blast_radius": 1,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": false,
+    "caught": [],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.005
+   },
+   {
+    "id": "tamper",
+    "defended": true,
+    "ops_after_attack": {
+     "log unreadable: tampered": 1
+    },
+    "label": "Tamper with the stored answer on disk",
+    "detail": "The answer's body is edited in the log file, below the store and every guard.",
+    "primitive": "tamper(m:e1628ee14f4a4cf2)",
+    "blocked": null,
+    "records_written": 0,
+    "blast_radius": 1,
+    "answer_attacked": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "origin_attacked": "cache",
+    "answer_changed": false,
+    "caught": [
+     "audit: memory m:e1628ee14f4a4cf2 does not hash to its id (m:04c671a78835760a): the body was altered"
+    ],
+    "repair": null,
+    "answer_after": "Alloy; Ceramic (MatOnto: Ceramics); Metal (MatOnto: MetallicMaterial); Polymer (MatOnto: Plastic); Steel",
+    "correct_after": true,
+    "seconds": 0.006
+   }
+  ]
+ },
+ "results": {
+  "aegis_ontologies": [
+   {
+    "ontology": "MatProc",
+    "concepts": 127,
+    "best_harm": 0.8,
+    "detected": true,
+    "restored": true,
+    "amplification": 2.09,
+    "exact_calls": 128,
+    "group_calls": 253,
+    "seconds": 0.1
+   },
+   {
+    "ontology": "XRD",
+    "concepts": 354,
+    "best_harm": 0.4,
+    "detected": true,
+    "restored": true,
+    "amplification": 2.01,
+    "exact_calls": 355,
+    "group_calls": 445,
+    "seconds": 0.3
+   },
+   {
+    "ontology": "EBSD",
+    "concepts": 54,
+    "best_harm": 0.4,
+    "detected": true,
+    "restored": true,
+    "amplification": 0.5,
+    "exact_calls": 55,
+    "group_calls": 55,
+    "seconds": 0.0
+   },
+   {
+    "ontology": "Mouse anatomy",
+    "concepts": 2743,
+    "best_harm": 0.7454,
+    "detected": true,
+    "restored": true,
+    "amplification": 5.8,
+    "exact_calls": 2744,
+    "group_calls": 2227,
+    "seconds": 11.0
+   }
+  ],
+  "aegis_memory_defense": {
+   "attribution": {
+    "score_after": 1.0,
+    "honest_after_kept": 1.0,
+    "probe_runs": 13.3
+   },
+   "rollback": {
+    "score_after": 1.0,
+    "honest_after_kept": 0.0,
+    "probe_runs": 2
+   }
+  },
+  "aegis_costs": {
+   "calls": 69,
+   "cost_usd": 2.8436,
+   "by_run": {
+    "llm_agent/setup": {
+     "calls": 4,
+     "cost_usd": 1.6106
+    },
+    "llm_agent/ids": {
+     "calls": 20,
+     "cost_usd": 0.4141
+    },
+    "llm_agent/check": {
+     "calls": 5,
+     "cost_usd": 0.0209
+    },
+    "llm_agent/fixed-gold": {
+     "calls": 20,
+     "cost_usd": 0.1153
+    },
+    "llm_agent/labels": {
+     "calls": 20,
+     "cost_usd": 0.6826
+    }
+   }
+  },
+  "mneme_policies": [
+   {
+    "policy": "FIFO",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 260,
+    "promoted": 0,
+    "evicted": 540,
+    "paged_in": 212,
+    "peak_working": 32,
+    "records": 1112,
+    "seconds": 0.0435,
+    "hit_rate": 0.5508
+   },
+   {
+    "policy": "LRU",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 351,
+    "promoted": 0,
+    "evicted": 449,
+    "paged_in": 121,
+    "peak_working": 32,
+    "records": 930,
+    "seconds": 0.0406,
+    "hit_rate": 0.7436
+   },
+   {
+    "policy": "LFU",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 217,
+    "promoted": 0,
+    "evicted": 583,
+    "paged_in": 255,
+    "peak_working": 32,
+    "records": 1198,
+    "seconds": 0.0499,
+    "hit_rate": 0.4597
+   },
+   {
+    "policy": "Scored",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 256,
+    "promoted": 0,
+    "evicted": 544,
+    "paged_in": 216,
+    "peak_working": 32,
+    "records": 1120,
+    "seconds": 0.0592,
+    "hit_rate": 0.5424
+   },
+   {
+    "policy": "Forgetting",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 364,
+    "promoted": 0,
+    "evicted": 436,
+    "paged_in": 108,
+    "peak_working": 32,
+    "records": 904,
+    "seconds": 0.0465,
+    "hit_rate": 0.7712
+   },
+   {
+    "policy": "2Q",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 227,
+    "promoted": 0,
+    "evicted": 573,
+    "paged_in": 245,
+    "peak_working": 32,
+    "records": 1178,
+    "seconds": 0.0514,
+    "hit_rate": 0.4809
+   },
+   {
+    "policy": "ARC",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 313,
+    "promoted": 0,
+    "evicted": 487,
+    "paged_in": 159,
+    "peak_working": 32,
+    "records": 1006,
+    "seconds": 0.043,
+    "hit_rate": 0.6631
+   },
+   {
+    "policy": "Learned",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 350,
+    "promoted": 0,
+    "evicted": 450,
+    "paged_in": 122,
+    "peak_working": 32,
+    "records": 932,
+    "seconds": 0.0566,
+    "hit_rate": 0.7415
+   },
+   {
+    "policy": "LRU + promote used",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 422,
+    "promoted": 91,
+    "evicted": 289,
+    "paged_in": 50,
+    "peak_working": 121,
+    "records": 790,
+    "seconds": 0.099,
+    "hit_rate": 0.8941
+   },
+   {
+    "policy": "Scored + promote important",
+    "capacity": 32,
+    "uses": 472,
+    "hits": 409,
+    "promoted": 71,
+    "evicted": 320,
+    "paged_in": 63,
+    "peak_working": 103,
+    "records": 814,
+    "seconds": 0.071,
+    "hit_rate": 0.8665
+   }
+  ],
+  "moira_agent_qa": [
+   {
+    "model": "ollama:llama3.1",
+    "recall": 0.25,
+    "wall_seconds": 97.1,
+    "calls": 0.88,
+    "input_tokens": 241,
+    "output_tokens": 48,
+    "model_seconds": 6.25
+   },
+   {
+    "model": "ollama:mistral",
+    "recall": 0.2156,
+    "wall_seconds": 88.1,
+    "calls": 0.88,
+    "input_tokens": 267,
+    "output_tokens": 90,
+    "model_seconds": 6.46
+   },
+   {
+    "model": "ollama:phi3",
+    "recall": 0.174,
+    "wall_seconds": 75.7,
+    "calls": 0.88,
+    "input_tokens": 286,
+    "output_tokens": 147,
+    "model_seconds": 6.83
+   }
+  ],
+  "hermes_ck26": [
+   {
+    "system": "algebra-agent",
+    "model": "llama3.1",
+    "F1": "0.094",
+    "calls": "14.51",
+    "input_tokens": "0",
+    "cost": "local, 40.4 GPU-min"
+   },
+   {
+    "system": "algebra-agent@qwen3-14b",
+    "model": "Qwen/Qwen3-14B",
+    "F1": "0.231",
+    "calls": "14.24",
+    "input_tokens": "29,454",
+    "cost": "local, 2.5 GPU-min"
+   },
+   {
+    "system": "algebra-agent@qwen3-4b",
+    "model": "Qwen/Qwen3-4B",
+    "F1": "0.103",
+    "calls": "14.17",
+    "input_tokens": "25,688",
+    "cost": "local, 3.6 GPU-min"
+   },
+   {
+    "system": "algebra-agent@qwen3-8b",
+    "model": "Qwen/Qwen3-8B",
+    "F1": "0.178",
+    "calls": "13.42",
+    "input_tokens": "28,056",
+    "cost": "local, 2.1 GPU-min"
+   },
+   {
+    "system": "prover@qwen3-14b",
+    "model": "Qwen/Qwen3-14B",
+    "F1": "0.282",
+    "calls": "12.65",
+    "input_tokens": "28,559",
+    "cost": "local, 2.6 GPU-min"
+   },
+   {
+    "system": "prover@qwen3-4b",
+    "model": "Qwen/Qwen3-4B",
+    "F1": "0.070",
+    "calls": "14.55",
+    "input_tokens": "28,406",
+    "cost": "local, 1.0 GPU-min"
+   },
+   {
+    "system": "prover@qwen3-8b",
+    "model": "Qwen/Qwen3-8B",
+    "F1": "0.158",
+    "calls": "13.95",
+    "input_tokens": "31,960",
+    "cost": "local, 2.5 GPU-min"
+   },
+   {
+    "system": "training-free",
+    "model": "llama3.1",
+    "F1": "0.017",
+    "calls": "1.16",
+    "input_tokens": "0",
+    "cost": "local, 6.2 GPU-min"
+   },
+   {
+    "system": "training-free@qwen3-14b",
+    "model": "Qwen/Qwen3-14B",
+    "F1": "0.089",
+    "calls": "1.06",
+    "input_tokens": "734",
+    "cost": "local, 3.0 GPU-min"
+   },
+   {
+    "system": "training-free@qwen3-4b",
+    "model": "Qwen/Qwen3-4B",
+    "F1": "0.000",
+    "calls": "1.98",
+    "input_tokens": "908",
+    "cost": "local, 1.1 GPU-min"
+   },
+   {
+    "system": "training-free@qwen3-8b",
+    "model": "Qwen/Qwen3-8B",
+    "F1": "0.067",
+    "calls": "1.11",
+    "input_tokens": "762",
+    "cost": "local, 1.8 GPU-min"
+   },
+   {
+    "system": "uniqgen",
+    "model": "llama3.1",
+    "F1": "0.064",
+    "calls": "1.98",
+    "input_tokens": "0",
+    "cost": "local, 35.6 GPU-min"
+   },
+   {
+    "system": "uniqgen-gold-oracle",
+    "model": "llama3.1",
+    "F1": "0.086",
+    "calls": "1.39",
+    "input_tokens": "0",
+    "cost": "local, 37.2 GPU-min"
+   },
+   {
+    "system": "uniqgen@qwen3-14b",
+    "model": "Qwen/Qwen3-14B",
+    "F1": "0.197",
+    "calls": "1.99",
+    "input_tokens": "3,916",
+    "cost": "local, 2.7 GPU-min"
+   },
+   {
+    "system": "uniqgen@qwen3-4b",
+    "model": "Qwen/Qwen3-4B",
+    "F1": "0.084",
+    "calls": "1.8",
+    "input_tokens": "4,188",
+    "cost": "local, 1.6 GPU-min"
+   },
+   {
+    "system": "uniqgen@qwen3-8b",
+    "model": "Qwen/Qwen3-8B",
+    "F1": "0.121",
+    "calls": "1.96",
+    "input_tokens": "4,304",
+    "cost": "local, 2.8 GPU-min"
+   }
+  ],
+  "hermes_best_official": {
+   "system": "SPARQL-LLM (official)",
+   "model": "",
+   "items": "",
+   "set_F_ndcg": "0.832",
+   "F1": "0.831",
+   "P": "0.838",
+   "R": "0.832",
+   "strict F1": ""
+  },
+  "kroma_paper": {
+   "inference_seconds": 10916,
+   "refinement_offline_seconds": 68,
+   "refinement_online_seconds": 14,
+   "source": "kroma/README.md (paper Tables 9 and 10)"
+  }
+ }
+}

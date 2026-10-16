@@ -80,6 +80,8 @@ The ontology loads before the first question, and the answer comes back as plain
 
 [![llama3.1 chooses an ontology lookup for the heart question](docs/images/chat-demo.jpg)](examples/mouse-anatomy-chat.md)
 
+**Shared Memory Lab.** MOIRA working with KROMA, Aegis, Mneme and OntoDB through one shared memory: step through a recorded run, open any memory to see its lineage, and run 45 ontology and 12 memory counterfactual attacks with Aegis's defences off and on. Open [`showcase/index.html`](showcase/) in a browser; [`showcase/README.md`](showcase/README.md) covers how it is recorded.
+
 ## 📊 Results
 
 Answer quality and cost by model, on eight mouse anatomy questions ("What

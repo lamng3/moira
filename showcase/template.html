@@ -191,7 +191,7 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
 <div class="wrap">
   <header class="top">
     <h1>Shared Memory Lab</h1>
-    <p class="lede">Agents that match ontologies, reason over them, and attack them never call each other. They share one pool of memory. Load an ontology, ask MOIRA about it, then change it as a curator or attack it, and watch Aegis and Mneme respond.</p>
+    <p class="lede" title="KROMA matches ontologies, MOIRA reasons over them, Aegis attacks and guards them. They never call each other; they share one memory, Mneme, and OntoDB stores the ontology.">Agents that never call each other, sharing one memory. Load an ontology, ask, attack, watch.</p>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -258,8 +258,7 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
     <div class="grid lab">
       <div class="panel picker">
         <div>
-          <h3>Pick an attack on the honest ontology</h3>
-          <p class="note">Each one is a full run of the workflow: steps 1 to 3, then this attack, then MOIRA is asked again. Red marks attacks that changed MOIRA's answer.</p>
+          <h3 title="Each is a full run of the real workflow: steps 1 to 3, this attack, then MOIRA is asked again. Red: the attack changed MOIRA's answer.">Pick an attack <span class="muted" style="font-weight:400;cursor:help">ⓘ</span></h3>
         </div>
         <div><span class="label">The scripted attack</span><div class="choices" id="c-scripted"></div></div>
         <div><span class="label">Remove an edge</span><div class="choices" id="c-remove"></div></div>
@@ -273,7 +272,7 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
     </div>
     <div class="row" style="justify-content:space-between;margin:28px 0 14px">
       <h2 style="flex-basis:100%">Attacks on the memory itself</h2>
-      <p class="note">Attacks on the agents' shared memory itself, from the honest state after step 3. Each is run twice: with no defences, and with Aegis's memory defences on: a writer policy learned from the honest run, required provenance for matches and answers, a sealed log, a laundering check, and a probe monitor that repairs by attribution.</p>
+      <p class="note" title="From the honest state after step 3, each attack runs twice: with no defences, and with Aegis's memory defences: a writer policy learned from the honest run, required provenance for matches and answers, a sealed log, a laundering check, and a probe monitor that repairs by attribution.">Each attack runs with Aegis's memory defences off and on. <span style="cursor:help">ⓘ</span></p>
       <div class="seg" role="group" aria-label="Defences">
         <button id="def-off" aria-pressed="false">Defences off</button>
         <button id="def-on" aria-pressed="true">Defences on</button>
@@ -288,7 +287,6 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
 
   <footer>
     <div class="cast" id="cast"></div>
-    <div><b>The system.</b> Agents: KROMA matches ontologies; MOIRA does relational reasoning, choosing from a list of tools as it goes (retrieval is one of them: <code>search_term_context</code>, <code>search_knowledge_graph</code>, <code>search_nodes</code>); Aegis attacks as a white hat and defends; Hermes generates queries (planned). Memory: Mneme, one pool all agents share. Ontologies: OntoDB.</div>
     <div id="foot"></div>
     <div>Reproduce: <code>uv run python showcase/record.py</code> then <code>python showcase/build.py</code> in the moira repository, with the other projects cloned beside it.</div>
   </footer>
@@ -331,6 +329,15 @@ const AGENT_COMPONENT = (a) => a.startsWith('kroma') ? 'kroma' : a.startsWith('m
   : a === 'mneme' ? 'mneme' : a === 'user' ? 'user' : a === 'mallory' ? 'attacker' : 'mneme';
 const KIND_COMPONENT = { ontology_version: 'aegis', match: 'kroma', match_request: 'user', question: 'user', answer: 'moira', receipt: 'mneme', review: 'kroma', seal: 'mneme' };
 
+const TIPS = {
+  kroma: 'Ontology matching agent: aligns concepts across ontologies (an LLM debate in the paper; fixed verdicts in the recorded run).',
+  moira: 'Relational reasoning agent. Picks tools from a list as it goes; retrieval is one of them (search_term_context, search_knowledge_graph, search_nodes).',
+  aegis: 'White hat: as a red team it finds the most harmful edits; as a guard it measures harm, alarms, and rolls back.',
+  mneme: 'Shared agentic memory: every action and result, with what it was built from, in one log with short-term, long-term and archive tiers.',
+  ontodb: 'Ontology management: stores the ontology and its versions, and can store Mneme\'s log as RDF for SPARQL.',
+  hermes: 'Query generation agent (verified SPARQL planning). Not wired into the live run yet.',
+  user: 'Asks questions and requests matches.',
+};
 // header
 const steps = T.steps;
 const honestOnto = steps[3].ontology;
@@ -342,7 +349,7 @@ $('#meta').append(
   el('span', {}, el('b', {}, String(T.model_calls)), ' model calls, so ', el('b', {}, '$0.00')),
 );
 for (const k of ['user', 'kroma', 'moira', 'aegis', 'mneme', 'ontodb', 'hermes']) {
-  $('#cast').append(el('span', { class: 'who', style: `--c:${CAST[k][2]}` }, el('i'), el('b', {}, CAST[k][0]), ' ', el('span', { class: 'muted' }, CAST[k][1])));
+  $('#cast').append(el('span', { class: 'who', style: `--c:${CAST[k][2]}`, title: TIPS[k] || '' }, el('i'), el('b', {}, CAST[k][0]), ' ', el('span', { class: 'muted' }, CAST[k][1])));
 }
 $('#foot').textContent = 'Commits: ' + tags.join(' · ') + '. KROMA\'s language-model debate stands as fixed verdicts in this run, and MOIRA\'s answerer reads the hierarchy, so the run makes no model calls. The Results tab shows the projects\' real model runs and what they cost.';
 

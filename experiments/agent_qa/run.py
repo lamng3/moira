@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -45,10 +47,15 @@ def main() -> None:
     parser.add_argument("--questions", type=int, default=8)
     parser.add_argument("--json", type=Path)
     args = parser.parse_args()
-    workspace = OntologyWorkspace(ONTOLOGY, save_memory=False)
     items = questions(ONTOLOGY, args.questions)
     rows = []
     for model in args.models:
+        # A fresh, empty query cache per model: otherwise the second model is answered from the
+        # first model's cached answers (and the user's own cache would collect ours).
+        cache = tempfile.TemporaryDirectory(prefix="moira-agent-qa-")
+        os.environ["MOIRA_CACHE_DIR"] = cache.name
+        # A fresh workspace per model too: a workspace builds its agent on the first question and keeps it.
+        workspace = OntologyWorkspace(ONTOLOGY, save_memory=False)  # reads the cached concept embeddings
         METER.reset()
         started = time.time()
         answers = []
@@ -58,6 +65,9 @@ def main() -> None:
             answers.append({"question": question, "gold": item["gold"], "answer": answer,
                             "recall": round(recall(answer, item["gold"]), 4)})
         cost = METER.summary()
+        wanted = model.split(":", 1)[-1]
+        if any(m != wanted for m in cost["models"]):
+            raise RuntimeError(f"asked for {model} but the calls went to {cost['models']}")
         row = {
             "model": model,
             "questions": len(items),
@@ -73,6 +83,7 @@ def main() -> None:
             "answers": answers,
         }
         rows.append(row)
+        cache.cleanup()
         print(f"{model}: recall {row['recall']:.3f}; per question {row['per_question']}; "
               f"cost {cost['cost_usd'] if cost['cost_usd'] is not None else 'local'}")
     if args.json:

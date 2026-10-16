@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-3b82f6)](pyproject.toml)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-green.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-[⚡ Quick start](#-quick-start) · [✨ What it is](#-what-it-is) · [🎬 Demo](#-demo) · [🔧 Usage](#-usage) · [📖 Docs](https://lamng3.github.io/moira-docs/) · [📝 Citation](#-citation)
+[⚡ Quick start](#-quick-start) · [✨ What it is](#-what-it-is) · [🎬 Demo](#-demo) · [📊 Results](#-results) · [🔧 Usage](#-usage) · [📖 Docs](https://lamng3.github.io/moira-docs/) · [📝 Citation](#-citation)
 
 </div>
 
@@ -79,6 +79,40 @@ The ontology loads before the first question, and the answer comes back as plain
 [What is the heart part of?](examples/mouse-anatomy-chat.md)
 
 [![llama3.1 chooses an ontology lookup for the heart question](docs/images/chat-demo.jpg)](examples/mouse-anatomy-chat.md)
+
+## 📊 Results
+
+Answer quality and cost by model, on eight mouse anatomy questions ("What
+kinds of iliac vein are there?") answered through the full pipeline:
+retrieval over the cached concept embeddings (top 10), then the model,
+temperature 0. Recall is the fraction of the concept's direct subclasses the
+answer names.
+
+<div align="center">
+
+| Model | Recall | Model calls | Input tokens / question | Output tokens / question | Model seconds / question | Wall time | Cost |
+|:--|:--:|--:|--:|--:|--:|--:|--:|
+| llama3.1 (8B) | **0.250** | 7 | 241 | 48 | 6.25 | 97 s | local |
+| mistral (7B) | 0.216 | 7 | 267 | 90 | 6.46 | 88 s | local |
+| phi3 (3.8B) | 0.174 | 7 | 286 | 147 | 6.83 | 76 s | local |
+
+<sub>Ollama on a laptop; each model with its own empty query cache · `python experiments/agent_qa/run.py --models ollama:llama3.1 ollama:mistral ollama:phi3 --json …` · `results/agent_qa/2026-10-16.json` · calls metered by `moira.costs`</sub>
+
+</div>
+
+Recall is low for every model because retrieval, not the model, is the
+bottleneck: top-10 retrieval rarely brings all of a concept's subclasses into
+context, and a model can only name what it was shown. Smaller models write
+longer answers (phi3 three times llama3.1's output) without naming more
+subclasses. Each run answered one of its eight questions from the query cache,
+which is why there are seven calls; that replay was wrong: "What kinds of
+brain grey matter are there?" was served the cached answer to the preceding
+blood-vessel question, because the router judged two questions with the same
+template to be the same question.
+
+Every model call MOIRA makes is metered (`moira.costs`): experiment metrics
+carry a `cost` block, and suite summaries show calls, tokens, and dollars at
+list price for hosted models.
 
 ## 🔧 Usage
 

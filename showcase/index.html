@@ -331,7 +331,7 @@ const CAST = {
   moira: ['MOIRA', 'answers questions', 'var(--c-moira)'],
   aegis: ['Aegis', 'versions and defends', 'var(--c-aegis)'],
   mneme: ['Mneme', 'shared agent memory', 'var(--c-mneme)'],
-  ontodb: ['OntoDB', 'stores ontology and memory', 'var(--c-ontodb)'],
+  ontodb: ['OntoDB', 'stores Mneme\'s log and the ontology', 'var(--c-ontodb)'],
   hermes: ['Hermes', 'SPARQL query planning', 'var(--c-hermes)'],
   attacker: ['Attacker', 'mallory', 'var(--c-attacker)'],
 };
@@ -455,14 +455,15 @@ function drawDiagram(step) {
       sv('text', { x, y: y - 3, 'text-anchor': 'middle', class: 'nm', style: `fill:${c}` }, label),
       sv('text', { x, y: y + 13, 'text-anchor': 'middle', class: 'rl' }, role)));
   };
-  for (const k of ['user', 'kroma', 'moira', 'aegis', 'attacker', 'ontodb', 'hermes']) box(k, CAST[k][0], k === 'hermes' ? 'planned' : CAST[k][1], CAST[k][2]);
+  for (const k of ['user', 'kroma', 'moira', 'aegis', 'attacker', 'hermes']) box(k, CAST[k][0], k === 'hermes' ? 'planned' : CAST[k][1], CAST[k][2]);
+  box('ontodb', 'OntoDB', 'disk for ontology + memory', CAST.ontodb[2], 168);
   box('cache', 'MOIRA cache', 'hot · short · long', 'var(--c-moira)', 130);
   // mneme as the big centre
   const [mx, my] = NODES.mneme; const on = true;
   svg.append(sv('g', { class: 'node on', style: '--c:var(--c-mneme)' },
     sv('rect', { x: mx - 86, y: my - 52, width: 172, height: 104, rx: 12 }),
     sv('text', { x: mx, y: my - 22, 'text-anchor': 'middle', class: 'nm', style: 'fill:var(--c-mneme);font-size:15px' }, 'Mneme'),
-    sv('text', { x: mx, y: my - 4, 'text-anchor': 'middle', class: 'rl' }, 'one append-only log'),
+    sv('text', { x: mx, y: my - 4, 'text-anchor': 'middle', class: 'rl' }, 'agent memory, one log'),
     sv('text', { x: mx, y: my + 18, 'text-anchor': 'middle', class: 'nm', style: 'font-family:var(--f-mono);font-size:12px' }, `lsn ${step.lsn}`),
     sv('text', { x: mx, y: my + 36, 'text-anchor': 'middle', class: 'rl' }, Object.entries(step.tiers).map(([t, n]) => `${t} ${n}`).join(' · '))));
 }

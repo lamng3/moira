@@ -88,6 +88,15 @@
 .vchip.base { background: var(--ok-bg); }
 .vchip.now { outline: 2px solid var(--ink); outline-offset: 1px; }
 .pg-sugg { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 12px; }
+.pg-rsel { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 7px; padding: 3px 6px; font: inherit; font-size: 12.5px; }
+.gr { stroke: var(--c-kroma); stroke-width: 1.4; stroke-dasharray: 6 4; fill: none; }
+.gr.added { stroke: var(--c-attacker); stroke-width: 2.2; }
+.gr.removed { stroke: var(--c-attacker); opacity: .55; }
+.gr.sel { stroke: var(--accent); stroke-width: 3; }
+.grl { font-size: 10.5px; fill: var(--c-kroma); font-style: italic; pointer-events: none; paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
+.pg-relform { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pg-relform input, .pg-relform select { font: inherit; font-size: 12.5px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 4px 8px; min-width: 0; }
+.pg-relform input { width: 150px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 
@@ -101,6 +110,7 @@
       <button id="pg-atk" class="atk" aria-pressed="true" title="Unreviewed edits: Aegis measures the harm against the last accepted version.">Attacker</button>
     </div>
     <label class="toggle" title="Aegis rolls back by itself when harm crosses 0.05"><input type="checkbox" id="pg-auto"> Auto-defend</label>
+    <button class="btn" id="pg-reset" title="Reload this ontology and start over: versions, questions and memory are cleared">Reset</button>
     <span class="pg-stat" id="pg-stat"></span>
   </div>
   <div class="pg-feed" id="pg-feed" aria-live="polite"></div>
@@ -111,8 +121,11 @@
         <button id="pg-zin" title="Zoom in" aria-label="Zoom in">+</button>
         <button id="pg-zout" title="Zoom out" aria-label="Zoom out">−</button>
         <button id="pg-tidy" title="Undo manual positions and lay the graph out again">Tidy</button>
-        <button id="pg-link" aria-pressed="false" title="Link mode: drag from one concept to another to add a subclass link. Shift-drag does the same anytime.">Link</button>
+        <label class="sr" for="pg-rtype">Relation type</label>
+        <select id="pg-rtype" class="pg-rsel" title="The relation to draw. Only “is a” changes MOIRA's answers; the others are stored and versioned alongside."><option>is a</option><option>part of</option><option>has part</option><option>made of</option><option>located in</option></select>
+        <button id="pg-link" aria-pressed="false" title="Draw mode: drag from one concept to another to add the chosen relation. Shift-drag works anytime.">Draw relation</button>
         <button id="pg-new" title="Add a concept under the selected one (or a new top-level concept)">+ Concept</button>
+        <button id="pg-newrel" title="Add a relation by name: from, type, to">+ Relation</button>
       </div>
       <input id="pg-find" class="pg-find" type="search" list="pg-labels" placeholder="Find a concept" aria-label="Find a concept">
       <datalist id="pg-labels"></datalist>
@@ -124,7 +137,7 @@
         <g id="pg-world"></g>
       </svg>
       <div class="pg-insp" id="pg-insp"></div>
-      <div class="pg-legend"><span style="--c:var(--c-moira)" title="Concepts you asked MOIRA about">asked</span><span style="--c:var(--c-attacker)" title="Changed since the last accepted version">changed</span><span class="d" style="--c:var(--c-attacker)" title="Links that were there in the accepted version">removed</span></div>
+      <div class="pg-legend"><span style="--c:var(--c-moira)" title="Concepts you asked MOIRA about">asked</span><span style="--c:var(--c-attacker)" title="Changed since the last accepted version">changed</span><span class="d" style="--c:var(--c-attacker)" title="Relations that were there in the accepted version">removed</span><span class="d" style="--c:var(--c-kroma)" title="Relations other than “is a” (part of, made of, …)">other relation</span></div>
     </div>
     <div class="pg-side">
       <div class="pg-card" style="--c:var(--c-moira)"><h3><i></i>MOIRA<span class="info" title="Relational reasoning agent. Answers “what kinds of X” from the ontology. Aegis guards every question you ask.">ⓘ</span></h3><div id="pg-qs"></div></div>
@@ -186,7 +199,9 @@ function f1(got, gold) {
 }
 
 // ---------- state ----------
-let S = null, mode = 'attacker', sel = null, selEdge = null, adding = false, worst = null, feed = [], linkMode = false;
+let S = null, mode = 'attacker', sel = null, selEdge = null, adding = false, relForm = false, worst = null, feed = [], linkMode = false, current = null;
+const RKEY = (c, r, d) => 'r\u0002' + c + '\u0001' + r + '\u0001' + d;
+const unr = (k) => k.slice(2).split('\u0001');
 const V = { shown: new Set(), pos: new Map(), k: 1, tx: 0, ty: 0, laid: new Map(), ghosts: new Set() };
 
 function load(sample) {
@@ -194,9 +209,10 @@ function load(sample) {
   const nodes = new Set(Object.keys(labels));
   const edges = new Set();
   for (const [c, p] of sample.edges) if (c !== p && nodes.has(c) && nodes.has(p)) edges.add(key(c, p));
-  S = { name: sample.name, labels, nodes, edges, idx: index(edges), versions: [], base: 0, cur: 0, questions: [],
+  current = sample;
+  S = { name: sample.name, labels, nodes, edges, rels: new Set(), idx: index(edges), versions: [], base: 0, cur: 0, questions: [],
         M: { lsn: 0, recs: [], mem: new Map(), tick: 0 }, cache: new Map() };
-  sel = null; selEdge = null; adding = false; worst = null; feed = [];
+  sel = null; selEdge = null; adding = false; relForm = false; worst = null; feed = [];
   newVersion('load', `loaded ${sample.name}`);
   S.base = 0;
   $('#pg-labels').replaceChildren(...Object.values(labels).slice(0, 6000).map((l) => el('option', { value: l })));
@@ -231,11 +247,11 @@ function maintain() {
 }
 
 // ---------- versions ----------
-const digest = (nodes, edges) => hash([...nodes].sort().join('|') + '#' + [...edges].sort().join('|'));
+const digest = (nodes, edges, rels = S.rels) => hash([...nodes].sort().join('|') + '#' + [...edges].sort().join('|') + '#' + [...rels].sort().join('|'));
 function versionMem(v) { return put('aegis', 'ontology_version', `${S.name}@v${v.n}`, { digest: v.digest }, [], 'long')[0]; }
 function newVersion(by, note) {
   const n = S.versions.length;
-  const v = { n, by, note, nodes: new Set(S.nodes), edges: new Set(S.edges), digest: digest(S.nodes, S.edges) };
+  const v = { n, by, note, nodes: new Set(S.nodes), edges: new Set(S.edges), rels: new Set(S.rels), digest: digest(S.nodes, S.edges) };
   S.versions.push(v);
   const prev = S.versions[S.cur];
   v.mem = versionMem(v).id;
@@ -275,9 +291,9 @@ function harmOf(edges, nodes) {
   return lost / S.questions.length;
 }
 function edit(apply, text, fromBase = false) {
-  if (fromBase && S.cur !== S.base) { S.edges = new Set(S.versions[S.base].edges); S.nodes = new Set(S.versions[S.base].nodes); }
+  if (fromBase && S.cur !== S.base) { S.edges = new Set(S.versions[S.base].edges); S.nodes = new Set(S.versions[S.base].nodes); S.rels = new Set(S.versions[S.base].rels); }
   const before = digest(S.nodes, S.edges);
-  apply(S.edges, S.nodes);
+  apply(S.edges, S.nodes, S.rels);
   if (digest(S.nodes, S.edges) === before) { say('ontodb', 'no change'); render(); return; }
   S.idx = index(S.edges);
   const staled = newVersion(mode, text);
@@ -298,10 +314,10 @@ function edit(apply, text, fromBase = false) {
 function rollback() {
   if (S.cur === S.base) return;
   const base = S.versions[S.base], attacked = S.versions[S.cur];
-  S.edges = new Set(base.edges); S.nodes = new Set(base.nodes); S.idx = index(S.edges);
+  S.edges = new Set(base.edges); S.nodes = new Set(base.nodes); S.rels = new Set(base.rels); S.idx = index(S.edges);
   const m = versionMem(base);
   const gone = stale(attacked.mem, 'aegis', 'rolled back').filter((x) => x.kind === 'answer').length;
-  S.versions.push({ n: S.versions.length, by: 'rollback', note: `back to v${base.restores ?? base.n}`, nodes: new Set(S.nodes), edges: new Set(S.edges), digest: base.digest, mem: m.id, restores: base.restores ?? base.n });
+  S.versions.push({ n: S.versions.length, by: 'rollback', note: `back to v${base.restores ?? base.n}`, nodes: new Set(S.nodes), edges: new Set(S.edges), rels: new Set(S.rels), digest: base.digest, mem: m.id, restores: base.restores ?? base.n });
   S.cur = S.base = S.versions.length - 1;
   const restored = reanswer();
   say('aegis', `rolled back to v${base.restores ?? base.n}`);
@@ -352,10 +368,17 @@ function moveTo(c, p) {
 function addLink(c, p) {
   if (c === p) return;
   if (below(S.idx, c).has(p)) { say('ontodb', 'that link would make a cycle'); render(); return; }
-  edit((E) => E.add(key(c, p)), `Link ${lab(c)} ⊑ ${lab(p)}`);
+  edit((E) => E.add(key(c, p)), `Link ${lab(c)} is a ${lab(p)}`);
 }
-function removeLink(c, p) { selEdge = null; edit((E) => E.delete(key(c, p)), `Unlink ${lab(c)} ⊑ ${lab(p)}`); }
-function deleteConcept(c) { sel = null; edit((E, N) => { N.delete(c); for (const k of [...E]) { const [a, b] = unkey(k); if (a === c || b === c) E.delete(k); } }, `Delete ${lab(c)}`); }
+function removeLink(c, p) { selEdge = null; edit((E) => E.delete(key(c, p)), `Unlink ${lab(c)} is a ${lab(p)}`); }
+function deleteConcept(c) { sel = null; edit((E, N, Rl) => { N.delete(c); for (const k of [...E]) { const [a, b] = unkey(k); if (a === c || b === c) E.delete(k); } for (const k of [...Rl]) { const [a, , b] = unr(k); if (a === c || b === c) Rl.delete(k); } }, `Delete ${lab(c)}`); }
+function relate(c, r, d) {
+  if (!c || !d || c === d) return;
+  if (r === 'is a') return addLink(c, d);
+  edit((E, N, Rl) => Rl.add(RKEY(c, r, d)), `${lab(c)} ${r} ${lab(d)}`);
+}
+function unrelate(k) { const [c, r, d] = unr(k); selEdge = null; edit((E, N, Rl) => Rl.delete(k), `Remove ${lab(c)} ${r} ${lab(d)}`); }
+const relType = () => $('#pg-rtype').value;
 function addConcept(name, parent) {
   const id = 'new:' + name + (S.labels['new:' + name] !== undefined ? ':' + S.versions.length : '');
   const m = similar(name, 1);
@@ -430,12 +453,26 @@ function draw() {
     const red = cls.includes('added') || cls.includes('removed');
     const d = curveOf(pos.get(c), pos.get(p));
     const path = sv('path', { d, class: 'ge ' + cls + (selEdge === key(c, p) ? ' sel' : ''), 'marker-end': red ? 'url(#pg-arr-r)' : 'url(#pg-arr)' });
-    const hit = sv('path', { d, class: 'ge-hit' }, sv('title', {}, `${lab(c)} ⊑ ${lab(p)}${cls.includes('removed') ? ' (removed)' : ''} · click to select`));
+    const hit = sv('path', { d, class: 'ge-hit' }, sv('title', {}, `${lab(c)} is a ${lab(p)}${cls.includes('removed') ? ' (removed)' : ''} · click to select`));
     g.append(path, hit); edgeLayer.append(g); drawnEdges.push({ c, p, path, hit });
   };
   for (const k of S.edges) { const [c, p] = unkey(k); const primary = (S.idx.par.get(c) || []).find((x) => V.shown.has(x)) === p;
     addEdge(c, p, (changed && !base.edges.has(k) ? 'added ' : '') + (primary ? '' : 'extra')); }
   if (changed) for (const k of base.edges) if (!S.edges.has(k)) { const [c, p] = unkey(k); addEdge(c, p, 'removed'); }
+  const addRel = (k, cls) => {
+    const [c, r, d] = unr(k); if (!pos.has(c) || !pos.has(d)) return;
+    const a = pos.get(c), b = pos.get(d);
+    const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, bend = Math.max(44, L * 0.32);
+    const mx = (a.x + b.x) / 2 + (dy / L) * bend, my = (a.y + b.y) / 2 - (dx / L) * bend;  // bow sideways, off the is-a lines
+    const dd = `M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}`;
+    const g = sv('g', { 'data-edge': k });
+    g.append(sv('path', { d: dd, class: 'gr ' + cls + (selEdge === k ? ' sel' : '') }),
+      sv('path', { d: dd, class: 'ge-hit' }, sv('title', {}, `${lab(c)} ${r} ${lab(d)}${cls === 'removed' ? ' (removed)' : ''} · click to select`)),
+      sv('text', { x: (a.x + 2 * mx + b.x) / 4, y: (a.y + 2 * my + b.y) / 4 - 3, 'text-anchor': 'middle', class: 'grl' }, r));
+    edgeLayer.append(g);
+  };
+  for (const k of S.rels) addRel(k, changed && !base.rels.has(k) ? 'added' : '');
+  if (changed) for (const k of base.rels) if (!S.rels.has(k)) addRel(k, 'removed');
   for (const [c, { x, y }] of pos) {
     const ghost = V.ghosts.has(c);
     const hit = !ghost && changed && (!base.nodes.has(c) || (S.idx.par.get(c) || []).slice().sort().join() !== (bIdx.par.get(c) || []).slice().sort().join());
@@ -520,16 +557,16 @@ function zoom(f, cx, cy) {
       sel = sel === d.id ? null : d.id; selEdge = null; adding = false; renderInsp(); draw(); return;
     }
     const target = nodeAt(toWorld(e), d.id);
-    if (target) { V.pos.delete(d.id); sel = d.id; d.link ? addLink(d.id, target) : moveTo(d.id, target); }
+    if (target) { V.pos.delete(d.id); sel = d.id; d.link ? relate(d.id, relType(), target) : moveTo(d.id, target); }
     else if (!d.link) V.pos.set(d.id, V.laid.get(d.id));
     else draw();
   });
   svg.addEventListener('wheel', (e) => { e.preventDefault(); const r = svg.getBoundingClientRect(); zoom(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
   document.addEventListener('keydown', (e) => {
     if ($('#tab-play').hidden || /INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName)) return;
-    if ((e.key === 'Delete' || e.key === 'Backspace') && selEdge) { e.preventDefault(); const [c, p] = unkey(selEdge); if (S.edges.has(selEdge)) removeLink(c, p); }
+    if ((e.key === 'Delete' || e.key === 'Backspace') && selEdge) { e.preventDefault(); if (selEdge.startsWith('r\u0002')) { if (S.rels.has(selEdge)) unrelate(selEdge); } else { const [c, p] = unkey(selEdge); if (S.edges.has(selEdge)) removeLink(c, p); } }
     else if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { e.preventDefault(); deleteConcept(sel); }
-    else if (e.key === 'Escape') { sel = null; selEdge = null; adding = false; linkMode = false; render(); }
+    else if (e.key === 'Escape') { sel = null; selEdge = null; adding = false; relForm = false; linkMode = false; render(); }
   });
 })();
 
@@ -537,11 +574,34 @@ function zoom(f, cx, cy) {
 function renderInsp() {
   const box = $('#pg-insp'); box.replaceChildren();
   const atk = mode === 'attacker' ? ' atk' : '';
+  if (relForm) {
+    const opts = ['is a', 'part of', 'has part', 'made of', 'located in'];
+    const from = el('input', { list: 'pg-labels', placeholder: 'From', value: sel && S.nodes.has(sel) ? lab(sel) : '', 'aria-label': 'From concept' });
+    const type = el('input', { list: 'pg-rtypes', placeholder: 'relation', value: relType(), 'aria-label': 'Relation', style: 'width:110px', title: 'Pick one or type your own name' });
+    const to = el('input', { list: 'pg-labels', placeholder: 'To', 'aria-label': 'To concept' });
+    const find = (v) => { v = v.trim().toLowerCase(); return [...S.nodes].find((c) => String(lab(c)).toLowerCase() === v); };
+    const go = () => { const c = find(from.value), d = find(to.value), r = type.value.trim() || 'is a';
+      if (!c || !d) { say('ontodb', `no concept named “${!c ? from.value : to.value}”`); render(); return; }
+      relForm = false; relate(c, r, d); };
+    to.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+    box.append(el('div', { class: 't' }, el('b', {}, 'New relation'), el('span', { class: 'muted', style: 'font-size:12px', title: 'Only “is a” changes MOIRA\'s answers. Other relations are stored, versioned and drawn dashed.' }, 'ⓘ')),
+      el('div', { class: 'pg-relform' }, from, type, to, el('datalist', { id: 'pg-rtypes' }, opts.map((o) => el('option', { value: o }))),
+        el('button', { class: 'btn' + (mode === 'attacker' ? ' atk' : ''), onclick: go }, 'Add'), el('button', { class: 'btn', onclick: () => { relForm = false; renderInsp(); } }, 'Cancel')));
+    setTimeout(() => (from.value ? to : from).focus(), 0);
+    return;
+  }
+  if (selEdge && selEdge.startsWith('r\u0002')) {
+    const [c, r, d] = unr(selEdge); const live = S.rels.has(selEdge);
+    box.append(el('div', { class: 't' }, el('b', {}, `${lab(c)} ${r} ${lab(d)}`), el('span', { class: 'muted', style: 'font-size:12px' }, live ? 'relation' : 'removed relation')),
+      el('div', { class: 'pg-acts' }, live ? el('button', { class: 'btn' + atk, onclick: () => unrelate(selEdge), title: 'The Delete key works too' }, 'Remove relation')
+        : el('button', { class: 'btn', onclick: () => { const k = selEdge; selEdge = null; edit((E, N, Rl) => Rl.add(k), `Restore ${lab(c)} ${r} ${lab(d)}`); } }, 'Put it back')));
+    return;
+  }
   if (selEdge) {
     const [c, p] = unkey(selEdge); const live = S.edges.has(selEdge);
-    box.append(el('div', { class: 't' }, el('b', {}, `${lab(c)} ⊑ ${lab(p)}`), el('span', { class: 'muted', style: 'font-size:12px' }, live ? 'subclass link' : 'removed link')),
+    box.append(el('div', { class: 't' }, el('b', {}, `${lab(c)} is a ${lab(p)}`), el('span', { class: 'muted', style: 'font-size:12px' }, live ? 'subclass link' : 'removed link')),
       el('div', { class: 'pg-acts' }, live ? el('button', { class: 'btn' + atk, onclick: () => removeLink(c, p), title: 'The Delete key works too' }, 'Remove link')
-        : el('button', { class: 'btn', onclick: () => { selEdge = null; edit((E) => E.add(key(c, p)), `Restore ${lab(c)} ⊑ ${lab(p)}`); } }, 'Put it back')));
+        : el('button', { class: 'btn', onclick: () => { selEdge = null; edit((E) => E.add(key(c, p)), `Restore ${lab(c)} is a ${lab(p)}`); } }, 'Put it back')));
     return;
   }
   if (!sel || !S.nodes.has(sel)) return;
@@ -551,6 +611,7 @@ function renderInsp() {
   box.append(el('div', { class: 'pg-acts' },
     el('button', { class: 'btn primary', onclick: () => ask(sel), title: 'MOIRA answers; Aegis starts guarding this question' }, asked ? 'Ask again' : `Ask: kinds of ${short(lab(sel))}?`),
     el('button', { class: 'btn' + atk, onclick: () => { adding = !adding; renderInsp(); }, title: 'Add a new concept under this one' }, '+ Child'),
+    el('button', { class: 'btn' + atk, onclick: () => { relForm = true; renderInsp(); }, title: 'Relate this concept to another (is a, part of, …)' }, '+ Relation'),
     el('button', { class: 'btn' + atk, disabled: !(S.idx.par.get(sel) || []).length, onclick: () => { const c = sel; const ps = S.idx.par.get(c) || []; edit((E) => ps.forEach((p) => E.delete(key(c, p))), `Detach ${lab(c)}`); }, title: 'Remove its links to its parents' }, 'Detach'),
     el('button', { class: 'btn' + atk, onclick: () => deleteConcept(sel), title: 'Delete the concept and its links (Delete key)' }, 'Delete')));
   if (adding) {
@@ -570,7 +631,7 @@ function renderInsp() {
 // ---------- side ----------
 function say(who, text) { feed.unshift({ who, text }); feed = feed.slice(0, 3); }
 function render() {
-  $('#pg-stat').textContent = `${S.nodes.size.toLocaleString()} concepts · ${S.edges.size.toLocaleString()} links · v${S.cur}`;
+  $('#pg-stat').textContent = `${S.nodes.size.toLocaleString()} concepts · ${(S.edges.size + S.rels.size).toLocaleString()} relations · v${S.cur}`;
   $('#pg-cur').setAttribute('aria-pressed', String(mode === 'curator')); $('#pg-atk').setAttribute('aria-pressed', String(mode === 'attacker'));
   $('#pg-link').setAttribute('aria-pressed', String(linkMode));
   $('#pg-feed').replaceChildren(...feed.map((f) => el('div', { style: `--c:${COLOR[f.who]}` }, el('b', {}, NAME[f.who]), el('span', {}, f.text))));
@@ -633,7 +694,7 @@ function renderMem() {
 }
 function renderVers() {
   const box = $('#pg-vers'); box.replaceChildren();
-  for (const v of S.versions) box.append(el('span', { class: ['vchip', v.by, v.n === S.base ? 'base' : '', v.n === S.cur ? 'now' : ''].join(' '), title: `${v.note} · ${v.nodes.size} concepts, ${v.edges.size} links` }, v.by === 'rollback' ? `↺v${v.restores}` : `v${v.n}`));
+  for (const v of S.versions) box.append(el('span', { class: ['vchip', v.by, v.n === S.base ? 'base' : '', v.n === S.cur ? 'now' : ''].join(' '), title: `${v.note} · ${v.nodes.size} concepts, ${v.edges.size + v.rels.size} relations` }, v.by === 'rollback' ? `↺v${v.restores}` : `v${v.n}`));
 }
 
 // ---------- parsing uploads ----------
@@ -751,6 +812,8 @@ $('#pg-atk').onclick = () => { mode = 'attacker'; render(); };
 $('#pg-fit').onclick = fit; $('#pg-zin').onclick = () => zoom(1.25); $('#pg-zout').onclick = () => zoom(0.8);
 $('#pg-tidy').onclick = () => { V.pos.clear(); draw(); fit(); };
 $('#pg-link').onclick = () => { linkMode = !linkMode; render(); };
+$('#pg-newrel').onclick = () => { relForm = true; adding = false; selEdge = null; renderInsp(); };
+$('#pg-reset').onclick = () => { const wasFirst = current === SAMPLES[0]; mode = 'attacker'; linkMode = false; load(current); if (wasFirst) starter(); else render(); requestAnimationFrame(fit); };
 $('#pg-new').onclick = () => { if (sel && S.nodes.has(sel)) { adding = true; renderInsp(); } else addConcept('New concept ' + S.versions.length, null); };
 $('#pg-find').addEventListener('change', (e) => { const v = e.target.value.trim().toLowerCase(); if (!v) return;
   const hit = [...S.nodes].find((c) => String(lab(c)).toLowerCase() === v) || [...S.nodes].find((c) => String(lab(c)).toLowerCase().includes(v));

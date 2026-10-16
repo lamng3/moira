@@ -329,6 +329,32 @@ and result hash. Catalog-based evaluations are available through
 </details>
 
 <details>
+<summary><b>Shared memory (Mneme)</b></summary>
+
+MOIRA hosts a multi-agent workflow whose agents, KROMA's matcher among them,
+share one [Mneme](https://github.com/lamng3/mneme) store: a transactional
+memory of traces, findings, and answers with provenance. `moira.integrations.mneme`
+connects MOIRA to it (install mneme, or clone it beside this repository):
+
+| Piece | What it does |
+| --- | --- |
+| `MnemeTraceObserver` | An agent observer: each run is written to the store as a trace while it runs |
+| `import_trace` | Loads a saved `oot_traces/memory_trace_*.json`, keeping its tree |
+| `MoiraAnswerCache` | The three-tier query cache as a view of the store; it never serves a stale answer |
+| `MoiraFrontDesk` | Ask through the cache; on a miss, the agents answer |
+| `OntoDBEngine` | Keeps the memory in an OntoDB database next to the ontology |
+
+```bash
+python examples/shared_memory_workflow.py --ontodb ../ontodb/build/dev/ontodb
+```
+
+The demo aligns an ontology with KROMA, answers through the cache, survives an
+attack on the ontology that Aegis detects and rolls back, and restores the
+honest answer with the same memory id.
+
+</details>
+
+<details>
 <summary><b>Python API</b></summary>
 
 ```python

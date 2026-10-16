@@ -18,3 +18,6 @@ data/.cache/
 
 # Local agent run traces
 src/moira/agents/shared_memory/.cache/
+
+# shared-memory demo state
+examples/demo-state/

@@ -1,0 +1,627 @@
+<style>
+/* Playground: one ontology you can edit, the agents reacting beside it. */
+.pg-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 12px; }
+.pg-bar select, .pg-bar input[type=search], .pg-field { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; min-width: 0; }
+.pg-bar .grow { flex: 1 1 auto; }
+.pg-upload { position: relative; overflow: hidden; }
+.pg-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.pg-mode { display: grid; gap: 4px; justify-items: start; }
+.pg-mode .seg button[aria-pressed="true"].atk { background: var(--c-attacker); border-color: var(--c-attacker); }
+.pg-mode .seg button[aria-pressed="true"].cur { background: var(--ok); }
+.pg-mode small { color: var(--muted); font-size: 12px; max-width: 46ch; }
+.pg-story { display: grid; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.pg-story .ev { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 10px; font-size: 13.5px; align-items: baseline; }
+.pg-story .ev.old { opacity: .55; }
+.pg-story .ev b { font-family: var(--f-mono); font-size: 11.5px; font-weight: 500; color: var(--c); text-align: right; }
+.pg-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .pg-grid { grid-template-columns: minmax(0, 1fr); } }
+.pg-side { display: grid; gap: 16px; }
+.pg-sel { display: grid; gap: 8px; background: var(--sunk); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.pg-sel .path { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.pg-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.pg-acts .btn { font-size: 12.5px; padding: 5px 10px; }
+.btn.atk { border-color: var(--c-attacker); color: var(--c-attacker); }
+.btn:disabled { opacity: .45; cursor: default; }
+.pg-tree { max-height: 560px; overflow: auto; padding: 4px 2px; }
+.trow { display: flex; align-items: center; gap: 6px; padding: 2px 0 2px calc(var(--d) * 18px); min-width: max-content; }
+.trow .car { width: 20px; height: 20px; border: 0; background: none; color: var(--muted); font-size: 11px; padding: 0; flex: none; }
+.trow .lbl { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 2px 8px; font-size: 13px; text-align: left; }
+.trow .lbl:hover { border-color: var(--muted); }
+.trow.sel .lbl { outline: 2px solid var(--ink); outline-offset: 1px; }
+.trow.asked .lbl { border-color: var(--c-moira); color: var(--c-moira); font-weight: 600; }
+.trow.moved .lbl, .trow.added .lbl { background: var(--bad-bg); border-color: var(--c-attacker); color: var(--c-attacker); font-weight: 600; }
+.trow.ghost .lbl { border-style: dashed; border-color: var(--c-attacker); color: var(--c-attacker); background: transparent; opacity: .75; cursor: default; }
+.trow.drop .lbl { background: var(--sunk); border-color: var(--accent); }
+.trow .cnt { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.trow .q { font-size: 10.5px; font-weight: 700; color: var(--c-moira); }
+.pg-more { margin: 4px 0 0 calc(var(--d) * 18px + 26px); }
+.pg-q { display: grid; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.pg-q:last-child { border-bottom: 0; }
+.pg-q .head { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+.pg-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.pg-chips span { font-size: 12px; padding: 1px 7px; border-radius: 5px; background: var(--sunk); }
+.pg-chips span.wrong { background: var(--bad-bg); color: var(--bad); font-weight: 600; }
+.pg-chips span.missing { color: var(--bad); text-decoration: line-through; border: 1px dashed var(--bad); background: transparent; }
+.pg-vers { display: flex; flex-wrap: wrap; gap: 6px; }
+.vchip { font-family: var(--f-mono); font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); }
+.vchip.attacker { border-color: var(--c-attacker); color: var(--c-attacker); }
+.vchip.curator { border-color: var(--ok); color: var(--ok); }
+.vchip.rollback { border-color: var(--c-aegis); color: var(--c-aegis); }
+.vchip.base { box-shadow: 0 0 0 2px var(--ok-bg); font-weight: 600; }
+.vchip.now { outline: 2px solid var(--ink); outline-offset: 1px; }
+.pg-recs { display: grid; gap: 2px; max-height: 260px; overflow: auto; font-family: var(--f-mono); font-size: 11.5px; }
+.pg-recs div { display: grid; grid-template-columns: 34px 62px 52px minmax(0, 1fr); gap: 6px; padding: 2px 0; border-bottom: 1px dashed var(--line); }
+.pg-recs div span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pg-agents { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.pg-worst { display: grid; gap: 6px; margin-top: 10px; }
+.pg-worst div { display: grid; grid-template-columns: minmax(0, 1fr) 60px auto; gap: 8px; align-items: center; font-size: 13px; }
+.pg-hint { font-size: 13px; color: var(--muted); }
+.pg-hint b { color: var(--ink); }
+.pg-add { display: grid; gap: 6px; }
+.pg-sugg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; }
+.pg-alarm { border-color: var(--bad) !important; box-shadow: 0 0 0 3px var(--bad-bg); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+
+<section id="tab-play" role="tabpanel" hidden>
+  <div class="pg-bar">
+    <label class="sr" for="pg-sample">Ontology</label>
+    <select id="pg-sample"></select>
+    <span class="btn pg-upload">Upload an ontology<input id="pg-file" type="file" accept=".owl,.rdf,.xml,.ttl,.nt,.obo,.json" aria-label="Upload an ontology (.owl, .rdf, .ttl, .nt, .obo, .json)"></span>
+    <span class="muted grow" id="pg-info" style="font-size:13px"></span>
+    <div class="pg-mode">
+      <div class="seg" role="group" aria-label="Who is editing">
+        <button id="pg-cur" class="cur" aria-pressed="false">Curator</button>
+        <button id="pg-atk" class="atk" aria-pressed="true">Attacker</button>
+      </div>
+      <small id="pg-modetext"></small>
+    </div>
+    <label class="toggle"><input type="checkbox" id="pg-auto"> Aegis rolls back automatically</label>
+  </div>
+  <div class="pg-story" id="pg-story" aria-live="polite"></div>
+  <div class="pg-grid">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;margin-bottom:8px">
+        <span class="label">The ontology (OntoDB) · drag a concept onto another to move it</span>
+        <label class="sr" for="pg-find">Find a concept</label>
+        <input id="pg-find" class="pg-field" type="search" list="pg-labels" placeholder="Find a concept" style="max-width:220px">
+        <datalist id="pg-labels"></datalist>
+      </div>
+      <div id="pg-sel"></div>
+      <div class="pg-tree" id="pg-tree" role="tree"></div>
+    </div>
+    <div class="pg-side">
+      <div class="panel" style="--c:var(--c-moira)">
+        <span class="label">MOIRA · questions and answers</span>
+        <div id="pg-qs"></div>
+      </div>
+      <div class="panel" id="pg-aegis">
+        <span class="label">Aegis · finds attacks, guards the ontology</span>
+        <div id="pg-guard"></div>
+      </div>
+      <div class="panel">
+        <span class="label">Mneme · the memory all agents share</span>
+        <div id="pg-mem"></div>
+      </div>
+      <div class="panel">
+        <span class="label">OntoDB · versions</span>
+        <div class="pg-vers" id="pg-vers"></div>
+      </div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:14px">The playground runs a compact JavaScript version of the rules in Mneme, Aegis, MOIRA and KROMA, so it works on any ontology without a server. An uploaded file never leaves your browser. The Recorded run tab replays the real Python code.</p>
+</section>
+
+<script id="samples" type="application/json">__SAMPLES__</script>
+<script>
+(() => {
+const SAMPLES = JSON.parse(document.getElementById('samples').textContent);
+const $ = (s) => document.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') n.className = v; else if (k === 'style') n.setAttribute('style', v);
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== undefined && v !== null && v !== false) n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return n;
+};
+const COLOR = { user: 'var(--c-user)', moira: 'var(--c-moira)', kroma: 'var(--c-kroma)', aegis: 'var(--c-aegis)', mneme: 'var(--c-mneme)', ontodb: 'var(--c-ontodb)', you: 'var(--c-attacker)', curator: 'var(--ok)' };
+const NAME = { user: 'User', moira: 'MOIRA', kroma: 'KROMA', aegis: 'Aegis', mneme: 'Mneme', ontodb: 'OntoDB', you: 'Attacker', curator: 'Curator' };
+const THRESHOLD = 0.05, SHORT_CAP = 12;
+
+// ---------- hashing (content-addressed memory ids, as in Mneme) ----------
+function hash(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) { const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0').slice(0, 4);
+}
+
+// ---------- the ontology ----------
+const key = (c, p) => c + '\u0001' + p;
+const unkey = (k) => k.split('\u0001');
+function index(edges) {
+  const par = new Map(), kids = new Map();
+  for (const k of edges) { const [c, p] = unkey(k);
+    if (!par.has(c)) par.set(c, []); par.get(c).push(p);
+    if (!kids.has(p)) kids.set(p, []); kids.get(p).push(c); }
+  return { par, kids };
+}
+function below(idx, t) {
+  const out = new Set(), todo = [t];
+  while (todo.length) for (const k of idx.kids.get(todo.pop()) || []) if (!out.has(k)) { out.add(k); todo.push(k); }
+  out.delete(t); return out;
+}
+function f1(got, gold) {
+  if (!got.size && !gold.size) return 1;
+  let hit = 0; for (const g of got) if (gold.has(g)) hit++;
+  if (!hit) return 0;
+  const p = hit / got.size, r = hit / gold.size; return 2 * p * r / (p + r);
+}
+
+// ---------- state ----------
+let S = null, sel = null, picking = false, adding = false, worst = null, expanded = new Set(), story = [], showAllRecs = false, rootLimit = 120;
+let mode = 'attacker';
+
+function load(sample, note) {
+  const labels = { ...sample.labels };
+  const edges = new Set();
+  for (const [c, p] of sample.edges) if (c !== p && labels[c] !== undefined && labels[p] !== undefined) edges.add(key(c, p));
+  S = { name: sample.name, labels, edges, idx: index(edges), versions: [], base: 0, cur: 0, questions: [],
+        M: { lsn: 0, recs: [], mem: new Map(), tick: 0 }, cache: new Map() };
+  sel = null; picking = false; adding = false; worst = null; story = []; rootLimit = 120;
+  const n = Object.keys(labels).length;
+  expanded = new Set(n <= 80 ? Object.keys(labels) : []);
+  newVersion('load', note || `loaded ${sample.name}`);
+  S.base = 0;
+  event('ontodb', `Loaded ${sample.name}: ${n.toLocaleString()} concepts, ${edges.size.toLocaleString()} subclass links. Saved as version v0.`);
+  $('#pg-labels').replaceChildren(...Object.entries(labels).slice(0, 5000).map(([id, l]) => el('option', { value: l })));
+  render();
+}
+
+// ---------- Mneme, in miniature ----------
+function rec(op, agent, m, reason = '', tier = '') { S.M.lsn++; S.M.recs.push({ lsn: S.M.lsn, op, agent, kind: m.kind, key: m.key, id: m.id, reason, tier }); }
+function put(agent, kind, k, body, derived = [], tier = 'short') {
+  const id = 'm:' + hash(JSON.stringify([kind, k, body, derived]));
+  const old = S.M.mem.get(id);
+  if (old) { let how = 'same'; if (old.status !== 'live') { old.status = 'live'; rec('restore', agent, old, 'the same work again'); how = 'restored'; } use(old); return [old, how]; }
+  const m = { id, kind, key: k, body, derived, source: agent, status: 'live', tier, uses: 0, last: ++S.M.tick };
+  S.M.mem.set(id, m); rec('put', agent, m, '', tier); return [m, 'new'];
+}
+function stale(id, agent, reason) {
+  const out = []; const todo = [id];
+  while (todo.length) {
+    const x = todo.pop(); const m = S.M.mem.get(x);
+    if (!m || m.status !== 'live') continue;
+    m.status = 'stale'; rec('stale', agent, m, reason); out.push(m);
+    for (const d of S.M.mem.values()) if (d.status === 'live' && d.derived.includes(x)) todo.push(d.id);
+  }
+  return out;
+}
+function use(m) { m.uses++; m.last = ++S.M.tick; if (m.tier === 'archive' && m.status === 'live') { m.tier = 'short'; rec('move', 'mneme', m, 'paged back in', 'short'); } }
+function maintain() {
+  for (const m of S.M.mem.values()) {
+    if (m.tier === 'short' && m.status !== 'live') { m.tier = 'archive'; rec('move', 'mneme', m, 'no longer holds', 'archive'); }
+    else if (m.tier === 'short' && m.uses >= 3) { m.tier = 'long'; rec('move', 'mneme', m, 'promoted: used 3 times', 'long'); }
+  }
+  const short = [...S.M.mem.values()].filter((m) => m.tier === 'short').sort((a, b) => a.last - b.last);
+  while (short.length > SHORT_CAP) { const m = short.shift(); m.tier = 'archive'; rec('move', 'mneme', m, 'evicted: least recently used', 'archive'); }
+}
+
+// ---------- versions (OntoDB, through Aegis) ----------
+const digest = (edges) => hash([...edges].sort().join('|'));
+function versionMem(v) { return put('aegis', 'ontology_version', `${S.name}@v${v.n}`, { digest: v.digest }, [], 'long')[0]; }
+function newVersion(by, note) {
+  const n = S.versions.length;
+  const v = { n, by, note, edges: new Set(S.edges), digest: digest(S.edges), restores: null };
+  S.versions.push(v);
+  const prev = S.versions[S.cur];
+  const m = versionMem(v); v.mem = m.id;
+  let staled = [];
+  if (n > 0 && prev && prev.mem && prev.mem !== m.id) staled = stale(prev.mem, 'aegis', `superseded by v${n}`);
+  S.cur = n;
+  return staled;
+}
+
+// ---------- MOIRA ----------
+const lab = (c) => S.labels[c] ?? c;
+const qtext = (t) => `What kinds of ${lab(t)} are there?`;
+function answer(q) {
+  const got = below(S.idx, q.target);
+  const body = { question: qtext(q.target), answer: [...got].sort() };
+  const v = S.versions[S.cur];
+  const [m, how] = put('moira', 'answer', qtext(q.target), body, [q.mem, v.mem]);
+  for (const r of [q.mem, v.mem]) { const x = S.M.mem.get(r); if (x) use(x); }
+  q.answer = m.id; S.cache.set(q.target, m.id);
+  return how;
+}
+function ask(t) {
+  let q = S.questions.find((x) => x.target === t);
+  if (q) {
+    const m = S.M.mem.get(S.cache.get(t));
+    if (m && m.status === 'live') { use(m); event('moira', `“${qtext(t)}” again: served from MOIRA's cache.`); maintain(); render(); return; }
+  }
+  const [qm] = put('user', 'question', qtext(t), { question: qtext(t) });
+  if (!q) {
+    const baseIdx = index(S.versions[S.base].edges);
+    q = { target: t, mem: qm.id, gold: below(baseIdx, t), answer: null };
+    S.questions.push(q);
+  }
+  answer(q);
+  const n = below(S.idx, t).size;
+  event('user', `asked “${qtext(t)}”`);
+  event('moira', `answered with ${n} concept${n === 1 ? '' : 's'}, built from the question and version v${S.cur}. Aegis now checks this question after every edit.`);
+  maintain(); render();
+}
+function reanswer() {
+  let fresh = 0, restored = 0;
+  for (const q of S.questions) { const how = answer(q); if (how === 'restored') restored++; else if (how === 'new') fresh++; }
+  return { fresh, restored };
+}
+
+// ---------- Aegis ----------
+function harmOf(edges) {
+  if (!S.questions.length) return 0;
+  const idx = edges === S.edges ? S.idx : index(edges);
+  let lost = 0; for (const q of S.questions) lost += 1 - f1(below(idx, q.target), q.gold);
+  return lost / S.questions.length;
+}
+function edit(apply, describe) {
+  const before = new Set(S.edges);
+  apply(S.edges);
+  if (digest(S.edges) === digest(before)) { event('ontodb', 'That edit changes nothing.'); render(); return; }
+  S.idx = index(S.edges);
+  const who = mode === 'curator' ? 'curator' : 'you';
+  const staled = newVersion(mode, describe);
+  event(who, `${describe}. OntoDB saved it as v${S.cur}.`);
+  const gone = staled.filter((m) => m.kind === 'answer').length;
+  if (gone) event('mneme', `marked ${gone} answer${gone === 1 ? '' : 's'} stale: built on the previous version, which no longer holds.`);
+  const r = reanswer();
+  if (S.questions.length) event('moira', `redid ${S.questions.length} answer${S.questions.length === 1 ? '' : 's'} for v${S.cur}${r.restored ? ` (${r.restored} identical to earlier work, restored)` : ''}.`);
+  worst = null;
+  if (mode === 'curator') {
+    S.base = S.cur;
+    for (const q of S.questions) q.gold = below(S.idx, q.target);
+    event('aegis', `accepted v${S.cur} as reviewed and honest: it is the new baseline, and the answers to your questions are the new truth.`);
+  } else {
+    const h = harmOf(S.edges);
+    if (!S.questions.length) event('aegis', 'cannot measure harm yet: ask MOIRA a question first, so Aegis knows what matters.');
+    else if (h > THRESHOLD) {
+      event('aegis', `ALARM: harm ${h.toFixed(3)} is over ${THRESHOLD}. The answers to your questions got worse.`);
+      if ($('#pg-auto').checked) setTimeout(rollback, 900);
+    } else event('aegis', `harm ${h.toFixed(3)}: under ${THRESHOLD}, so no alarm. This edit doesn't change any answer that matters yet.`);
+  }
+  maintain(); render();
+}
+function rollback() {
+  if (S.cur === S.base) return;
+  const base = S.versions[S.base], attacked = S.versions[S.cur];
+  S.edges = new Set(base.edges); S.idx = index(S.edges);
+  const m = versionMem(base);
+  const staled = stale(attacked.mem, 'aegis', 'rolled back');
+  const v = { n: S.versions.length, by: 'rollback', note: `back to v${base.n}`, edges: new Set(S.edges), digest: base.digest, mem: m.id, restores: base.n };
+  S.versions.push(v); S.cur = v.n;
+  S.base = v.n;
+  const r = reanswer();
+  event('aegis', `rolled the ontology back to v${base.n}, the last accepted version.`);
+  const gone = staled.filter((m) => m.kind === 'answer').length;
+  event('mneme', `${gone} poisoned answer${gone === 1 ? '' : 's'} went stale; ${r.restored} honest answer${r.restored === 1 ? '' : 's'} restored with the same memory id.`);
+  maintain(); render();
+}
+function accept() {
+  S.base = S.cur; for (const q of S.questions) q.gold = below(S.idx, q.target);
+  event('aegis', `accepted v${S.cur} after review: it is the new baseline.`); render();
+}
+function findWorst() {
+  if (!S.questions.length) return;
+  const t0 = performance.now();
+  const relevant = new Set(); for (const q of S.questions) { relevant.add(q.target); for (const c of below(S.idx, q.target)) relevant.add(c); }
+  const all = Object.keys(S.labels);
+  const outside = all.filter((c) => !relevant.has(c));
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const sample = (arr, n) => { const a = arr.slice(); const out = []; while (a.length && out.length < n) out.push(a.splice(Math.floor(rnd() * a.length), 1)[0]); return out; };
+  const cands = [];
+  const rel = [...relevant].filter((c) => !S.questions.some((q) => q.target === c));
+  const size = (c) => below(S.idx, c).size;
+  rel.sort((a, b) => size(b) - size(a));
+  for (const c of rel.slice(0, 80)) for (const p of S.idx.par.get(c) || []) cands.push({ text: `Detach ${lab(c)} from ${lab(p)}`, apply: (E) => E.delete(key(c, p)) });
+  for (const c of rel.slice(0, 40)) {
+    const sub = below(S.idx, c);
+    for (const p of sample([...outside, ...rel].filter((x) => x !== c && !sub.has(x)), 8)) cands.push({ text: `Move ${lab(c)} under ${lab(p)}`, apply: (E) => { for (const q of S.idx.par.get(c) || []) E.delete(key(c, q)); E.add(key(c, p)); } });
+  }
+  const bigOut = outside.sort((a, b) => size(b) - size(a)).slice(0, 30);
+  for (const c of bigOut) for (const q of S.questions) cands.push({ text: `Move ${lab(c)} under ${lab(q.target)}`, apply: (E) => { for (const x of S.idx.par.get(c) || []) E.delete(key(c, x)); E.add(key(c, q.target)); } });
+  const scored = [];
+  for (const cand of cands.slice(0, 2500)) { const E = new Set(S.edges); cand.apply(E); scored.push({ ...cand, harm: harmOf(E) }); }
+  scored.sort((a, b) => b.harm - a.harm);
+  const seen = new Set();
+  worst = { list: scored.filter((s) => s.harm > 0 && !seen.has(s.text) && seen.add(s.text)).slice(0, 5), tried: Math.min(cands.length, 2500), ms: Math.round(performance.now() - t0) };
+  event('aegis', `searched ${worst.tried} single edits in ${worst.ms} ms for the one that would hurt your questions most${worst.list.length ? `: ${worst.list[0].text}, harm ${worst.list[0].harm.toFixed(3)}` : ': none changes an answer'}.`);
+  render();
+}
+
+// ---------- KROMA ----------
+function grams(s) { const t = ` ${s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()} `; const g = new Set(); for (let i = 0; i < t.length - 2; i++) g.add(t.slice(i, i + 3)); return g; }
+function similar(label, n = 3) {
+  const g = grams(label); const out = [];
+  for (const [id, l] of Object.entries(S.labels)) { const h = grams(l); let inter = 0; for (const x of g) if (h.has(x)) inter++; const s = (2 * inter) / (g.size + h.size || 1); if (s > 0.25) out.push([id, s]); }
+  return out.sort((a, b) => b[1] - a[1]).slice(0, n);
+}
+
+// ---------- events ----------
+function event(who, text) { story.unshift({ who, text }); story = story.slice(0, 7); }
+
+// ---------- rendering ----------
+function render() { renderInfo(); renderStory(); renderSel(); renderTree(); renderQs(); renderGuard(); renderMem(); renderVers(); }
+function renderInfo() {
+  $('#pg-info').textContent = `${Object.keys(S.labels).length.toLocaleString()} concepts · ${S.edges.size.toLocaleString()} links · now v${S.cur}${S.cur === S.base ? ' (accepted)' : `, accepted v${S.versions[S.base].n}`}`;
+  $('#pg-cur').setAttribute('aria-pressed', String(mode === 'curator')); $('#pg-atk').setAttribute('aria-pressed', String(mode === 'attacker'));
+  $('#pg-modetext').textContent = mode === 'curator' ? 'Your edits are reviewed: Aegis accepts each one as the new truth.' : 'Your edits are unreviewed: Aegis measures the harm against the last accepted version.';
+}
+function renderStory() {
+  const box = $('#pg-story'); box.replaceChildren();
+  if (!story.length) return;
+  story.forEach((e, i) => box.append(el('div', { class: 'ev' + (i > 2 ? ' old' : ''), style: `--c:${COLOR[e.who]}` }, el('b', {}, NAME[e.who]), el('span', {}, e.text))));
+}
+function pathOf(c) { const out = []; let x = c; const seen = new Set(); while (x && !seen.has(x)) { seen.add(x); out.unshift(lab(x)); x = (S.idx.par.get(x) || [])[0]; } return out; }
+function renderSel() {
+  const box = $('#pg-sel'); box.replaceChildren();
+  if (!sel) {
+    box.append(el('div', { class: 'pg-sel' }, el('p', { class: 'pg-hint' }, S.questions.length ? [el('b', {}, 'Click a concept'), ' to ask about it or change it. Try dragging one onto another in Attacker mode, then watch Aegis.'] :
+      [el('b', {}, 'Start here: click a concept and ask MOIRA about it.'), ' Aegis guards the questions you ask.'])));
+    return;
+  }
+  const kids = below(S.idx, sel).size; const asked = S.questions.some((q) => q.target === sel);
+  const acts = el('div', { class: 'pg-acts' },
+    el('button', { class: 'btn primary', onclick: () => ask(sel) }, asked ? 'Ask again' : `Ask: what kinds of ${lab(sel)}?`),
+    el('button', { class: 'btn' + (mode === 'attacker' ? ' atk' : ''), onclick: () => { picking = !picking; adding = false; renderSel(); renderTree(); } }, picking ? 'Cancel move' : 'Move under…'),
+    el('button', { class: 'btn' + (mode === 'attacker' ? ' atk' : ''), disabled: !(S.idx.par.get(sel) || []).length, onclick: () => { const c = sel; const ps = S.idx.par.get(c) || []; edit((E) => ps.forEach((p) => E.delete(key(c, p))), `Detached ${lab(c)} from ${ps.map(lab).join(', ')}`); } }, 'Detach from parent'),
+    el('button', { class: 'btn' + (mode === 'attacker' ? ' atk' : ''), onclick: () => { adding = !adding; picking = false; renderSel(); } }, adding ? 'Cancel' : 'Add a concept under it'));
+  const card = el('div', { class: 'pg-sel' }, el('div', { class: 'row' }, el('b', {}, lab(sel)), el('span', { class: 'chip' }, `${kids} below`), asked ? el('span', { class: 'chip cache' }, 'asked') : null),
+    el('div', { class: 'path' }, pathOf(sel).join(' › ')), acts);
+  if (picking) card.append(el('p', { class: 'pg-hint' }, el('b', {}, `Click the concept ${lab(sel)} should move under,`), ' or drag it there.'));
+  if (adding) {
+    const input = el('input', { class: 'pg-field', id: 'pg-new', placeholder: 'New concept name', autocomplete: 'off' });
+    const sugg = el('div', { class: 'pg-sugg' });
+    const show = () => { sugg.replaceChildren(); const v = input.value.trim(); if (!v) return;
+      const m = similar(v);
+      if (m.length) { sugg.append(el('span', { style: 'color:var(--c-kroma);font-weight:600' }, 'KROMA:'));
+        for (const [id, s] of m) sugg.append(el('span', { class: 'chip' + (s >= 0.8 ? ' bad' : '') }, `≈ ${lab(id)} ${s.toFixed(2)}`));
+        if (m[0][1] >= 0.8) sugg.append(el('span', { class: 'muted' }, 'looks like an existing concept: a possible look-alike'));
+      } else sugg.append(el('span', { class: 'muted' }, 'KROMA finds nothing similar.')); };
+    input.addEventListener('input', show);
+    const go = () => { const v = input.value.trim(); if (!v) return; const parent = sel; const id = 'new:' + v;
+      const m = similar(v, 1);
+      if (m.length && m[0][1] >= 0.5) { put('kroma', 'match', `${v}|${lab(m[0][0])}`, { source: v, target: m[0][0], score: +m[0][1].toFixed(2) }); event('kroma', `matched “${v}” to ${lab(m[0][0])} (${m[0][1].toFixed(2)})${m[0][1] >= 0.8 ? ': close enough to be a look-alike' : ''}.`); }
+      S.labels[id] = v; adding = false;
+      edit((E) => E.add(key(id, parent)), `Added ${v} under ${lab(parent)}`); };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+    card.append(el('div', { class: 'pg-add' }, el('div', { class: 'row' }, input, el('button', { class: 'btn', onclick: go }, 'Add')), sugg));
+    setTimeout(() => input.focus(), 0);
+  }
+  box.append(card);
+}
+function moveTo(c, p) {
+  if (c === p) return;
+  if (below(S.idx, c).has(p)) { event('ontodb', `Cannot move ${lab(c)} under its own descendant ${lab(p)}.`); render(); return; }
+  const ps = S.idx.par.get(c) || [];
+  picking = false;
+  edit((E) => { ps.forEach((x) => E.delete(key(c, x))); E.add(key(c, p)); }, `Moved ${lab(c)} under ${lab(p)}${ps.length ? ` (was under ${ps.map(lab).join(', ')})` : ''}`);
+}
+let dragging = null;
+function renderTree() {
+  const box = $('#pg-tree'); const keep = box.scrollTop; box.replaceChildren();
+  const baseIdx = index(S.versions[S.base].edges);
+  const asked = new Set(S.questions.map((q) => q.target));
+  const cmp = (a, b) => lab(a).localeCompare(lab(b));
+  const roots = Object.keys(S.labels).filter((c) => !(S.idx.par.get(c) || []).length).sort((a, b) => (S.idx.kids.get(b) || []).length - (S.idx.kids.get(a) || []).length || cmp(a, b));
+  const row = (c, d, ghost) => {
+    const kids = (S.idx.kids.get(c) || []);
+    const changed = !ghost && S.cur !== S.base && ((S.idx.par.get(c) || []).join() !== (baseIdx.par.get(c) || []).join());
+    const added = !ghost && c.startsWith('new:') && !baseIdx.par.has(c) && S.cur !== S.base;
+    const cls = ['trow', ghost ? 'ghost' : '', c === sel && !ghost ? 'sel' : '', asked.has(c) ? 'asked' : '', changed ? 'moved' : '', added ? 'added' : ''].join(' ');
+    const open = expanded.has(c);
+    const r = el('div', { class: cls, style: `--d:${d}`, role: 'treeitem', 'aria-expanded': kids.length ? String(open) : null },
+      el('button', { class: 'car', 'aria-label': open ? 'Collapse' : 'Expand', tabindex: kids.length && !ghost ? 0 : -1, onclick: () => { if (!kids.length || ghost) return; open ? expanded.delete(c) : expanded.add(c); renderTree(); } }, kids.length && !ghost ? (open ? '▾' : '▸') : ''),
+      el('button', { class: 'lbl', draggable: ghost ? 'false' : 'true', onclick: () => { if (ghost) return; if (picking && sel && sel !== c) { moveTo(sel, c); return; } sel = sel === c ? null : c; picking = false; adding = false; renderSel(); renderTree(); } }, lab(c) + (ghost ? ' (moved away)' : '')),
+      asked.has(c) ? el('span', { class: 'q' }, '?') : null,
+      kids.length && !ghost ? el('span', { class: 'cnt' }, String(below(S.idx, c).size)) : null);
+    if (!ghost) {
+      const lbl = r.querySelector('.lbl');
+      lbl.addEventListener('dragstart', (e) => { dragging = c; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', c); } catch (x) {} });
+      r.addEventListener('dragover', (e) => { if (dragging && dragging !== c) { e.preventDefault(); r.classList.add('drop'); } });
+      r.addEventListener('dragleave', () => r.classList.remove('drop'));
+      r.addEventListener('drop', (e) => { e.preventDefault(); r.classList.remove('drop'); const from = dragging; dragging = null; if (from && from !== c) { sel = from; moveTo(from, c); } });
+    }
+    box.append(r);
+    if (open && !ghost) {
+      kids.slice().sort(cmp).forEach((k) => row(k, d + 1, false));
+      for (const k of baseIdx.kids.get(c) || []) if (S.cur !== S.base && !kids.includes(k)) row(k, d + 1, true);
+    }
+  };
+  roots.slice(0, rootLimit).forEach((c) => row(c, 0, false));
+  if (roots.length > rootLimit) box.append(el('button', { class: 'btn pg-more', style: '--d:0', onclick: () => { rootLimit += 200; renderTree(); } }, `Show ${Math.min(200, roots.length - rootLimit)} more of ${roots.length - rootLimit} top-level concepts`));
+  box.scrollTop = keep;
+}
+function reveal(c) { let x = (S.idx.par.get(c) || [])[0]; const seen = new Set(); while (x && !seen.has(x)) { seen.add(x); expanded.add(x); x = (S.idx.par.get(x) || [])[0]; } }
+function renderQs() {
+  const box = $('#pg-qs'); box.replaceChildren();
+  if (!S.questions.length) { box.append(el('p', { class: 'pg-hint' }, 'No questions yet. Select a concept and press Ask.')); return; }
+  for (const q of S.questions) {
+    const m = S.M.mem.get(q.answer); const got = new Set(m ? m.body.answer : []);
+    const score = f1(got, q.gold);
+    const chips = el('div', { class: 'pg-chips' });
+    const list = [...got].sort((a, b) => lab(a).localeCompare(lab(b)));
+    list.slice(0, 14).forEach((c) => chips.append(el('span', { class: q.gold.has(c) ? '' : 'wrong' }, lab(c))));
+    if (list.length > 14) chips.append(el('span', {}, `+${list.length - 14} more`));
+    const missing = [...q.gold].filter((c) => !got.has(c));
+    missing.slice(0, 6).forEach((c) => chips.append(el('span', { class: 'missing' }, lab(c))));
+    if (missing.length > 6) chips.append(el('span', { class: 'missing' }, `${missing.length - 6} more missing`));
+    if (!list.length && !missing.length) chips.append(el('span', {}, 'none: it has no subclasses'));
+    box.append(el('div', { class: 'pg-q' }, el('div', { class: 'head' }, el('b', { style: 'font-size:13.5px' }, qtext(q.target)),
+      el('span', { class: 'chip ' + (score >= 0.999 ? 'ok' : 'bad') }, score >= 0.999 ? 'correct' : `F1 ${score.toFixed(2)}`)), chips));
+  }
+}
+function renderGuard() {
+  const box = $('#pg-guard'); box.replaceChildren();
+  const h = harmOf(S.edges); const alarm = h > THRESHOLD;
+  $('#pg-aegis').classList.toggle('pg-alarm', alarm);
+  box.append(el('div', { class: 'gauges' },
+    el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Harm'), el('span', { class: 'v', style: alarm ? 'color:var(--bad)' : '' }, h.toFixed(3)),
+      el('div', { class: 'bar', style: `--c:${alarm ? 'var(--bad)' : 'var(--ok)'}` }, el('span', { style: `width:${Math.min(100, h * 100)}%` }), el('em', { style: 'left:5%' }))),
+    el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Status'), el('span', { class: 'v', style: `font-size:15px;color:${alarm ? 'var(--bad)' : S.cur !== S.base ? 'var(--warn)' : 'var(--ok)'}` },
+      !S.questions.length ? 'waiting for a question' : alarm ? 'alarm' : S.cur !== S.base ? 'unreviewed edits' : 'all clear'))));
+  const acts = el('div', { class: 'pg-acts', style: 'margin-top:10px' });
+  if (S.cur !== S.base) {
+    acts.append(el('button', { class: 'btn primary', onclick: rollback }, `Roll back to v${S.versions[S.base].n}`));
+    if (!alarm) acts.append(el('button', { class: 'btn', onclick: accept }, 'Accept as honest'));
+  }
+  acts.append(el('button', { class: 'btn', disabled: !S.questions.length || S.cur !== S.base, onclick: findWorst, title: S.cur !== S.base ? 'Roll back or accept first: Aegis searches from the accepted version' : 'Aegis as red team: search single edits for the most harmful one' }, 'Find the worst attack'));
+  box.append(acts);
+  if (worst) {
+    const w = el('div', { class: 'pg-worst' });
+    if (!worst.list.length) w.append(el('p', { class: 'pg-hint' }, `None of ${worst.tried} edits changes an answer to your questions.`));
+    for (const s of worst.list) w.append(el('div', {}, el('span', {}, s.text), el('div', { class: 'bar', style: '--c:var(--bad)' }, el('span', { style: `width:${Math.min(100, s.harm * 100)}%` })),
+      el('button', { class: 'btn atk', onclick: () => { mode = 'attacker'; worst = null; edit(s.apply, s.text); } }, 'Try it')));
+    box.append(w, el('p', { class: 'muted', style: 'font-size:12px;margin-top:6px' }, `Searched ${worst.tried} single edits in ${worst.ms} ms. This is Aegis's attacker side: it finds the weak points first, so you can guard them.`));
+  }
+}
+function renderMem() {
+  const box = $('#pg-mem'); box.replaceChildren();
+  const ms = [...S.M.mem.values()];
+  const by = {}; for (const m of ms) by[m.source] = (by[m.source] || 0) + 1;
+  const tiers = { short: 0, long: 0, archive: 0 }; for (const m of ms) tiers[m.tier] = (tiers[m.tier] || 0) + 1;
+  box.append(el('div', { class: 'pg-agents' }, Object.entries(by).map(([a, n]) => el('span', { class: 'who', style: `--c:${COLOR[a]}` }, el('i'), el('b', {}, NAME[a]), ` ${n}`))));
+  box.append(el('div', { class: 'gauges', style: 'margin-bottom:10px' },
+    ...['short', 'long', 'archive'].map((t) => el('div', { class: 'gauge' }, el('span', { class: 'label' }, t === 'short' ? 'Short-term' : t === 'long' ? 'Long-term' : 'Archive'), el('span', { class: 'v' }, tiers[t] || 0))),
+    el('div', { class: 'gauge' }, el('span', { class: 'label' }, 'Live / stale'), el('span', { class: 'v' }, `${ms.filter((m) => m.status === 'live').length} / ${ms.filter((m) => m.status !== 'live').length}`))));
+  const recs = el('div', { class: 'pg-recs' });
+  const list = S.M.recs.slice().reverse().slice(0, showAllRecs ? 400 : 10);
+  for (const r of list) recs.append(el('div', {}, el('span', { class: 'muted' }, r.lsn), el('span', { style: `color:${COLOR[r.agent]}` }, NAME[r.agent]), el('span', { class: 'op-' + r.op }, r.op), el('span', { title: `${r.kind} ${r.key} ${r.reason}` }, `${r.kind} · ${r.key}${r.reason ? ' — ' + r.reason : ''}`)));
+  box.append(recs, el('button', { class: 'btn', style: 'margin-top:8px;font-size:12px', onclick: () => { showAllRecs = !showAllRecs; renderMem(); } }, showAllRecs ? 'Show the latest 10' : `Show all ${S.M.recs.length} log records`));
+}
+function renderVers() {
+  const box = $('#pg-vers'); box.replaceChildren();
+  for (const v of S.versions) box.append(el('span', { class: ['vchip', v.by, v.n === S.base ? 'base' : '', v.n === S.cur ? 'now' : ''].join(' '), title: v.note },
+    v.by === 'rollback' ? `↺ v${v.restores}` : `v${v.n} ${v.by === 'load' ? 'loaded' : v.by}`));
+  box.append(el('p', { class: 'muted', style: 'font-size:12px;flex-basis:100%;margin-top:4px' }, 'Green ring: the accepted version Aegis measures harm against. OntoDB keeps every version and the memory log.'));
+}
+
+// ---------- parsing uploads ----------
+function localName(iri) { const m = String(iri).match(/[#/]([^#/]+)$/); return m ? decodeURIComponent(m[1]) : String(iri); }
+function fromPairs(name, labels, edges) {
+  const ids = {}; const used = new Set(); const id = (iri) => { if (ids[iri]) return ids[iri]; let n = localName(iri); if (used.has(n)) n = iri; used.add(n); ids[iri] = n; return n; };
+  const out = { name, about: 'uploaded', labels: {}, edges: [] };
+  for (const [iri, l] of Object.entries(labels)) out.labels[id(iri)] = l || localName(iri);
+  for (const [c, p] of edges) { const a = id(c), b = id(p); if (!(a in out.labels)) out.labels[a] = localName(c); if (!(b in out.labels)) out.labels[b] = localName(p); out.edges.push([a, b]); }
+  return out;
+}
+function parseRdfXml(text, name) {
+  const doc = new DOMParser().parseFromString(text, 'application/xml');
+  if (doc.querySelector('parsererror')) throw new Error('This file is not well-formed XML.');
+  const RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+  const base = doc.documentElement.getAttributeNS('http://www.w3.org/XML/1998/namespace', 'base') || '';
+  const iriOf = (e) => { const a = e.getAttributeNS(RDF, 'about') || e.getAttributeNS(RDF, 'resource'); if (a) return a.startsWith('#') ? base + a : a; const i = e.getAttributeNS(RDF, 'ID'); return i ? base + '#' + i : null; };
+  const labels = {}, edges = [];
+  for (const e of doc.getElementsByTagName('*')) {
+    if (!(e.localName === 'Class' || e.localName === 'Description')) continue;
+    const iri = iriOf(e); if (!iri) continue;
+    let isClass = e.localName === 'Class', label = null, labelEn = null;
+    for (const ch of e.children) {
+      if (ch.localName === 'label') { const lang = ch.getAttributeNS('http://www.w3.org/XML/1998/namespace', 'lang'); if (!lang || lang.startsWith('en')) labelEn = labelEn || ch.textContent.trim(); label = label || ch.textContent.trim(); }
+      if (ch.localName === 'subClassOf') { isClass = true; const r = ch.getAttributeNS(RDF, 'resource'); if (r) edges.push([iri, r.startsWith('#') ? base + r : r]); else { const inner = ch.firstElementChild; if (inner && inner.localName === 'Class' && iriOf(inner)) edges.push([iri, iriOf(inner)]); } }
+    }
+    if (isClass) labels[iri] = labelEn || label || labels[iri] || null;
+  }
+  return fromPairs(name, labels, edges.filter(([c, p]) => !p.endsWith('#Thing')));
+}
+function parseTurtle(text, name) {
+  const toks = []; const re = /\s+|#[^\n]*|<([^>]*)>|"""([\s\S]*?)"""|"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|(@prefix|@base|PREFIX|BASE)\b|(@[A-Za-z-]+)|(\^\^)|([A-Za-z_][\w.-]*)?:([\w.\-%:]*)|(_:[\w-]+)|([.;,\[\]()])|([+-]?\d[\d.eE+-]*)|(\btrue\b|\bfalse\b)|(\ba\b)/gy;
+  let m; let i = 0;
+  while (i < text.length) {
+    re.lastIndex = i; m = re.exec(text); if (!m) throw new Error(`Turtle: cannot read near “${text.slice(i, i + 30)}”`);
+    i = re.lastIndex;
+    if (m[1] !== undefined) toks.push({ t: 'iri', v: m[1] });
+    else if (m[2] !== undefined || m[3] !== undefined || m[4] !== undefined) toks.push({ t: 'lit', v: (m[2] ?? m[3] ?? m[4]).replace(/\\(.)/g, '$1') });
+    else if (m[5]) toks.push({ t: 'dir', v: m[5].toLowerCase().replace('@', '') });
+    else if (m[6]) toks.push({ t: 'lang', v: m[6] });
+    else if (m[7]) toks.push({ t: '^^' });
+    else if (m[9] !== undefined) toks.push({ t: 'pn', p: m[8] || '', v: m[9] });
+    else if (m[10]) toks.push({ t: 'bn', v: m[10] });
+    else if (m[11]) toks.push({ t: m[11] });
+    else if (m[12] || m[13]) toks.push({ t: 'lit', v: m[12] || m[13] });
+    else if (m[14]) toks.push({ t: 'iri', v: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' });
+  }
+  const prefixes = {}; let base = ''; let k = 0; let bn = 0; const triples = [];
+  const term = () => {
+    const x = toks[k++]; if (!x) throw new Error('Turtle: unexpected end');
+    if (x.t === 'iri') return { iri: x.v.match(/^[a-z]+:/i) ? x.v : base + x.v };
+    if (x.t === 'pn') return { iri: (prefixes[x.p] ?? (x.p + ':')) + x.v };
+    if (x.t === 'bn') return { bn: x.v };
+    if (x.t === 'lit') { const out = { lit: x.v }; if (toks[k] && toks[k].t === 'lang') out.lang = toks[k++].v; else if (toks[k] && toks[k].t === '^^') { k++; term(); } return out; }
+    if (x.t === '[') { const id = { bn: '_:b' + (bn++) }; if (toks[k] && toks[k].t === ']') { k++; return id; } preds(id); if (!toks[k] || toks[k++].t !== ']') throw new Error('Turtle: missing ]'); return id; }
+    if (x.t === '(') { while (toks[k] && toks[k].t !== ')') term(); k++; return { bn: '_:list' + (bn++) }; }
+    throw new Error(`Turtle: unexpected ${x.t}`);
+  };
+  const preds = (s) => { for (;;) { const p = term(); for (;;) { const o = term(); triples.push([s, p, o]); if (toks[k] && toks[k].t === ',') { k++; continue; } break; }
+    if (toks[k] && toks[k].t === ';') { k++; while (toks[k] && toks[k].t === ';') k++; if (!toks[k] || ['.', ']'].includes(toks[k].t)) return; continue; } return; } };
+  while (k < toks.length) {
+    const x = toks[k];
+    if (x.t === 'dir') { k++; if (x.v === 'prefix') { const p = toks[k++]; const iri = toks[k++]; prefixes[p.p] = iri.v; } else { base = toks[k++].v; } if (toks[k] && toks[k].t === '.') k++; continue; }
+    const s = term(); if (!(toks[k] && toks[k].t === '.')) preds(s); if (toks[k] && toks[k].t === '.') k++;
+  }
+  const RDFS = 'http://www.w3.org/2000/01/rdf-schema#', OWL = 'http://www.w3.org/2002/07/owl#';
+  const labels = {}, edges = [];
+  for (const [s, p, o] of triples) {
+    if (!s.iri) continue;
+    if (p.iri === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && (o.iri === OWL + 'Class' || o.iri === RDFS + 'Class')) labels[s.iri] = labels[s.iri] || null;
+    if (p.iri === RDFS + 'subClassOf' && o.iri && o.iri !== OWL + 'Thing') { edges.push([s.iri, o.iri]); labels[s.iri] = labels[s.iri] || null; }
+  }
+  for (const [s, p, o] of triples) if (s.iri && p.iri === RDFS + 'label' && o.lit && s.iri in labels && (!labels[s.iri] || (o.lang || 'en').startsWith('en'))) labels[s.iri] = o.lit;
+  return fromPairs(name, labels, edges);
+}
+function parseObo(text, name) {
+  const labels = {}, edges = []; let cur = null, obsolete = false;
+  const flush = () => { if (cur && !obsolete) labels[cur.id] = cur.name; cur = null; obsolete = false; };
+  for (const line of text.split(/\r?\n/)) {
+    if (line.startsWith('[')) { flush(); if (line.trim() === '[Term]') cur = { id: null, name: null }; continue; }
+    if (!cur) continue;
+    const m = line.match(/^(\w+):\s*(.*?)\s*(?:!.*)?$/); if (!m) continue;
+    if (m[1] === 'id') cur.id = m[2]; else if (m[1] === 'name') cur.name = m[2]; else if (m[1] === 'is_a' && cur.id) edges.push([cur.id, m[2]]); else if (m[1] === 'is_obsolete' && m[2] === 'true') obsolete = true;
+  }
+  flush();
+  return { name, about: 'uploaded', labels, edges: edges.filter(([c, p]) => c in labels && p in labels) };
+}
+async function upload(file) {
+  try {
+    const text = await file.text(); const name = file.name.replace(/\.[^.]+$/, '');
+    let sample;
+    if (/\.json$/i.test(file.name)) { const j = JSON.parse(text); sample = Array.isArray(j) ? j[0] : j; if (!sample.labels || !sample.edges) throw new Error('JSON needs "labels" and "edges".'); }
+    else if (/\.obo$/i.test(file.name)) sample = parseObo(text, name);
+    else if (/\.(ttl|nt)$/i.test(file.name) || !/^\s*</.test(text)) sample = parseTurtle(text, name);
+    else sample = parseRdfXml(text, name);
+    const n = Object.keys(sample.labels).length;
+    if (!n) throw new Error('No classes found. The playground reads owl:Class or rdfs:Class and rdfs:subClassOf.');
+    const opt = el('option', { value: 'u:' + name }, `${name} (uploaded)`); $('#pg-sample').append(opt); $('#pg-sample').value = opt.value;
+    uploads['u:' + name] = sample;
+    load(sample, `uploaded ${file.name}`);
+  } catch (err) { event('ontodb', `Could not load ${file.name}: ${err.message}`); renderStory(); }
+}
+
+window.__playgroundParsers = { parseTurtle, parseRdfXml, parseObo };  // for tests
+// ---------- wiring ----------
+const uploads = {};
+SAMPLES.forEach((s, i) => $('#pg-sample').append(el('option', { value: String(i) }, `${s.name}: ${s.about}`)));
+$('#pg-sample').onchange = (e) => { const v = e.target.value; load(v.startsWith('u:') ? uploads[v] : SAMPLES[+v]); if (!v.startsWith('u:') && +v === 0) starter(); };
+$('#pg-file').onchange = (e) => { if (e.target.files[0]) upload(e.target.files[0]); e.target.value = ''; };
+$('#pg-cur').onclick = () => { mode = 'curator'; render(); };
+$('#pg-atk').onclick = () => { mode = 'attacker'; render(); };
+$('#pg-find').addEventListener('change', (e) => { const v = e.target.value.trim().toLowerCase(); const hit = Object.entries(S.labels).find(([, l]) => String(l).toLowerCase() === v) || Object.entries(S.labels).find(([, l]) => String(l).toLowerCase().includes(v));
+  if (hit) { sel = hit[0]; reveal(sel); render(); setTimeout(() => { const n = document.querySelector('.trow.sel'); if (n) n.scrollIntoView({ block: 'center' }); }, 0); } });
+function starter() { story = []; ask('Material'); story = []; event('moira', 'answered “What kinds of material are there?”, so Aegis has a question to guard.');
+  event('user', 'Try it: in Attacker mode, drag Metal onto Temperature. Or press “Find the worst attack”.'); render(); }
+load(SAMPLES[0]); starter();
+})();
+</script>

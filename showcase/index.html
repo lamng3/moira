@@ -197,7 +197,6 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
 
 <div class="wrap">
   <header class="top">
-    <span class="label">Agents: KROMA · MOIRA · Aegis · Hermes &nbsp;/&nbsp; Memory: Mneme &nbsp;/&nbsp; Ontologies: OntoDB</span>
     <h1>Shared Memory Lab</h1>
     <p class="lede">Agents that match ontologies, reason over them, and attack them never call each other. They share one pool of memory: every action, result, and what it was built from. OntoDB manages the ontology underneath. Step through a recorded run, open any memory to see what it was built from, then attack the ontology or the memory yourself and see what each defence does.</p>
     <div class="meta" id="meta"></div>
@@ -297,6 +296,7 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
   </section>
 
   <footer>
+    <div><b>The system.</b> Agents: KROMA matches ontologies; MOIRA does relational reasoning, choosing from a list of tools as it goes (retrieval is one of them: <code>search_term_context</code>, <code>search_knowledge_graph</code>, <code>search_nodes</code>); Aegis attacks as a white hat and defends; Hermes generates queries (planned). Memory: Mneme, one pool all agents share. Ontologies: OntoDB.</div>
     <div id="foot"></div>
     <div>Reproduce: <code>uv run python showcase/record.py</code> then <code>python showcase/build.py</code> in the moira repository, with the other projects cloned beside it.</div>
   </footer>
@@ -328,7 +328,7 @@ const fmt = (x, d = 3) => (x === null || x === undefined) ? '—' : Number(x).to
 const CAST = {
   user: ['User', 'asks and requests', 'var(--c-user)'],
   kroma: ['KROMA', 'ontology matching agent', 'var(--c-kroma)'],
-  moira: ['MOIRA', 'reasoning and retrieval agent', 'var(--c-moira)'],
+  moira: ['MOIRA', 'relational reasoning agent', 'var(--c-moira)'],
   aegis: ['Aegis', 'white-hat attacker agent', 'var(--c-aegis)'],
   mneme: ['Mneme', 'shared agentic memory', 'var(--c-mneme)'],
   ontodb: ['OntoDB', 'ontology management', 'var(--c-ontodb)'],
@@ -464,7 +464,7 @@ function drawDiagram(step) {
   };
   box('user', 'User', 'asks, requests', CAST.user[2], 100);
   box('kroma', 'KROMA', 'matching agent', CAST.kroma[2]);
-  box('moira', 'MOIRA', 'reasoning agent', CAST.moira[2]);
+  box('moira', 'MOIRA', 'relational reasoning', CAST.moira[2], 124);
   box('aegis', 'Aegis', 'white-hat attacker', CAST.aegis[2], 120);
   box('hermes', 'Hermes', 'query agent · planned', CAST.hermes[2], 124);
   box('cache', 'MOIRA cache', 'hot · short · long', 'var(--c-moira)', 110);

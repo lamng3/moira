@@ -10,6 +10,7 @@ import tiktoken
 from langchain_together import ChatTogether
 
 from moira.agents import Agent, ByteTokenizer, create_oot_enhanced_agent
+from moira.costs import attach
 
 
 DEFAULT_MODEL = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
@@ -24,6 +25,7 @@ GROQ_MODEL_MAP = {
 class ModelRuntime:
     llm: Any
     tokenizer: Any
+
 
 
 def _optional_import(module: str, name: str) -> Any:
@@ -84,7 +86,7 @@ def create_model_runtime(
                 pipeline_kwargs={"temperature": temperature},
             )
         )
-        return ModelRuntime(llm, tokenizer)
+        return ModelRuntime(attach(llm), tokenizer)
 
     if model_name.startswith("ollama:"):
         chat_ollama = _optional_import("langchain_ollama", "ChatOllama")
@@ -95,7 +97,7 @@ def create_model_runtime(
             temperature=temperature,
             num_predict=512,
         )
-        return ModelRuntime(llm, ByteTokenizer())
+        return ModelRuntime(attach(llm), ByteTokenizer())
 
     if model_name.startswith("gpt"):
         chat_open_ai = _optional_import("langchain_openai", "ChatOpenAI")
@@ -104,7 +106,7 @@ def create_model_runtime(
             api_key=os.getenv("OPENAI_API_KEY"),
             temperature=temperature,
         )
-        return ModelRuntime(llm, tiktoken.get_encoding("cl100k_base"))
+        return ModelRuntime(attach(llm), tiktoken.get_encoding("cl100k_base"))
 
     if "gemini" in model_name:
         chat_google = _optional_import(
@@ -115,7 +117,7 @@ def create_model_runtime(
             api_key=os.getenv("GOOGLE_API_KEY"),
             temperature=temperature,
         )
-        return ModelRuntime(llm, ByteTokenizer())
+        return ModelRuntime(attach(llm), ByteTokenizer())
 
     if use_groq:
         chat_groq = _optional_import("langchain_groq", "ChatGroq")
@@ -136,7 +138,7 @@ def create_model_runtime(
         tokenizer = auto_tokenizer.from_pretrained(model_name)
     except (ImportError, OSError, ValueError):
         tokenizer = ByteTokenizer()
-    return ModelRuntime(llm, tokenizer)
+    return ModelRuntime(attach(llm), tokenizer)
 
 
 def create_application_agent(

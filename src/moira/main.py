@@ -38,6 +38,7 @@ except ImportError:
 from moira.agents import Agent, ByteTokenizer, create_oot_enhanced_agent
 from moira.algorithms.graph import ConceptGraph, Ontology, EquivalentClass
 from moira.algorithms.refinement import OntologyRefiner, RefinementOptions
+from moira.costs import attach
 from moira.functions.similarity import (
     SimilarityMethod,
     analyze_alignment_similarity,
@@ -805,7 +806,7 @@ def _legacy_main():
         tools_path = PACKAGE_ROOT / "agents/tools/registry/ontology_tools.json"
 
         agent = create_oot_enhanced_agent(
-            llm=llm,
+            llm=attach(llm),
             tools_path=tools_path,
             traces_dir="results/traces/oot",
             verbose=True,

@@ -13,6 +13,7 @@ import torch
 
 from moira.algorithms.graph import ConceptGraph, ConceptHypergraph, Ontology
 from moira.algorithms.refinement import OntologyRefiner, RefinementOptions
+from moira.costs import METER
 from moira.model_runtime import (
     ModelRuntime,
     create_application_agent,
@@ -235,6 +236,7 @@ def _write_experiment_metrics(
                 },
             }
         )
+    payload["cost"] = METER.summary()
     if similarity:
         payload["similarity"] = similarity.get(
             "similarity_avgs_over_gold", similarity

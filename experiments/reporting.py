@@ -100,8 +100,8 @@ class SuiteReporter:
             "",
             "## Summary",
             "",
-            "| Experiment | Status | Precision | Recall | F1 | Time | Repeatable |",
-            "| --- | --- | ---: | ---: | ---: | ---: | --- |",
+            "| Experiment | Status | Precision | Recall | F1 | Time | LLM calls | Tokens in / out | Cost (USD) | Repeatable |",
+            "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
         ]
         for result in results:
             quality = _quality(result)
@@ -118,7 +118,7 @@ class SuiteReporter:
                 f"{_format_metric(quality.get('precision'))} | "
                 f"{_format_metric(quality.get('recall'))} | "
                 f"{_format_metric(quality.get('f1'))} | "
-                f"{result.duration_seconds:.3f}s | {repeatable} |"
+                f"{result.duration_seconds:.3f}s | {_cost_cells(result)} | {repeatable} |"
             )
         if chart_written:
             lines.extend(
@@ -208,6 +208,16 @@ class SuiteReporter:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("\n".join(svg), encoding="utf-8")
         return True
+
+
+def _cost_cells(result: ExperimentResult) -> str:
+    """LLM calls, tokens, and dollars from a run's `cost` metrics (moira.costs); blank when it made no calls."""
+    cost = (result.metrics or {}).get("cost") or {}
+    if not cost.get("calls"):
+        return "0 | | "
+    usd = cost.get("cost_usd")
+    money = f"{usd:.4f}" if usd is not None else f"local, {cost.get('model_seconds', 0):.1f} model-s"
+    return f"{cost['calls']} | {cost.get('input_tokens', 0):,} / {cost.get('output_tokens', 0):,} | {money}"
 
 
 def _format_metric(value: float | None) -> str:

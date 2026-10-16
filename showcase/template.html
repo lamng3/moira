@@ -79,7 +79,7 @@ nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: 
 .say .txt { min-width: 0; overflow-wrap: anywhere; }
 
 svg text { fill: var(--ink); font-family: var(--f-body); }
-.diagram { width: 100%; height: auto; display: block; }
+.diagram { width: 100%; height: auto; max-height: 420px; display: block; margin: 0 auto; }
 .node rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: stroke .3s, fill .3s; }
 .node.on rect { stroke: var(--c); stroke-width: 2.5; fill: var(--sunk); }
 .node .nm { font-weight: 600; font-size: 13px; }
@@ -190,9 +190,9 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
 
 <div class="wrap">
   <header class="top">
-    <span class="label">KROMA · MOIRA · Aegis · Mneme · OntoDB · Hermes</span>
+    <span class="label">Agents: KROMA · MOIRA · Aegis · Hermes &nbsp;/&nbsp; Memory: Mneme &nbsp;/&nbsp; Ontologies: OntoDB</span>
     <h1>Shared Memory Lab</h1>
-    <p class="lede">Five agents and systems answer questions over a materials ontology through one shared memory. Step through a recorded run, open any memory to see what it was built from, then attack the ontology or the memory yourself and see what each defence does.</p>
+    <p class="lede">Agents that match ontologies, reason over them, and attack them never call each other. They share one pool of memory: every action, result, and what it was built from. OntoDB manages the ontology underneath. Step through a recorded run, open any memory to see what it was built from, then attack the ontology or the memory yourself and see what each defence does.</p>
     <div class="meta" id="meta"></div>
     <div class="cast" id="cast"></div>
   </header>
@@ -205,6 +205,10 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
   </nav>
 
   <section id="tab-walk" role="tabpanel">
+    <div class="panel" style="margin-bottom:16px">
+      <span class="label">Who is working in this step</span>
+      <svg class="diagram" id="diagram" viewBox="0 0 640 380" role="img" aria-label="Agents on top write to Mneme, the shared memory, which OntoDB stores beneath"></svg>
+    </div>
     <div class="grid walk">
       <div class="grid" style="align-content:start">
         <div class="panel stepcard">
@@ -218,10 +222,6 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
           <h2 id="steptitle"></h2>
           <p id="steptext" class="muted"></p>
           <div class="feed" id="feed"></div>
-        </div>
-        <div class="panel">
-          <span class="label">Who is working</span>
-          <svg class="diagram" id="diagram" viewBox="0 0 640 380" role="img" aria-label="System diagram"></svg>
         </div>
         <div class="panel">
           <span class="label">Gauges</span>
@@ -320,12 +320,12 @@ const fmt = (x, d = 3) => (x === null || x === undefined) ? '—' : Number(x).to
 
 const CAST = {
   user: ['User', 'asks and requests', 'var(--c-user)'],
-  kroma: ['KROMA', 'aligns ontologies', 'var(--c-kroma)'],
-  moira: ['MOIRA', 'answers questions', 'var(--c-moira)'],
-  aegis: ['Aegis', 'versions and defends', 'var(--c-aegis)'],
-  mneme: ['Mneme', 'shared agent memory', 'var(--c-mneme)'],
-  ontodb: ['OntoDB', 'stores Mneme\'s log and the ontology', 'var(--c-ontodb)'],
-  hermes: ['Hermes', 'SPARQL query planning', 'var(--c-hermes)'],
+  kroma: ['KROMA', 'ontology matching agent', 'var(--c-kroma)'],
+  moira: ['MOIRA', 'reasoning and retrieval agent', 'var(--c-moira)'],
+  aegis: ['Aegis', 'white-hat attacker agent', 'var(--c-aegis)'],
+  mneme: ['Mneme', 'shared agentic memory', 'var(--c-mneme)'],
+  ontodb: ['OntoDB', 'ontology management', 'var(--c-ontodb)'],
+  hermes: ['Hermes', 'query generation agent (planned)', 'var(--c-hermes)'],
   attacker: ['Attacker', 'mallory', 'var(--c-attacker)'],
 };
 const AGENT_COMPONENT = (a) => a.startsWith('kroma') ? 'kroma' : a.startsWith('moira') ? 'moira' : a === 'aegis' || a.startsWith('aegis.') ? 'aegis'
@@ -423,42 +423,56 @@ function answerView(answer, base, origin) {
 }
 
 // ---------- walkthrough ----------
+// Layers: agents on top, the shared memory pool in the middle, ontology management at the bottom.
 const NODES = {
-  user: [70, 52], kroma: [70, 160], moira: [70, 268], cache: [200, 340],
-  mneme: [330, 170], aegis: [560, 170], attacker: [560, 52], ontodb: [400, 336], hermes: [560, 300],
+  user: [62, 58], kroma: [186, 58], moira: [310, 58], aegis: [434, 58], hermes: [570, 58],
+  cache: [248, 146], attacker: [556, 146], mneme: [300, 232], ontodb: [300, 340],
 };
-const LINKS = [['user', 'mneme'], ['kroma', 'mneme'], ['moira', 'mneme'], ['moira', 'cache'], ['aegis', 'mneme'],
-  ['aegis', 'ontodb'], ['mneme', 'ontodb'], ['attacker', 'aegis'], ['hermes', 'ontodb', 'planned']];
+const LINKS = [
+  ['user', 'mneme', 'M62,82 V202'], ['kroma', 'mneme', 'M186,82 V202'], ['moira', 'mneme', 'M310,82 V202'],
+  ['aegis', 'mneme', 'M434,82 V202'], ['hermes', 'mneme', 'M570,82 V202', 'planned'],
+  ['moira', 'cache', 'M296,82 L268,122'], ['mneme', 'ontodb', 'M200,262 V316'],
+  ['aegis', 'ontodb', 'M470,82 V104 H628 V340 H580'], ['attacker', 'ontodb', 'M596,170 V328 H580'],
+];
 function drawDiagram(step) {
   const svg = $('#diagram'); svg.replaceChildren();
+  svg.setAttribute('viewBox', '0 0 640 380');
   const actors = new Set(step.actors);
   if (step.n === 4) actors.add('attacker');
   if (step.events.some((e) => e.ask && e.ask.origin === 'cache')) actors.add('cache');
   if (step.n === 1 || step.n === 3) actors.add('user');
-  for (const [a, b, kind] of LINKS) {
-    const [x1, y1] = NODES[a], [x2, y2] = NODES[b];
+  for (const [a, b, d, kind] of LINKS) {
     const on = actors.has(a) && actors.has(b);
     const c = CAST[a] ? CAST[a][2] : 'var(--c-moira)';
-    svg.append(sv('line', { x1, y1, x2, y2, class: 'link' + (on ? ' on' : '') + (kind ? ' planned' : ''), style: `--c:${c}` }));
+    svg.append(sv('path', { d, class: 'link' + (on ? ' on' : '') + (kind ? ' planned' : ''), style: `--c:${c}` }));
   }
-  const box = (k, label, role, c, w = 118) => {
+  svg.append(sv('text', { x: 206, y: 294, class: 'rl', style: 'font-size:10px' }, 'log saved here'));
+  svg.append(sv('text', { x: 634, y: 236, class: 'rl', style: 'font-size:10px', 'text-anchor': 'middle', transform: 'rotate(90 634 236)' }, 'ontology versions'));
+  const box = (k, label, role, c, w = 112) => {
     const [x, y] = NODES[k]; const on = actors.has(k);
     svg.append(sv('g', { class: 'node' + (on ? ' on' : '') + (k === 'hermes' ? ' off' : ''), style: `--c:${c}` },
       sv('rect', { x: x - w / 2, y: y - 24, width: w, height: 48, rx: 9 }),
       sv('text', { x, y: y - 3, 'text-anchor': 'middle', class: 'nm', style: `fill:${c}` }, label),
       sv('text', { x, y: y + 13, 'text-anchor': 'middle', class: 'rl' }, role)));
   };
-  for (const k of ['user', 'kroma', 'moira', 'aegis', 'attacker', 'hermes']) box(k, CAST[k][0], k === 'hermes' ? 'planned' : CAST[k][1], CAST[k][2]);
-  box('ontodb', 'OntoDB', 'disk for ontology + memory', CAST.ontodb[2], 168);
-  box('cache', 'MOIRA cache', 'hot · short · long', 'var(--c-moira)', 130);
-  // mneme as the big centre
-  const [mx, my] = NODES.mneme; const on = true;
-  svg.append(sv('g', { class: 'node on', style: '--c:var(--c-mneme)' },
-    sv('rect', { x: mx - 86, y: my - 52, width: 172, height: 104, rx: 12 }),
-    sv('text', { x: mx, y: my - 22, 'text-anchor': 'middle', class: 'nm', style: 'fill:var(--c-mneme);font-size:15px' }, 'Mneme'),
-    sv('text', { x: mx, y: my - 4, 'text-anchor': 'middle', class: 'rl' }, 'agent memory, one log'),
-    sv('text', { x: mx, y: my + 18, 'text-anchor': 'middle', class: 'nm', style: 'font-family:var(--f-mono);font-size:12px' }, `lsn ${step.lsn}`),
-    sv('text', { x: mx, y: my + 36, 'text-anchor': 'middle', class: 'rl' }, Object.entries(step.tiers).map(([t, n]) => `${t} ${n}`).join(' · '))));
+  box('user', 'User', 'asks, requests', CAST.user[2], 100);
+  box('kroma', 'KROMA', 'matching agent', CAST.kroma[2]);
+  box('moira', 'MOIRA', 'reasoning agent', CAST.moira[2]);
+  box('aegis', 'Aegis', 'white-hat attacker', CAST.aegis[2], 120);
+  box('hermes', 'Hermes', 'query agent · planned', CAST.hermes[2], 124);
+  box('cache', 'MOIRA cache', 'hot · short · long', 'var(--c-moira)', 110);
+  box('attacker', 'Attacker', 'mallory', CAST.attacker[2], 100);
+  const bar = (k, y, h, title, sub, right) => {
+    const on = actors.has(k) || k === 'mneme';
+    svg.append(sv('g', { class: 'node' + (on ? ' on' : ''), style: `--c:${CAST[k][2]}` },
+      sv('rect', { x: 20, y: y - h / 2, width: 560, height: h, rx: 12 }),
+      sv('text', { x: 40, y: y - 4, class: 'nm', style: `fill:${CAST[k][2]};font-size:15px` }, title),
+      sv('text', { x: 40, y: y + 14, class: 'rl', style: 'font-size:11px' }, sub),
+      right ? sv('text', { x: 564, y: y + 4, 'text-anchor': 'end', class: 'nm', style: 'font-family:var(--f-mono);font-size:11.5px' }, right) : null));
+  };
+  const tiers = Object.entries(step.tiers).map(([t, n]) => `${t} ${n}`).join(' · ');
+  bar('mneme', 232, 60, 'Mneme · shared agentic memory', 'one pool every agent reads and writes: actions, results, provenance', `lsn ${step.lsn} · ${tiers}`);
+  bar('ontodb', 340, 48, 'OntoDB · ontology management', 'stores the ontology and its versions, and Mneme\'s log as RDF', `${step.ontology.version}`);
 }
 
 let cur = 0, timer = null, selected = null;

@@ -288,7 +288,6 @@ code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunk); p
   <footer>
     <div class="cast" id="cast"></div>
     <div id="foot"></div>
-    <div>Reproduce: <code>uv run python showcase/record.py</code> then <code>python showcase/build.py</code> in the moira repository, with the other projects cloned beside it.</div>
   </footer>
 </div>
 
@@ -351,7 +350,9 @@ $('#meta').append(
 for (const k of ['user', 'kroma', 'moira', 'aegis', 'mneme', 'ontodb', 'hermes']) {
   $('#cast').append(el('span', { class: 'who', style: `--c:${CAST[k][2]}`, title: TIPS[k] || '' }, el('i'), el('b', {}, CAST[k][0]), ' ', el('span', { class: 'muted' }, CAST[k][1])));
 }
-$('#foot').textContent = 'Commits: ' + tags.join(' · ') + '. KROMA\'s language-model debate stands as fixed verdicts in this run, and MOIRA\'s answerer reads the hierarchy, so the run makes no model calls. The Results tab shows the projects\' real model runs and what they cost.';
+$('#foot').append(
+  el('span', { title: 'Commits: ' + tags.join(' · ') }, Object.entries(T.projects).map(([p, h]) => `${p} ${h.tag || h.commit}`).join(' · ')),
+  ' ', el('span', { style: 'cursor:help', title: 'The recorded run makes no model calls: KROMA\'s verdicts are fixed and MOIRA reads the hierarchy. Real model runs and their cost are in Results.\n\nReproduce, in the moira repo with the other projects beside it:\nuv run python showcase/record.py\npython showcase/build.py' }, 'ⓘ'));
 
 // tabs
 const tabs = [...document.querySelectorAll('nav.tabs button')];
